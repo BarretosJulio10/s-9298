@@ -11,6 +11,7 @@ import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySett
 import { useAuth } from "@/hooks/useAuth";
 import { Home, CreditCard, MessageSquare, Settings } from "lucide-react";
 import { useState } from "react";
+import DashboardHome from "./dashboard/DashboardHome";
 
 type ActiveSection = "home" | "charges" | "templates" | "settings";
 
@@ -20,6 +21,8 @@ const CompanyDashboard = () => {
 
   const renderContent = () => {
     switch (activeSection) {
+      case "home":
+        return <DashboardHome />;
       case "charges":
         return <CompanyCharges companyId={session?.user?.id || ""} />;
       case "settings":
@@ -28,7 +31,7 @@ const CompanyDashboard = () => {
         return (
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Bem-vindo ao seu painel</h2>
-            <p className="text-muted">
+            <p className="text-muted-foreground">
               Selecione uma opção no menu para começar.
             </p>
           </div>

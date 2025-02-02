@@ -40,6 +40,7 @@ export function CompanySettingsForm() {
       const { data, error } = await supabase
         .from("company_settings")
         .select("*")
+        .eq("company_id", session?.user?.id)
         .single();
 
       if (error) throw error;
@@ -84,13 +85,13 @@ export function CompanySettingsForm() {
   }
 
   return (
-    <Card>
+    <Card className="max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Configurações do Asaas</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="asaas_api_key"
