@@ -116,7 +116,7 @@ const AdminPlans = () => {
                   <Button variant="outline" size="sm">
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" variant="destructive">
+                  <Button variant="destructive" size="sm">
                     <Trash className="h-4 w-4" />
                   </Button>
                 </div>
