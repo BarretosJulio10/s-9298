@@ -43,7 +43,7 @@ export function CompanySettingsForm() {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as CompanySettingsFormData;
     },
   });
 
@@ -113,7 +113,7 @@ export function CompanySettingsForm() {
             <FormField
               control={form.control}
               name="asaas_environment"
-              defaultValue={settings?.asaas_environment || "sandbox"}
+              defaultValue={settings?.asaas_environment as "sandbox" | "production"}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Ambiente</FormLabel>
