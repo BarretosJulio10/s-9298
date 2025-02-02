@@ -11,36 +11,36 @@ const Footer = () => {
               <span className="font-medium">Antimetal</span>
             </div>
             <p className="text-accent text-sm">
-              Save time and money on AWS. Automated cloud cost optimization platform.
+              Economize tempo e dinheiro na AWS. Plataforma automatizada de otimização de custos na nuvem.
             </p>
           </div>
           
           <div>
-            <h3 className="font-medium mb-4">Product</h3>
+            <h3 className="font-medium mb-4">Produto</h3>
             <ul className="space-y-3 text-accent">
-              <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Enterprise</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Recursos</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Empresas</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Segurança</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Preços</a></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="font-medium mb-4">Resources</h3>
+            <h3 className="font-medium mb-4">Recursos</h3>
             <ul className="space-y-3 text-accent">
-              <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">API Reference</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Documentação</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">API</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
               <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="font-medium mb-4">Company</h3>
+            <h3 className="font-medium mb-4">Empresa</h3>
             <ul className="space-y-3 text-accent">
-              <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Sobre</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Carreiras</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Contato</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Legal</a></li>
             </ul>
           </div>
@@ -48,10 +48,10 @@ const Footer = () => {
         
         <div className="border-t border-white/10 mt-16 pt-8 text-accent text-sm">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p>© 2024 Antimetal. All rights reserved.</p>
+            <p>© 2024 Antimetal. Todos os direitos reservados.</p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
+              <a href="#" className="hover:text-white transition-colors">Termos de Serviço</a>
             </div>
           </div>
         </div>

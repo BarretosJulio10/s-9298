@@ -1,32 +1,32 @@
 const faqs = [
   {
-    question: "How do I detect idle resources?",
-    answer: "Our platform automatically scans and identifies unused AWS resources...",
+    question: "Como detectar recursos ociosos?",
+    answer: "Nossa plataforma automaticamente escaneia e identifica recursos AWS não utilizados...",
     iconBg: "bg-pink-50",
   },
   {
-    question: "Why can't I get any support?",
-    answer: "We provide 24/7 dedicated support to help you with any AWS-related issues...",
+    question: "Por que não consigo suporte?",
+    answer: "Fornecemos suporte dedicado 24/7 para ajudar você com qualquer problema relacionado à AWS...",
     iconBg: "bg-purple-50",
   },
   {
-    question: "How can I forecast accurately?",
-    answer: "Our advanced analytics and machine learning models provide precise cost forecasting...",
+    question: "Como fazer previsões precisas?",
+    answer: "Nossos modelos avançados de análise e machine learning fornecem previsões precisas de custos...",
     iconBg: "bg-blue-50",
   },
   {
-    question: "Is it time to buy a savings plan?",
-    answer: "Our platform analyzes your usage patterns to recommend optimal savings plans...",
+    question: "É hora de comprar um plano de economia?",
+    answer: "Nossa plataforma analisa seus padrões de uso para recomendar planos de economia ideais...",
     iconBg: "bg-pink-50",
   },
   {
-    question: "How do I reduce data transfer costs?",
-    answer: "We analyze your data transfer patterns and provide optimization recommendations...",
+    question: "Como reduzir custos de transferência de dados?",
+    answer: "Analisamos seus padrões de transferência de dados e fornecemos recomendações de otimização...",
     iconBg: "bg-pink-50",
   },
   {
-    question: "Why did I get a surprise AWS bill?",
-    answer: "We help prevent unexpected costs by monitoring your usage in real-time...",
+    question: "Por que recebi uma conta surpresa da AWS?",
+    answer: "Ajudamos a prevenir custos inesperados monitorando seu uso em tempo real...",
     iconBg: "bg-purple-50",
   },
 ];
@@ -39,11 +39,11 @@ const FAQ = () => {
           <div className="w-6 h-6 rounded-full border border-primary/20 flex items-center justify-center">
             <span className="text-sm">?</span>
           </div>
-          <span className="text-sm text-secondary">The problem</span>
+          <span className="text-sm text-secondary">O problema</span>
         </div>
         
         <h2 className="text-4xl md:text-6xl font-bold text-center mb-16">
-          The cloud is complicated
+          A nuvem é complicada
         </h2>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

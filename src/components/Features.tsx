@@ -1,27 +1,27 @@
 const features = [
   {
-    title: "Easy Integration",
-    description: "Connect with your favorite tools and apps in minutes",
+    title: "Integração Fácil",
+    description: "Conecte com suas ferramentas e apps favoritos em minutos",
   },
   {
-    title: "Powerful Analytics",
-    description: "Get insights and data visualization to drive growth",
+    title: "Análises Poderosas",
+    description: "Obtenha insights e visualização de dados para impulsionar o crescimento",
   },
   {
-    title: "Team Collaboration",
-    description: "Work together seamlessly with your entire team",
+    title: "Colaboração em Equipe",
+    description: "Trabalhe em conjunto com toda sua equipe de forma integrada",
   },
   {
-    title: "Cloud Storage",
-    description: "Secure and scalable storage for all your needs",
+    title: "Armazenamento em Nuvem",
+    description: "Armazenamento seguro e escalável para todas as suas necessidades",
   },
   {
-    title: "24/7 Support",
-    description: "Expert help available whenever you need it",
+    title: "Suporte 24/7",
+    description: "Ajuda especializada disponível sempre que você precisar",
   },
   {
-    title: "Regular Updates",
-    description: "New features and improvements every month",
+    title: "Atualizações Regulares",
+    description: "Novos recursos e melhorias todos os meses",
   },
 ];
 
@@ -31,10 +31,10 @@ const Features = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Everything You Need
+            Tudo que Você Precisa
           </h2>
           <p className="text-secondary max-w-2xl mx-auto">
-            Our platform provides all the tools and features you need to succeed in today's digital world
+            Nossa plataforma fornece todas as ferramentas e recursos necessários para seu sucesso no mundo digital
           </p>
         </div>
         

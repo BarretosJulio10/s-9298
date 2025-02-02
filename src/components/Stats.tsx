@@ -1,8 +1,8 @@
 const stats = [
-  { number: "10k+", label: "Active Users" },
-  { number: "99.9%", label: "Uptime" },
-  { number: "24/7", label: "Support" },
-  { number: "50+", label: "Integrations" },
+  { number: "10k+", label: "Usuários Ativos" },
+  { number: "99.9%", label: "Disponibilidade" },
+  { number: "24/7", label: "Suporte" },
+  { number: "50+", label: "Integrações" },
 ];
 
 const Stats = () => {
@@ -11,10 +11,10 @@ const Stats = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Trusted by Thousands
+            Confiado por Milhares
           </h2>
           <p className="text-accent max-w-2xl mx-auto">
-            Join thousands of satisfied customers who trust our platform
+            Junte-se a milhares de clientes satisfeitos que confiam em nossa plataforma
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
