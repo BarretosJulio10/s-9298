@@ -4,18 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-interface QRCodeResponse {
-  status: string;
-  qrcode?: string;
-  message?: string;
-}
-
-interface StatusResponse {
-  status: string;
-  message: string;
-  connected: boolean;
-}
+import { callWhatsAppAPI } from "@/lib/whatsapp";
 
 const AdminWhatsApp = () => {
   const [qrCode, setQrCode] = useState("");
@@ -36,82 +25,37 @@ const AdminWhatsApp = () => {
     },
   });
 
-  // Função para verificar status
-  const checkStatus = async () => {
-    if (!config?.whatsapp_instance_id) {
-      throw new Error("ID da instância do WhatsApp não configurado");
-    }
-
-    const response = await fetch(
-      `https://www.w-api.app/session/status`,
-      {
-        method: "GET",
-        headers: {
-          "Accept": "application/json",
-          "Token": config.whatsapp_instance_id
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Falha ao verificar status");
-    }
-
-    const data = await response.json();
-    return data;
-  };
-
-  // Query para verificar status periodicamente
+  // Check WhatsApp connection status
   const { data: statusData } = useQuery({
     queryKey: ["whatsapp-status", config?.whatsapp_instance_id],
-    queryFn: checkStatus,
+    queryFn: async () => {
+      return callWhatsAppAPI("status");
+    },
     enabled: !!config?.whatsapp_instance_id,
     refetchInterval: 10000,
   });
 
-  // Atualiza o estado de conexão baseado no status
+  // Update connection status based on API response
   useEffect(() => {
     if (statusData?.data?.Connected && statusData?.data?.LoggedIn) {
       setIsConnected(true);
-      setQrCode(""); // Limpa o QR code quando conectado
+      setQrCode("");
     } else {
       setIsConnected(false);
     }
   }, [statusData]);
 
-  // Mutation para gerar QR code
+  // Generate QR code
   const qrCodeMutation = useMutation({
     mutationFn: async () => {
-      if (!config?.whatsapp_instance_id) {
-        throw new Error("ID da instância do WhatsApp não configurado");
-      }
-
-      const response = await fetch(
-        `https://www.w-api.app/session/qr`,
-        {
-          method: "GET",
-          headers: {
-            "Accept": "application/json",
-            "Token": config.whatsapp_instance_id
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Falha ao gerar QR Code");
-      }
-
-      const data: QRCodeResponse = await response.json();
-      
-      if (data.status === "erro" && data.message === "connected") {
+      const response = await callWhatsAppAPI("qrcode");
+      if (response.status === "erro" && response.message === "connected") {
         throw new Error("WhatsApp já está conectado");
       }
-      
-      if (data.status === "success" && data.qrcode) {
-        return data.qrcode;
-      } else {
-        throw new Error("Falha ao gerar QR Code");
+      if (response.status === "success" && response.data?.QRCode) {
+        return response.data.QRCode;
       }
+      throw new Error("Falha ao gerar QR Code");
     },
     onSuccess: (qrcode) => {
       setQrCode(qrcode);
@@ -124,40 +68,15 @@ const AdminWhatsApp = () => {
       toast({
         variant: "destructive",
         title: "Erro ao gerar QR Code",
-        description: error instanceof Error ? error.message : "Não foi possível gerar o QR Code. Tente novamente.",
+        description: error instanceof Error ? error.message : "Não foi possível gerar o QR Code",
       });
     },
   });
 
-  // Mutation para conectar WhatsApp
+  // Connect WhatsApp
   const connectMutation = useMutation({
     mutationFn: async () => {
-      if (!config?.whatsapp_instance_id) {
-        throw new Error("ID da instância do WhatsApp não configurado");
-      }
-
-      const response = await fetch(
-        `https://www.w-api.app/session/connect`,
-        {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Token": config.whatsapp_instance_id,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            "Subscribe": ["Message"],
-            "Immediate": false
-          })
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Falha ao conectar WhatsApp");
-      }
-
-      const data = await response.json();
-      return data;
+      return callWhatsAppAPI("connect");
     },
     onSuccess: () => {
       toast({
@@ -169,54 +88,36 @@ const AdminWhatsApp = () => {
       toast({
         variant: "destructive",
         title: "Erro ao conectar WhatsApp",
-        description: error instanceof Error ? error.message : "Não foi possível conectar o WhatsApp. Tente novamente.",
+        description: error instanceof Error ? error.message : "Não foi possível conectar",
       });
     },
   });
 
-  // Mutation para desconectar
+  // Disconnect WhatsApp
   const disconnectMutation = useMutation({
     mutationFn: async () => {
-      if (!config?.whatsapp_instance_id) {
-        throw new Error("ID da instância do WhatsApp não configurado");
-      }
-
-      const response = await fetch(
-        `https://www.w-api.app/session/logout`,
-        {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Token": config.whatsapp_instance_id
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Falha ao desconectar");
-      }
-
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error("Falha ao desconectar");
-      }
+      return callWhatsAppAPI("disconnect");
     },
     onSuccess: () => {
       setQrCode("");
       setIsConnected(false);
       toast({
         title: "WhatsApp desconectado",
-        description: "A conexão foi encerrada com sucesso",
+        description: "Conexão encerrada com sucesso",
       });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
         title: "Erro ao desconectar",
-        description: error instanceof Error ? error.message : "Não foi possível desconectar. Tente novamente.",
+        description: error instanceof Error ? error.message : "Não foi possível desconectar",
       });
     },
   });
+
+  const handleGenerateQR = () => {
+    qrCodeMutation.mutate();
+  };
 
   const handleConnect = () => {
     connectMutation.mutate();
@@ -224,10 +125,6 @@ const AdminWhatsApp = () => {
 
   const handleDisconnect = () => {
     disconnectMutation.mutate();
-  };
-
-  const handleGenerateQR = () => {
-    qrCodeMutation.mutate();
   };
 
   return (
