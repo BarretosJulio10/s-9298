@@ -139,6 +139,7 @@ export type Database = {
           plan_id: string | null
           status: Database["public"]["Enums"]["company_status"] | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           cnpj?: string | null
@@ -150,6 +151,7 @@ export type Database = {
           plan_id?: string | null
           status?: Database["public"]["Enums"]["company_status"] | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           cnpj?: string | null
@@ -161,6 +163,7 @@ export type Database = {
           plan_id?: string | null
           status?: Database["public"]["Enums"]["company_status"] | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: [
           {
