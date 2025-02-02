@@ -36,7 +36,7 @@ const AdminWhatsApp = () => {
   const generateQRCode = async (): Promise<QRCodeResponse> => {
     try {
       const response = await fetch(
-        "https://www.w-api.app/api/v3/qrcode/generate",
+        `https://www.w-api.app/manager/create?adm_key=${instanceId}`,
         {
           method: "POST",
           headers: {
