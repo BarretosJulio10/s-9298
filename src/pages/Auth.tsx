@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +36,18 @@ const Auth = () => {
           password,
         });
 
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          // Tratamento específico para usuário já existente
+          if (signUpError.message === "User already registered") {
+            toast({
+              variant: "destructive",
+              title: "Erro no cadastro",
+              description: "Este email já está cadastrado. Por favor, faça login ou use outro email.",
+            });
+            return;
+          }
+          throw signUpError;
+        }
 
         if (data.user) {
           const { error: profileError } = await supabase
