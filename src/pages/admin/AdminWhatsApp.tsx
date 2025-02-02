@@ -13,7 +13,7 @@ const AdminWhatsApp = () => {
   // Função para gerar QR code
   const generateQRCode = async () => {
     try {
-      const response = await fetch(`https://api.w-api.app/v2/instance/qrcode?id=${instanceId}`, {
+      const response = await fetch(`https://api.w-api.app/api/v2/instance/qrcode?id=${instanceId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
