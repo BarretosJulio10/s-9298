@@ -14,8 +14,19 @@ interface AppRoutesProps {
 }
 
 const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
-  // Redirect to admin dashboard if user is admin
-  if (session && userRole === 'admin') {
+  // Se não estiver autenticado, redireciona para /auth
+  if (!session) {
+    return (
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="*" element={<Navigate to="/auth" replace />} />
+      </Routes>
+    );
+  }
+
+  // Se for admin, mostra apenas as rotas de admin
+  if (userRole === 'admin') {
     return (
       <Routes>
         <Route path="/admin" element={<AdminDashboard />}>
@@ -29,23 +40,12 @@ const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
     );
   }
 
-  // Regular user routes
+  // Se for usuário comum, mostra apenas as rotas de usuário
   return (
     <Routes>
       <Route path="/" element={<Index />} />
-      <Route
-        path="/dashboard"
-        element={
-          session ? <Dashboard /> : <Navigate to="/auth" replace />
-        }
-      />
-      <Route
-        path="/auth"
-        element={
-          !session ? <Auth /> : <Navigate to="/dashboard" replace />
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 };

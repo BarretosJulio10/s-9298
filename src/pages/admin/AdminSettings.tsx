@@ -1,9 +1,8 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -12,8 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { Settings2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const AdminSettings = () => {
   const { toast } = useToast();
@@ -21,79 +19,80 @@ const AdminSettings = () => {
   const [apiKey, setApiKey] = useState("");
   const [environment, setEnvironment] = useState("sandbox");
 
-  const { data: configurations, isLoading } = useQuery({
+  // Buscar configurações existentes
+  const { data: config } = useQuery({
     queryKey: ["configurations"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("configurations")
         .select("*")
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       return data;
     },
   });
 
-  const updateConfigurations = useMutation({
-    mutationFn: async (values: { asaas_api_key?: string; asaas_environment?: string }) => {
+  // Mutation para salvar configurações
+  const mutation = useMutation({
+    mutationFn: async (values: { asaas_api_key: string; asaas_environment: string }) => {
       const { error } = await supabase
         .from("configurations")
-        .upsert({
-          id: configurations?.id || undefined,
-          ...values,
-        });
+        .upsert([values], { onConflict: "id" });
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["configurations"] });
       toast({
-        title: "Sucesso",
-        description: "Configurações atualizadas com sucesso",
+        title: "Configurações salvas",
+        description: "As configurações foram atualizadas com sucesso.",
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: "Erro ao atualizar configurações",
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar as configurações.",
       });
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const values: { asaas_api_key?: string; asaas_environment?: string } = {};
-    
-    if (apiKey) {
-      values.asaas_api_key = apiKey;
-    }
-    if (environment) {
-      values.asaas_environment = environment;
-    }
-
-    updateConfigurations.mutate(values);
+    mutation.mutate({
+      asaas_api_key: apiKey,
+      asaas_environment: environment,
+    });
   };
-
-  if (isLoading) {
-    return <div>Carregando...</div>;
-  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Settings2 className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">Configurações</h1>
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Configurações</h2>
+        <p className="text-muted-foreground">
+          Gerencie as configurações da integração com o Asaas
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Configurações do Asaas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Configurações do Asaas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="environment">Ambiente</Label>
+              <label htmlFor="apiKey">Chave API</label>
+              <Input
+                id="apiKey"
+                placeholder="Insira sua chave API do Asaas"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="environment">Ambiente</label>
               <Select
                 value={environment}
                 onValueChange={setEnvironment}
@@ -108,45 +107,31 @@ const AdminSettings = () => {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="apiKey">API Key</Label>
-              <Input
-                id="apiKey"
-                type="password"
-                placeholder="Digite a API Key do Asaas"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-              />
-            </div>
-
-            <Button type="submit">
-              Salvar Configurações
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? "Salvando..." : "Salvar configurações"}
             </Button>
-          </CardContent>
-        </Card>
-      </form>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Configurações Atuais</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div>
-            <span className="font-semibold">Ambiente: </span>
-            <span className="capitalize">
-              {configurations?.asaas_environment || "sandbox"}
-            </span>
-          </div>
-          <div>
-            <span className="font-semibold">API Key: </span>
-            <span>
-              {configurations?.asaas_api_key
-                ? "••••••••" + configurations.asaas_api_key.slice(-4)
-                : "Não configurado"}
-            </span>
-          </div>
+          </form>
         </CardContent>
       </Card>
+
+      {config && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Configurações atuais</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p>
+                <strong>Ambiente:</strong> {config.asaas_environment}
+              </p>
+              <p>
+                <strong>Chave API:</strong>{" "}
+                {config.asaas_api_key ? "Configurada" : "Não configurada"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
