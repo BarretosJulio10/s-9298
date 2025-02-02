@@ -28,6 +28,11 @@ interface CompanySettingsFormData {
   asaas_environment: "sandbox" | "production";
 }
 
+const defaultSettings: CompanySettingsFormData = {
+  asaas_api_key: "",
+  asaas_environment: "sandbox",
+};
+
 export function CompanySettingsForm() {
   const { toast } = useToast();
   const { session } = useAuth();
@@ -41,9 +46,25 @@ export function CompanySettingsForm() {
         .from("company_settings")
         .select("*")
         .eq("company_id", session?.user?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+
+      // If no settings exist, create default settings
+      if (!data) {
+        const { data: newSettings, error: createError } = await supabase
+          .from("company_settings")
+          .insert({
+            company_id: session?.user?.id,
+            ...defaultSettings,
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        return newSettings as CompanySettingsFormData;
+      }
+
       return data as CompanySettingsFormData;
     },
   });
