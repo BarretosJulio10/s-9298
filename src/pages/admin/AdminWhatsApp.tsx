@@ -2,23 +2,21 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
 const AdminWhatsApp = () => {
-  const [apiKey, setApiKey] = useState("");
   const [qrCode, setQrCode] = useState("");
   const { toast } = useToast();
+  const instanceId = "1716319589869x721327290780988000";
 
   // Função para gerar QR code
   const generateQRCode = async () => {
     try {
-      const response = await fetch("https://api.w-api.app/v2/instance/qrcode", {
+      const response = await fetch(`https://api.w-api.app/v2/instance/qrcode?id=${instanceId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": apiKey,
         },
       });
 
@@ -47,20 +45,12 @@ const AdminWhatsApp = () => {
       toast({
         variant: "destructive",
         title: "Erro ao gerar QR Code",
-        description: "Verifique sua chave API e tente novamente",
+        description: "Não foi possível gerar o QR Code. Tente novamente.",
       });
     },
   });
 
   const handleConnect = () => {
-    if (!apiKey) {
-      toast({
-        variant: "destructive",
-        title: "Chave API necessária",
-        description: "Por favor, insira sua chave API do W-API",
-      });
-      return;
-    }
     qrCodeMutation.mutate();
   };
 
@@ -80,16 +70,6 @@ const AdminWhatsApp = () => {
           <CardTitle>Configuração do WhatsApp</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="apiKey">Chave API</label>
-            <Input
-              id="apiKey"
-              placeholder="Insira sua chave API do W-API"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-            />
-          </div>
-
           <Button
             onClick={handleConnect}
             disabled={qrCodeMutation.isPending}
