@@ -1,4 +1,4 @@
-import { Home, Users, Package, Settings2, LogOut } from "lucide-react";
+import { Home, Users, Package, Settings2, LogOut, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -28,6 +28,11 @@ const menuItems = [
     title: "Planos",
     url: "/admin/plans",
     icon: Package,
+  },
+  {
+    title: "WhatsApp",
+    url: "/admin/whatsapp",
+    icon: MessageSquare,
   },
   {
     title: "Configurações",
@@ -77,7 +82,6 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Logout button at the bottom */}
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
