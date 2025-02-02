@@ -15,6 +15,7 @@ export const useLoginForm = () => {
     setIsLoading(true);
 
     try {
+      // Primeiro, tenta fazer o login
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -27,20 +28,43 @@ export const useLoginForm = () => {
             title: "Erro no login",
             description: "Email ou senha incorretos. Por favor, verifique suas credenciais.",
           });
-          return;
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erro no login",
+            description: "Ocorreu um erro ao tentar fazer login. Tente novamente.",
+          });
         }
-        throw signInError;
+        return;
       }
 
-      // Fetch user role after successful login
+      // Após login bem sucedido, busca o usuário atual
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Usuário não encontrado.",
+        });
+        return;
+      }
+
+      // Busca o papel do usuário
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .eq('user_id', user.id)
         .maybeSingle();
 
       if (roleError) {
-        throw roleError;
+        console.error('Erro ao buscar papel do usuário:', roleError);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Erro ao verificar permissões do usuário.",
+        });
+        return;
       }
 
       if (!roleData) {
@@ -52,7 +76,7 @@ export const useLoginForm = () => {
         return;
       }
 
-      // Redirect based on user role
+      // Redireciona baseado no papel do usuário
       if (roleData.role === 'admin') {
         navigate('/admin');
         toast({
@@ -67,10 +91,11 @@ export const useLoginForm = () => {
         });
       }
     } catch (error: any) {
+      console.error('Erro no processo de login:', error);
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message,
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
       });
     } finally {
       setIsLoading(false);
