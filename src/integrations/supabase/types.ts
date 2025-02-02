@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      charge_settings: {
+        Row: {
+          auto_send_notifications: boolean | null
+          company_id: string
+          created_at: string
+          default_interest_rate: number | null
+          default_late_fee: number | null
+          id: string
+          notification_days_before: number | null
+          notification_message: string | null
+          updated_at: string
+        }
+        Insert: {
+          auto_send_notifications?: boolean | null
+          company_id: string
+          created_at?: string
+          default_interest_rate?: number | null
+          default_late_fee?: number | null
+          id?: string
+          notification_days_before?: number | null
+          notification_message?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auto_send_notifications?: boolean | null
+          company_id?: string
+          created_at?: string
+          default_interest_rate?: number | null
+          default_late_fee?: number | null
+          id?: string
+          notification_days_before?: number | null
+          notification_message?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charge_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       charges: {
         Row: {
           amount: number
@@ -22,7 +66,11 @@ export type Database = {
           id: string
           interest_rate: number | null
           late_fee: number | null
+          notification_date: string | null
+          notification_sent: boolean | null
+          payment_date: string | null
           payment_link: string | null
+          payment_method: string | null
           status: Database["public"]["Enums"]["charge_status"]
           updated_at: string
         }
@@ -38,7 +86,11 @@ export type Database = {
           id?: string
           interest_rate?: number | null
           late_fee?: number | null
+          notification_date?: string | null
+          notification_sent?: boolean | null
+          payment_date?: string | null
           payment_link?: string | null
+          payment_method?: string | null
           status?: Database["public"]["Enums"]["charge_status"]
           updated_at?: string
         }
@@ -54,7 +106,11 @@ export type Database = {
           id?: string
           interest_rate?: number | null
           late_fee?: number | null
+          notification_date?: string | null
+          notification_sent?: boolean | null
+          payment_date?: string | null
           payment_link?: string | null
+          payment_method?: string | null
           status?: Database["public"]["Enums"]["charge_status"]
           updated_at?: string
         }
@@ -94,6 +150,41 @@ export type Database = {
           whatsapp_instance_id?: string | null
         }
         Relationships: []
+      }
+      notification_history: {
+        Row: {
+          charge_id: string
+          created_at: string
+          id: string
+          message: string | null
+          status: string
+          type: string
+        }
+        Insert: {
+          charge_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status: string
+          type: string
+        }
+        Update: {
+          charge_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          status?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_history_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "charges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       plans: {
         Row: {
@@ -216,6 +307,7 @@ export type Database = {
     Enums: {
       charge_status: "pending" | "paid" | "overdue" | "cancelled"
       company_status: "active" | "inactive" | "pending"
+      payment_method: "pix" | "boleto" | "credit_card"
       user_role: "admin" | "company"
     }
     CompositeTypes: {
