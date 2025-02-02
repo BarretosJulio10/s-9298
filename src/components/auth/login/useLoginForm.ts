@@ -15,13 +15,13 @@ export const useLoginForm = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) {
-        if (error.message === "Invalid login credentials") {
+      if (signInError) {
+        if (signInError.message === "Invalid login credentials") {
           toast({
             variant: "destructive",
             title: "Erro no login",
@@ -29,9 +29,32 @@ export const useLoginForm = () => {
           });
           return;
         }
-        throw error;
+        throw signInError;
       }
-      navigate("/dashboard");
+
+      // Fetch user role after successful login
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (roleError) throw roleError;
+
+      // Redirect based on user role
+      if (roleData.role === 'admin') {
+        navigate('/admin');
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo ao painel administrativo!",
+        });
+      } else {
+        navigate('/dashboard');
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo ao PagouPix!",
+        });
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
