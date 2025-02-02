@@ -1,5 +1,5 @@
-import { Home, Users, Package, Settings2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Home, Users, Package, Settings2, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -10,6 +10,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const menuItems = [
   {
@@ -35,9 +37,28 @@ const menuItems = [
 ];
 
 export function AdminSidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Logout realizado com sucesso",
+        description: "Você será redirecionado para a página principal",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Erro ao realizar logout",
+        description: "Tente novamente mais tarde",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Sidebar>
-      <SidebarContent>
+      <SidebarContent className="flex flex-col h-full">
         <SidebarGroup>
           <SidebarGroupLabel>Administração</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -52,6 +73,20 @@ export function AdminSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Logout button at the bottom */}
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleLogout}>
+                  <LogOut className="h-4 w-4" />
+                  <span>Sair</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
