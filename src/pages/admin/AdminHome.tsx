@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Users, CreditCard, CheckCircle, XCircle } from "lucide-react";
 
 const AdminHome = () => {
+  // Buscar estatísticas de empresas
   const { data: stats = { total: 0, active: 0, pending: 0, inactive: 0 } } = useQuery({
     queryKey: ["companiesStats"],
     queryFn: async () => {
@@ -22,6 +23,7 @@ const AdminHome = () => {
     },
   });
 
+  // Buscar quantidade de planos ativos
   const { data: plansCount = 0 } = useQuery({
     queryKey: ["plansCount"],
     queryFn: async () => {

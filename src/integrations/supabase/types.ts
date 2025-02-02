@@ -9,6 +9,65 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      charges: {
+        Row: {
+          amount: number
+          asaas_id: string | null
+          company_id: string
+          created_at: string
+          customer_document: string
+          customer_email: string
+          customer_name: string
+          due_date: string
+          id: string
+          interest_rate: number | null
+          late_fee: number | null
+          payment_link: string | null
+          status: Database["public"]["Enums"]["charge_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          asaas_id?: string | null
+          company_id: string
+          created_at?: string
+          customer_document: string
+          customer_email: string
+          customer_name: string
+          due_date: string
+          id?: string
+          interest_rate?: number | null
+          late_fee?: number | null
+          payment_link?: string | null
+          status?: Database["public"]["Enums"]["charge_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          asaas_id?: string | null
+          company_id?: string
+          created_at?: string
+          customer_document?: string
+          customer_email?: string
+          customer_name?: string
+          due_date?: string
+          id?: string
+          interest_rate?: number | null
+          late_fee?: number | null
+          payment_link?: string | null
+          status?: Database["public"]["Enums"]["charge_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charges_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configurations: {
         Row: {
           asaas_api_key: string | null
@@ -149,6 +208,7 @@ export type Database = {
       }
     }
     Enums: {
+      charge_status: "pending" | "paid" | "overdue" | "cancelled"
       company_status: "active" | "inactive" | "pending"
       user_role: "admin" | "company"
     }
