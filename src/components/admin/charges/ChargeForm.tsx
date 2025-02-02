@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ChargeFormData {
   customerName: string;
@@ -41,6 +43,7 @@ interface ChargeFormData {
 
 export function ChargeForm() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const form = useForm<ChargeFormData>();
   const [date, setDate] = useState<Date>();
@@ -54,6 +57,7 @@ export function ChargeForm() {
         amount: data.amount,
         due_date: format(data.dueDate, "yyyy-MM-dd"),
         payment_method: data.paymentMethod,
+        company_id: user?.id, // Adicionando o company_id do usuário logado
       });
 
       if (error) throw error;
