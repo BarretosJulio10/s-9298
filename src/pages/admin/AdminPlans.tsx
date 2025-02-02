@@ -19,6 +19,7 @@ const AdminPlans = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch plans
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ["plans"],
     queryFn: async () => {
@@ -27,11 +28,19 @@ const AdminPlans = () => {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Erro ao carregar planos",
+        });
+        throw error;
+      }
       return data || [];
     },
   });
 
+  // Toggle plan status
   const togglePlanStatus = useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
       const { error } = await supabase
@@ -53,6 +62,28 @@ const AdminPlans = () => {
         variant: "destructive",
         title: "Erro",
         description: "Erro ao atualizar status do plano",
+      });
+    },
+  });
+
+  // Delete plan
+  const deletePlan = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("plans").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["plans"] });
+      toast({
+        title: "Sucesso",
+        description: "Plano excluído com sucesso",
+      });
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao excluir plano",
       });
     },
   });
@@ -101,7 +132,9 @@ const AdminPlans = () => {
                 <Badge
                   variant={plan.active ? "success" : "destructive"}
                   className="cursor-pointer"
-                  onClick={() => togglePlanStatus.mutate({ id: plan.id, active: !plan.active })}
+                  onClick={() =>
+                    togglePlanStatus.mutate({ id: plan.id, active: !plan.active })
+                  }
                 >
                   {plan.active ? "Ativo" : "Inativo"}
                 </Badge>
@@ -116,7 +149,11 @@ const AdminPlans = () => {
                   <Button variant="outline" size="sm">
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="destructive" size="sm">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deletePlan.mutate(plan.id)}
+                  >
                     <Trash className="h-4 w-4" />
                   </Button>
                 </div>
