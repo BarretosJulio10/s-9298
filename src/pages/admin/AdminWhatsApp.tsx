@@ -19,12 +19,8 @@ const AdminWhatsApp = () => {
           headers: {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Authorization": instanceId,
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization"
-          },
-          mode: "cors"
+            "Authorization": instanceId
+          }
         }
       );
 
