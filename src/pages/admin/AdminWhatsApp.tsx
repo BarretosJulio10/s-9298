@@ -66,7 +66,7 @@ const AdminWhatsApp = () => {
     queryKey: ["whatsapp-status", config?.whatsapp_instance_id],
     queryFn: checkStatus,
     enabled: !!config?.whatsapp_instance_id,
-    refetchInterval: 10000, // Verifica a cada 10 segundos
+    refetchInterval: 10000,
   });
 
   // Atualiza o estado de conexão baseado no status
@@ -129,6 +129,51 @@ const AdminWhatsApp = () => {
     },
   });
 
+  // Mutation para conectar WhatsApp
+  const connectMutation = useMutation({
+    mutationFn: async () => {
+      if (!config?.whatsapp_instance_id) {
+        throw new Error("ID da instância do WhatsApp não configurado");
+      }
+
+      const response = await fetch(
+        `https://www.w-api.app/session/connect`,
+        {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Token": config.whatsapp_instance_id,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            "Subscribe": ["Message"],
+            "Immediate": false
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Falha ao conectar WhatsApp");
+      }
+
+      const data = await response.json();
+      return data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "WhatsApp conectado",
+        description: "Conexão estabelecida com sucesso",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao conectar WhatsApp",
+        description: error instanceof Error ? error.message : "Não foi possível conectar o WhatsApp. Tente novamente.",
+      });
+    },
+  });
+
   // Mutation para desconectar
   const disconnectMutation = useMutation({
     mutationFn: async () => {
@@ -174,11 +219,15 @@ const AdminWhatsApp = () => {
   });
 
   const handleConnect = () => {
-    qrCodeMutation.mutate();
+    connectMutation.mutate();
   };
 
   const handleDisconnect = () => {
     disconnectMutation.mutate();
+  };
+
+  const handleGenerateQR = () => {
+    qrCodeMutation.mutate();
   };
 
   return (
@@ -205,11 +254,20 @@ const AdminWhatsApp = () => {
             <>
               <div className="flex items-center gap-4">
                 <Button
-                  onClick={handleConnect}
+                  onClick={handleGenerateQR}
                   disabled={qrCodeMutation.isPending || isConnected}
                 >
                   {qrCodeMutation.isPending ? "Gerando QR Code..." : "Gerar QR Code"}
                 </Button>
+
+                {qrCode && !isConnected && (
+                  <Button
+                    onClick={handleConnect}
+                    disabled={connectMutation.isPending}
+                  >
+                    {connectMutation.isPending ? "Conectando..." : "Conectar WhatsApp"}
+                  </Button>
+                )}
 
                 {isConnected && (
                   <Button
@@ -228,18 +286,18 @@ const AdminWhatsApp = () => {
                   {isConnected ? 'Conectado' : 'Desconectado'}
                 </span>
               </div>
-            </>
-          )}
 
-          {qrCode && !isConnected && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold mb-2">QR Code</h3>
-              <img
-                src={qrCode}
-                alt="WhatsApp QR Code"
-                className="max-w-[300px] border rounded-lg"
-              />
-            </div>
+              {qrCode && !isConnected && (
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold mb-2">QR Code</h3>
+                  <img
+                    src={qrCode}
+                    alt="WhatsApp QR Code"
+                    className="max-w-[300px] border rounded-lg"
+                  />
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
