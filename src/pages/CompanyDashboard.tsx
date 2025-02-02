@@ -63,67 +63,81 @@ const CompanyDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar>
+      <Sidebar className="border-r border-gray-200">
         <SidebarGroup>
           <SidebarGroupContent>
-            <div className="px-3 py-2">
-              <h2 className="text-lg font-semibold mb-2">PagouPix</h2>
-              <p className="text-sm text-muted-foreground">Painel da Empresa</p>
+            <div className="px-3 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-primary">PagouPix</h2>
+              <p className="text-sm text-muted-foreground mt-1">Painel da Empresa</p>
             </div>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection("home")}
-                  className={activeSection === "home" ? "bg-accent" : ""}
-                >
-                  <Home className="h-4 w-4" />
-                  <span>Início</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection("charges")}
-                  className={activeSection === "charges" ? "bg-accent" : ""}
-                >
-                  <CreditCard className="h-4 w-4" />
-                  <span>Cobranças</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection("templates")}
-                  className={activeSection === "templates" ? "bg-accent" : ""}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Templates</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection("settings")}
-                  className={activeSection === "settings" ? "bg-accent" : ""}
-                >
-                  <Settings className="h-4 w-4" />
-                  <span>Configurações</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={handleLogout}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Sair</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
+            <div className="py-2">
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setActiveSection("home")}
+                    className={`w-full ${activeSection === "home" ? "bg-primary/10 text-primary" : ""}`}
+                  >
+                    <Home className="h-5 w-5" />
+                    <span>Início</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setActiveSection("charges")}
+                    className={`w-full ${activeSection === "charges" ? "bg-primary/10 text-primary" : ""}`}
+                  >
+                    <CreditCard className="h-5 w-5" />
+                    <span>Cobranças</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setActiveSection("templates")}
+                    className={`w-full ${activeSection === "templates" ? "bg-primary/10 text-primary" : ""}`}
+                  >
+                    <MessageSquare className="h-5 w-5" />
+                    <span>Templates</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setActiveSection("settings")}
+                    className={`w-full ${activeSection === "settings" ? "bg-primary/10 text-primary" : ""}`}
+                  >
+                    <Settings className="h-5 w-5" />
+                    <span>Configurações</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </div>
+            <div className="mt-auto pt-4 border-t border-gray-200">
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={handleLogout}
+                    className="w-full text-red-600 hover:bg-red-50 hover:text-red-700"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Sair</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </Sidebar>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto px-6 py-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="h-16 bg-white border-b border-gray-200 flex items-center px-6">
+          <h1 className="text-2xl font-semibold">
+            {activeSection === "home" && "Dashboard"}
+            {activeSection === "charges" && "Cobranças"}
+            {activeSection === "templates" && "Templates"}
+            {activeSection === "settings" && "Configurações"}
+          </h1>
+        </div>
+        <div className="p-6">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             {renderContent()}
           </div>
         </div>
