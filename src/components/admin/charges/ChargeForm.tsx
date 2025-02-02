@@ -43,7 +43,7 @@ interface ChargeFormData {
 
 export function ChargeForm() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { session } = useAuth();
   const queryClient = useQueryClient();
   const form = useForm<ChargeFormData>();
   const [date, setDate] = useState<Date>();
@@ -57,7 +57,7 @@ export function ChargeForm() {
         amount: data.amount,
         due_date: format(data.dueDate, "yyyy-MM-dd"),
         payment_method: data.paymentMethod,
-        company_id: user?.id, // Adicionando o company_id do usuário logado
+        company_id: session?.user?.id, // Usando o user ID do session
       });
 
       if (error) throw error;
