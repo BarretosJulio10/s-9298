@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { cn } from "@/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -17,28 +14,22 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 
 interface ChargeFormData {
-  customerName: string;
-  customerEmail: string;
-  customerDocument: string;
+  customer_name: string;
+  customer_email: string;
+  customer_document: string;
   amount: number;
-  dueDate: Date;
-  paymentMethod: string;
+  due_date: string;
+  payment_method: "pix" | "boleto" | "credit_card";
 }
 
 export function ChargeForm() {
@@ -46,21 +37,70 @@ export function ChargeForm() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const form = useForm<ChargeFormData>();
-  const [date, setDate] = useState<Date>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const createCharge = useMutation({
     mutationFn: async (data: ChargeFormData) => {
-      const { error } = await supabase.from("charges").insert({
-        customer_name: data.customerName,
-        customer_email: data.customerEmail,
-        customer_document: data.customerDocument,
-        amount: data.amount,
-        due_date: format(data.dueDate, "yyyy-MM-dd"),
-        payment_method: data.paymentMethod,
-        company_id: session?.user?.id, // Usando o user ID do session
+      if (!session?.user?.id) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      // Primeiro, busca as configurações da empresa
+      const { data: settings, error: settingsError } = await supabase
+        .from("company_settings")
+        .select("*")
+        .eq("company_id", session.user.id)
+        .maybeSingle();
+
+      if (settingsError) throw settingsError;
+      if (!settings?.asaas_api_key) {
+        throw new Error("Chave API do Asaas não configurada");
+      }
+
+      // Cria a cobrança no Asaas usando Edge Function
+      const asaasResponse = await fetch("/api/asaas/create-charge", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          apiKey: settings.asaas_api_key,
+          environment: settings.asaas_environment,
+          charge: {
+            customer: {
+              name: data.customer_name,
+              email: data.customer_email,
+              cpfCnpj: data.customer_document,
+            },
+            billingType: data.payment_method.toUpperCase(),
+            value: data.amount,
+            dueDate: data.due_date,
+          },
+        }),
       });
 
-      if (error) throw error;
+      if (!asaasResponse.ok) {
+        const error = await asaasResponse.json();
+        throw new Error(error.message || "Erro ao criar cobrança no Asaas");
+      }
+
+      const asaasData = await asaasResponse.json();
+
+      // Salva a cobrança no banco de dados
+      const { error: chargeError } = await supabase.from("charges").insert({
+        company_id: session.user.id,
+        customer_name: data.customer_name,
+        customer_email: data.customer_email,
+        customer_document: data.customer_document,
+        amount: data.amount,
+        due_date: data.due_date,
+        payment_method: data.payment_method,
+        asaas_id: asaasData.id,
+        payment_link: asaasData.bankSlipUrl || asaasData.invoiceUrl,
+        status: "pending",
+      });
+
+      if (chargeError) throw chargeError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["charges"] });
@@ -70,156 +110,147 @@ export function ChargeForm() {
       });
       form.reset();
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         variant: "destructive",
         title: "Erro ao criar cobrança",
-        description: "Não foi possível criar a cobrança",
+        description: error.message,
       });
     },
   });
 
   const onSubmit = (data: ChargeFormData) => {
+    setIsLoading(true);
     createCharge.mutate(data);
+    setIsLoading(false);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="customerName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome do Cliente</FormLabel>
-              <FormControl>
-                <Input placeholder="Digite o nome do cliente" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="customerEmail"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>E-mail</FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder="Digite o e-mail do cliente"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="customerDocument"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>CPF/CNPJ</FormLabel>
-              <FormControl>
-                <Input placeholder="Digite o CPF ou CNPJ" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  placeholder="Digite o valor"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Vencimento</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+    <Card className="max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>Nova Cobrança</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="customer_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome do Cliente</FormLabel>
                   <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP", { locale: ptBR })
-                      ) : (
-                        <span>Selecione uma data</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
+                    <Input placeholder="Digite o nome do cliente" {...field} />
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="paymentMethod"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Método de Pagamento</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o método" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="pix">PIX</SelectItem>
-                  <SelectItem value="boleto">Boleto</SelectItem>
-                  <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="customer_email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>E-mail do Cliente</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Digite o e-mail do cliente"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Button type="submit" disabled={createCharge.isPending}>
-          {createCharge.isPending ? "Criando..." : "Criar Cobrança"}
-        </Button>
-      </form>
-    </Form>
+            <FormField
+              control={form.control}
+              name="customer_document"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CPF/CNPJ do Cliente</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Digite o CPF ou CNPJ do cliente"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Valor</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Digite o valor"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="due_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data de Vencimento</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="payment_method"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Método de Pagamento</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o método" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="pix">PIX</SelectItem>
+                      <SelectItem value="boleto">Boleto</SelectItem>
+                      <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "Criando..." : "Criar Cobrança"}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }
