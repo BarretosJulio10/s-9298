@@ -1,8 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ChargesList } from "@/components/dashboard/charges/ChargesList";
+import { ChargeForm } from "@/components/dashboard/charges/ChargeForm";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Plus } from "lucide-react";
 
 const DashboardHome = () => {
+  const [showChargeForm, setShowChargeForm] = useState(false);
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
@@ -32,7 +38,13 @@ const DashboardHome = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <Button onClick={() => setShowChargeForm(true)} className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Nova Cobrança
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="p-6">
@@ -66,6 +78,23 @@ const DashboardHome = () => {
           </p>
         </Card>
       </div>
+
+      {showChargeForm ? (
+        <div className="mt-6">
+          <ChargeForm />
+          <Button 
+            variant="outline" 
+            onClick={() => setShowChargeForm(false)}
+            className="mt-4"
+          >
+            Voltar para Lista
+          </Button>
+        </div>
+      ) : (
+        <div className="mt-6">
+          <ChargesList />
+        </div>
+      )}
     </div>
   );
 };

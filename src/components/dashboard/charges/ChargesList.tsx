@@ -16,9 +16,13 @@ export function ChargesList() {
   const { data: charges, isLoading } = useQuery({
     queryKey: ["charges"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
       const { data, error } = await supabase
         .from("charges")
         .select("*")
+        .eq("company_id", user.id)
         .order("due_date", { ascending: false });
 
       if (error) throw error;
@@ -43,61 +47,72 @@ export function ChargesList() {
     }
   };
 
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "Pago";
+      case "pending":
+        return "Pendente";
+      case "overdue":
+        return "Vencido";
+      case "cancelled":
+        return "Cancelado";
+      default:
+        return status;
+    }
+  };
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Cliente</TableHead>
-          <TableHead>Valor</TableHead>
-          <TableHead>Vencimento</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Método</TableHead>
-          <TableHead>Data Pagamento</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {charges?.map((charge) => (
-          <TableRow key={charge.id}>
-            <TableCell>{charge.customer_name}</TableCell>
-            <TableCell>
-              {new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(charge.amount)}
-            </TableCell>
-            <TableCell>
-              {format(new Date(charge.due_date), "dd/MM/yyyy", {
-                locale: ptBR,
-              })}
-            </TableCell>
-            <TableCell>
-              <Badge variant={getStatusColor(charge.status)}>
-                {charge.status === "paid"
-                  ? "Pago"
-                  : charge.status === "pending"
-                  ? "Pendente"
-                  : charge.status === "overdue"
-                  ? "Atrasado"
-                  : "Cancelado"}
-              </Badge>
-            </TableCell>
-            <TableCell className="capitalize">
-              {charge.payment_method === "pix"
-                ? "PIX"
-                : charge.payment_method === "boleto"
-                ? "Boleto"
-                : "Cartão"}
-            </TableCell>
-            <TableCell>
-              {charge.payment_date
-                ? format(new Date(charge.payment_date), "dd/MM/yyyy", {
-                    locale: ptBR,
-                  })
-                : "-"}
-            </TableCell>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Cliente</TableHead>
+            <TableHead>Valor</TableHead>
+            <TableHead>Vencimento</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Método</TableHead>
+            <TableHead>Data Pagamento</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {charges?.map((charge) => (
+            <TableRow key={charge.id}>
+              <TableCell>{charge.customer_name}</TableCell>
+              <TableCell>
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(charge.amount)}
+              </TableCell>
+              <TableCell>
+                {format(new Date(charge.due_date), "dd/MM/yyyy", {
+                  locale: ptBR,
+                })}
+              </TableCell>
+              <TableCell>
+                <Badge variant={getStatusColor(charge.status)}>
+                  {formatStatus(charge.status)}
+                </Badge>
+              </TableCell>
+              <TableCell className="capitalize">
+                {charge.payment_method === "pix"
+                  ? "PIX"
+                  : charge.payment_method === "boleto"
+                  ? "Boleto"
+                  : "Cartão"}
+              </TableCell>
+              <TableCell>
+                {charge.payment_date
+                  ? format(new Date(charge.payment_date), "dd/MM/yyyy", {
+                      locale: ptBR,
+                    })
+                  : "-"}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
