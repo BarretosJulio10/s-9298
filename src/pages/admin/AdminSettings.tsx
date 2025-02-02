@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChargeSettingsForm } from "@/components/admin/settings/ChargeSettingsForm";
 
 const AdminSettings = () => {
   const { toast } = useToast();
@@ -71,7 +72,7 @@ const AdminSettings = () => {
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Configurações</h2>
         <p className="text-muted-foreground">
-          Gerencie as configurações da integração com o Asaas
+          Gerencie as configurações do sistema
         </p>
       </div>
 
@@ -113,6 +114,8 @@ const AdminSettings = () => {
           </form>
         </CardContent>
       </Card>
+
+      <ChargeSettingsForm />
 
       {config && (
         <Card>
