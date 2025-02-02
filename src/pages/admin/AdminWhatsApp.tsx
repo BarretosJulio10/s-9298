@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { callWhatsAppAPI } from "@/lib/whatsapp";
+import { WhatsAppStatus } from "@/components/admin/whatsapp/WhatsAppStatus";
+import { WhatsAppMessage } from "@/components/admin/whatsapp/WhatsAppMessage";
+import { NotificationHistory } from "@/components/admin/whatsapp/NotificationHistory";
 
 const AdminWhatsApp = () => {
   const [qrCode, setQrCode] = useState("");
@@ -115,91 +116,40 @@ const AdminWhatsApp = () => {
     },
   });
 
-  const handleGenerateQR = () => {
-    qrCodeMutation.mutate();
-  };
-
-  const handleConnect = () => {
-    connectMutation.mutate();
-  };
-
-  const handleDisconnect = () => {
-    disconnectMutation.mutate();
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+  if (!config?.whatsapp_instance_id) {
+    return (
+      <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">WhatsApp</h2>
-          <p className="text-muted-foreground">
-            Conecte seu WhatsApp escaneando o QR Code
+          <p className="text-destructive">
+            ID da instância do WhatsApp não configurado. Configure-o na seção de configurações.
           </p>
         </div>
       </div>
+    );
+  }
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuração do WhatsApp</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {!config?.whatsapp_instance_id ? (
-            <p className="text-destructive">
-              ID da instância do WhatsApp não configurado. Configure-o na seção de configurações.
-            </p>
-          ) : (
-            <>
-              <div className="flex items-center gap-4">
-                {!isConnected && !qrCode && (
-                  <Button
-                    onClick={handleGenerateQR}
-                    disabled={qrCodeMutation.isPending}
-                  >
-                    {qrCodeMutation.isPending ? "Gerando QR Code..." : "Gerar QR Code"}
-                  </Button>
-                )}
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">WhatsApp</h2>
+        <p className="text-muted-foreground">
+          Gerencie a conexão com o WhatsApp e envie mensagens
+        </p>
+      </div>
 
-                {qrCode && !isConnected && (
-                  <Button
-                    onClick={handleConnect}
-                    disabled={connectMutation.isPending}
-                  >
-                    {connectMutation.isPending ? "Conectando..." : "Conectar WhatsApp"}
-                  </Button>
-                )}
+      <div className="grid gap-6 md:grid-cols-2">
+        <WhatsAppStatus
+          isConnected={isConnected}
+          qrCode={qrCode}
+          onGenerateQR={() => qrCodeMutation.mutate()}
+          onConnect={() => connectMutation.mutate()}
+          onDisconnect={() => disconnectMutation.mutate()}
+        />
+        <WhatsAppMessage isConnected={isConnected} />
+      </div>
 
-                {isConnected && (
-                  <Button
-                    variant="destructive"
-                    onClick={handleDisconnect}
-                    disabled={disconnectMutation.isPending}
-                  >
-                    {disconnectMutation.isPending ? "Desconectando..." : "Desconectar"}
-                  </Button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-                <span className="text-sm">
-                  {isConnected ? 'Conectado' : 'Desconectado'}
-                </span>
-              </div>
-
-              {qrCode && !isConnected && (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold mb-2">QR Code</h3>
-                  <img
-                    src={qrCode}
-                    alt="WhatsApp QR Code"
-                    className="max-w-[300px] border rounded-lg"
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+      <NotificationHistory />
     </div>
   );
 };
