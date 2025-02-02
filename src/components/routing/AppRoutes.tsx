@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
-import Dashboard from "@/pages/Dashboard";
+import CompanyDashboard from "@/pages/CompanyDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminHome from "@/pages/admin/AdminHome";
 import AdminCompanies from "@/pages/admin/AdminCompanies";
@@ -16,7 +16,6 @@ interface AppRoutesProps {
 }
 
 const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
-  // Se não estiver autenticado, redireciona para /auth
   if (!session) {
     return (
       <Routes>
@@ -27,7 +26,6 @@ const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
     );
   }
 
-  // Se for admin, mostra apenas as rotas de admin
   if (userRole === 'admin') {
     return (
       <Routes>
@@ -44,11 +42,10 @@ const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
     );
   }
 
-  // Se for usuário comum, mostra apenas as rotas de usuário
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard/*" element={<CompanyDashboard />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
