@@ -1,4 +1,4 @@
-import { serve } from "https://deno.fresh.dev/std/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
 const WHATSAPP_API_ENDPOINT = "http://167.114.6.95/";
