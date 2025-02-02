@@ -28,7 +28,17 @@ const Auth = () => {
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          if (error.message === "Invalid login credentials") {
+            toast({
+              variant: "destructive",
+              title: "Erro no login",
+              description: "Email ou senha incorretos. Por favor, verifique suas credenciais.",
+            });
+            return;
+          }
+          throw error;
+        }
         navigate("/");
       } else {
         const { error: signUpError, data } = await supabase.auth.signUp({
@@ -37,7 +47,6 @@ const Auth = () => {
         });
 
         if (signUpError) {
-          // Tratamento específico para usuário já existente
           if (signUpError.message === "User already registered") {
             toast({
               variant: "destructive",
