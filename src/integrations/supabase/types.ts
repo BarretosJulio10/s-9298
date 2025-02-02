@@ -65,10 +65,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          role: Database["public"]["Enums"]["user_role"]
-        }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_company: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
     }
