@@ -15,18 +15,26 @@ const AdminWhatsApp = () => {
       const response = await fetch(`https://api.w-api.app/api/instance/qrcode`, {
         method: "GET",
         headers: {
+          "Accept": "application/json",
           "Content-Type": "application/json",
-          "instanceid": instanceId
+          "instanceid": instanceId,
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization"
         },
+        mode: "cors"
       });
 
       if (!response.ok) {
+        console.error("Response not OK:", await response.text());
         throw new Error("Falha ao gerar QR Code");
       }
 
       const data = await response.json();
+      console.log("QR Code response:", data);
       return data;
     } catch (error) {
+      console.error("Error generating QR code:", error);
       throw error;
     }
   };
@@ -41,7 +49,8 @@ const AdminWhatsApp = () => {
         description: "Escaneie o QR Code com seu WhatsApp",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Mutation error:", error);
       toast({
         variant: "destructive",
         title: "Erro ao gerar QR Code",
