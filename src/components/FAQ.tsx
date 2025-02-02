@@ -1,32 +1,32 @@
 const faqs = [
   {
-    question: "Como detectar recursos ociosos?",
-    answer: "Nossa plataforma automaticamente escaneia e identifica recursos AWS não utilizados...",
+    question: "Como funciona a cobrança recorrente via Pix?",
+    answer: "Nossa plataforma gera automaticamente cobranças Pix para seus clientes nas datas programadas, enviando notificações e gerenciando todo o processo de forma automática.",
     iconBg: "bg-pink-50",
   },
   {
-    question: "Por que não consigo suporte?",
-    answer: "Fornecemos suporte dedicado 24/7 para ajudar você com qualquer problema relacionado à AWS...",
+    question: "Quais são as taxas cobradas?",
+    answer: "Oferecemos as menores taxas do mercado, começando em 0.99% por transação, sem mensalidade ou custos ocultos.",
     iconBg: "bg-purple-50",
   },
   {
-    question: "Como fazer previsões precisas?",
-    answer: "Nossos modelos avançados de análise e machine learning fornecem previsões precisas de custos...",
+    question: "Como faço para integrar com meu sistema?",
+    answer: "Disponibilizamos uma API moderna e SDK's para as principais linguagens. Nossa documentação completa permite integração em poucos minutos.",
     iconBg: "bg-blue-50",
   },
   {
-    question: "É hora de comprar um plano de economia?",
-    answer: "Nossa plataforma analisa seus padrões de uso para recomendar planos de economia ideais...",
+    question: "O sistema é seguro?",
+    answer: "Sim, utilizamos infraestrutura certificada e seguimos todas as normas do Banco Central para garantir a segurança das transações.",
     iconBg: "bg-pink-50",
   },
   {
-    question: "Como reduzir custos de transferência de dados?",
-    answer: "Analisamos seus padrões de transferência de dados e fornecemos recomendações de otimização...",
+    question: "Quanto tempo leva para receber os pagamentos?",
+    answer: "Os pagamentos são processados em tempo real e o saldo fica disponível imediatamente na sua conta.",
     iconBg: "bg-pink-50",
   },
   {
-    question: "Por que recebi uma conta surpresa da AWS?",
-    answer: "Ajudamos a prevenir custos inesperados monitorando seu uso em tempo real...",
+    question: "Preciso ter CNPJ para usar?",
+    answer: "Sim, é necessário ter CNPJ ativo para utilizar nossa plataforma de cobranças recorrentes.",
     iconBg: "bg-purple-50",
   },
 ];
@@ -39,11 +39,11 @@ const FAQ = () => {
           <div className="w-6 h-6 rounded-full border border-primary/20 flex items-center justify-center">
             <span className="text-sm">?</span>
           </div>
-          <span className="text-sm text-secondary">O problema</span>
+          <span className="text-sm text-secondary">Dúvidas Frequentes</span>
         </div>
         
         <h2 className="text-4xl md:text-6xl font-bold text-center mb-16">
-          A nuvem é complicada
+          Tire suas dúvidas
         </h2>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

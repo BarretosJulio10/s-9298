@@ -1,27 +1,31 @@
 const stats = [
-  { number: "10k+", label: "Usuários Ativos" },
-  { number: "99.9%", label: "Disponibilidade" },
-  { number: "24/7", label: "Suporte" },
-  { number: "50+", label: "Integrações" },
+  {
+    value: "R$10M+",
+    label: "Processados",
+  },
+  {
+    value: "99.9%",
+    label: "Uptime",
+  },
+  {
+    value: "2000+",
+    label: "Clientes Ativos",
+  },
+  {
+    value: "<1%",
+    label: "Taxa de Falha",
+  },
 ];
 
 const Stats = () => {
   return (
-    <section className="py-24 px-6 bg-primary text-white">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Confiado por Milhares
-          </h2>
-          <p className="text-accent max-w-2xl mx-auto">
-            Junte-se a milhares de clientes satisfeitos que confiam em nossa plataforma
-          </p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+    <section className="py-24 px-6 bg-primary/5">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
-            <div key={index} className="space-y-2">
-              <div className="text-4xl md:text-5xl font-bold">{stat.number}</div>
-              <div className="text-accent">{stat.label}</div>
+            <div key={index} className="text-center">
+              <div className="text-4xl font-bold mb-2">{stat.value}</div>
+              <div className="text-secondary">{stat.label}</div>
             </div>
           ))}
         </div>
