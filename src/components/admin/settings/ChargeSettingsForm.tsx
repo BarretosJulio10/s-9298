@@ -36,6 +36,16 @@ export function ChargeSettingsForm() {
     },
   });
 
+  // Buscar usuário atual
+  const { data: user } = useQuery({
+    queryKey: ["current-user"],
+    queryFn: async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      return user;
+    },
+  });
+
   // Buscar configurações existentes
   const { data: settings } = useQuery({
     queryKey: ["charge-settings"],
@@ -53,9 +63,11 @@ export function ChargeSettingsForm() {
   // Mutation para salvar configurações
   const mutation = useMutation({
     mutationFn: async (values: ChargeSettingsFormData) => {
+      if (!user?.id) throw new Error("Usuário não encontrado");
+
       const { error } = await supabase
         .from("charge_settings")
-        .upsert([values]);
+        .upsert([{ ...values, company_id: user.id }]);
 
       if (error) throw error;
     },
