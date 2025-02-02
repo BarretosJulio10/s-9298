@@ -39,9 +39,8 @@ const Auth = () => {
           }
           throw error;
         }
-        navigate("/");
+        navigate("/dashboard");
       } else {
-        // Primeiro registra o usuário
         const { error: signUpError, data } = await supabase.auth.signUp({
           email,
           password,
@@ -60,7 +59,6 @@ const Auth = () => {
         }
 
         if (data.user) {
-          // Cria o perfil do usuário
           const { error: profileError } = await supabase
             .from("profiles")
             .insert([
@@ -75,7 +73,6 @@ const Auth = () => {
 
           if (profileError) throw profileError;
 
-          // Após o cadastro bem-sucedido, faz login automaticamente
           const { error: signInError } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -88,7 +85,7 @@ const Auth = () => {
             description: "Bem-vindo ao PagouPix!",
           });
           
-          navigate("/");
+          navigate("/dashboard");
         }
       }
     } catch (error: any) {
