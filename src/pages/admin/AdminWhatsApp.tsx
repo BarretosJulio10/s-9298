@@ -4,13 +4,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
+interface QRCodeResponse {
+  error: boolean;
+  message: string;
+  connectionKey: string;
+  qrcode: string;
+}
+
+interface QRCodeGeneratedEvent {
+  event: string;
+  connectionKey: string;
+  qrcode: string;
+  moment: string;
+  retryCount: string;
+}
+
+interface ConnectedInstanceEvent {
+  event: string;
+  connectionKey: string;
+  connectedPhone: string;
+  connected: boolean;
+  moment: string;
+}
+
 const AdminWhatsApp = () => {
   const [qrCode, setQrCode] = useState("");
   const { toast } = useToast();
   const instanceId = "1716319589869x721327290780988000";
 
   // Função para gerar QR code
-  const generateQRCode = async () => {
+  const generateQRCode = async (): Promise<QRCodeResponse> => {
     try {
       const response = await fetch(
         "https://www.w-api.app/api/v3/qrcode/generate",
@@ -36,6 +59,11 @@ const AdminWhatsApp = () => {
 
       const data = await response.json();
       console.log("QR Code response:", data);
+
+      if (data.error) {
+        throw new Error(data.message || "Falha ao gerar QR Code");
+      }
+
       return data;
     } catch (error) {
       console.error("Error generating QR code:", error);
