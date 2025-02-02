@@ -6,10 +6,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface QRCodeResponse {
-  error: boolean;
-  message: string;
-  connectionKey: string;
-  qrcode: string;
+  status: string;
+  qrcode?: string;
+  message?: string;
 }
 
 interface StatusResponse {
@@ -74,6 +73,7 @@ const AdminWhatsApp = () => {
   useEffect(() => {
     if (statusData?.data?.Connected && statusData?.data?.LoggedIn) {
       setIsConnected(true);
+      setQrCode(""); // Limpa o QR code quando conectado
     } else {
       setIsConnected(false);
     }
@@ -101,11 +101,14 @@ const AdminWhatsApp = () => {
         throw new Error("Falha ao gerar QR Code");
       }
 
-      const data = await response.json();
-      if (data.success && data.data?.QRCode) {
-        return data.data.QRCode;
-      } else if (data.error === "Already Loggedin") {
+      const data: QRCodeResponse = await response.json();
+      
+      if (data.status === "erro" && data.message === "connected") {
         throw new Error("WhatsApp já está conectado");
+      }
+      
+      if (data.status === "success" && data.qrcode) {
+        return data.qrcode;
       } else {
         throw new Error("Falha ao gerar QR Code");
       }
