@@ -1,4 +1,4 @@
-import { Home, Users, Package, Settings } from "lucide-react";
+import { Home, Users, Package, Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Sidebar,
@@ -30,7 +30,7 @@ const menuItems = [
   {
     title: "Configurações",
     url: "/admin/settings",
-    icon: Settings,
+    icon: Settings2,
   },
 ];
 

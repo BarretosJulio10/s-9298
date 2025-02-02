@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Settings2 } from "lucide-react";
 
 const AdminSettings = () => {
   const { toast } = useToast();
@@ -60,10 +61,6 @@ const AdminSettings = () => {
     },
   });
 
-  if (isLoading) {
-    return <div>Carregando...</div>;
-  }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const values: { asaas_api_key?: string; asaas_environment?: string } = {};
@@ -78,9 +75,16 @@ const AdminSettings = () => {
     updateConfigurations.mutate(values);
   };
 
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Configurações</h1>
+      <div className="flex items-center gap-2">
+        <Settings2 className="h-6 w-6" />
+        <h1 className="text-2xl font-bold">Configurações</h1>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
