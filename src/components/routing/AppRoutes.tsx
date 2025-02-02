@@ -4,6 +4,9 @@ import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminHome from "@/pages/admin/AdminHome";
+import AdminCompanies from "@/pages/admin/AdminCompanies";
+import AdminPlans from "@/pages/admin/AdminPlans";
+import AdminSettings from "@/pages/admin/AdminSettings";
 
 interface AppRoutesProps {
   session: any;
@@ -49,6 +52,9 @@ const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
         }
       >
         <Route index element={<AdminHome />} />
+        <Route path="companies" element={<AdminCompanies />} />
+        <Route path="plans" element={<AdminPlans />} />
+        <Route path="settings" element={<AdminSettings />} />
       </Route>
     </Routes>
   );
