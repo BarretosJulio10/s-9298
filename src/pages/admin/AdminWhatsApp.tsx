@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QRCodeResponse {
   error: boolean;
@@ -30,22 +31,39 @@ interface ConnectedInstanceEvent {
 const AdminWhatsApp = () => {
   const [qrCode, setQrCode] = useState("");
   const { toast } = useToast();
-  const instanceId = "1716319589869x721327290780988000";
+
+  // Fetch configurations from Supabase
+  const { data: config } = useQuery({
+    queryKey: ["configurations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("configurations")
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   // Função para gerar QR code
   const generateQRCode = async (): Promise<QRCodeResponse> => {
+    if (!config?.whatsapp_instance_id) {
+      throw new Error("ID da instância do WhatsApp não configurado");
+    }
+
     try {
       const response = await fetch(
-        `https://www.w-api.app/manager/create?adm_key=${instanceId}`,
+        `https://www.w-api.app/manager/create?adm_key=${config.whatsapp_instance_id}`,
         {
           method: "POST",
           headers: {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Authorization": instanceId
+            "Authorization": config.whatsapp_instance_id
           },
           body: JSON.stringify({
-            connectionKey: instanceId,
+            connectionKey: config.whatsapp_instance_id,
             syncContacts: "enable",
             returnQrcode: "enable"
           })
@@ -86,7 +104,7 @@ const AdminWhatsApp = () => {
       toast({
         variant: "destructive",
         title: "Erro ao gerar QR Code",
-        description: "Não foi possível gerar o QR Code. Tente novamente.",
+        description: error instanceof Error ? error.message : "Não foi possível gerar o QR Code. Tente novamente.",
       });
     },
   });
@@ -111,12 +129,18 @@ const AdminWhatsApp = () => {
           <CardTitle>Configuração do WhatsApp</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button
-            onClick={handleConnect}
-            disabled={qrCodeMutation.isPending}
-          >
-            {qrCodeMutation.isPending ? "Gerando QR Code..." : "Gerar QR Code"}
-          </Button>
+          {!config?.whatsapp_instance_id ? (
+            <p className="text-destructive">
+              ID da instância do WhatsApp não configurado. Configure-o na seção de configurações.
+            </p>
+          ) : (
+            <Button
+              onClick={handleConnect}
+              disabled={qrCodeMutation.isPending}
+            >
+              {qrCodeMutation.isPending ? "Gerando QR Code..." : "Gerar QR Code"}
+            </Button>
+          )}
 
           {qrCode && (
             <div className="mt-4">

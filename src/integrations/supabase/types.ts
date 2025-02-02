@@ -75,6 +75,7 @@ export type Database = {
           created_at: string
           id: string
           updated_at: string
+          whatsapp_instance_id: string | null
         }
         Insert: {
           asaas_api_key?: string | null
@@ -82,6 +83,7 @@ export type Database = {
           created_at?: string
           id?: string
           updated_at?: string
+          whatsapp_instance_id?: string | null
         }
         Update: {
           asaas_api_key?: string | null
@@ -89,6 +91,7 @@ export type Database = {
           created_at?: string
           id?: string
           updated_at?: string
+          whatsapp_instance_id?: string | null
         }
         Relationships: []
       }
