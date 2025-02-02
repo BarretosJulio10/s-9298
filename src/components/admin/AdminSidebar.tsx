@@ -1,4 +1,4 @@
-import { Home, Users, Package, Settings2, LogOut, MessageSquare } from "lucide-react";
+import { Home, Users, Package, Settings2, LogOut, MessageSquare, Receipt } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -28,6 +28,11 @@ const menuItems = [
     title: "Planos",
     url: "/admin/plans",
     icon: Package,
+  },
+  {
+    title: "Cobranças",
+    url: "/admin/charges",
+    icon: Receipt,
   },
   {
     title: "WhatsApp",

@@ -8,6 +8,7 @@ import AdminCompanies from "@/pages/admin/AdminCompanies";
 import AdminPlans from "@/pages/admin/AdminPlans";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminWhatsApp from "@/pages/admin/AdminWhatsApp";
+import AdminCharges from "@/pages/admin/AdminCharges";
 
 interface AppRoutesProps {
   session: any;
@@ -34,6 +35,7 @@ const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
           <Route index element={<AdminHome />} />
           <Route path="companies" element={<AdminCompanies />} />
           <Route path="plans" element={<AdminPlans />} />
+          <Route path="charges" element={<AdminCharges />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
