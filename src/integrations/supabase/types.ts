@@ -124,6 +124,41 @@ export type Database = {
           },
         ]
       }
+      company_settings: {
+        Row: {
+          asaas_api_key: string | null
+          asaas_environment: string | null
+          company_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          asaas_api_key?: string | null
+          asaas_environment?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          asaas_api_key?: string | null
+          asaas_environment?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configurations: {
         Row: {
           asaas_api_key: string | null

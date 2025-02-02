@@ -24,12 +24,27 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        primary: "#141413",
-        secondary: "#828179",
-        accent: "#C4C3BB",
-        muted: "#A3A299",
-        highlight: "#F2FF44",
-        surface: "#FAFAF8",
+        primary: {
+          DEFAULT: "#2563eb", // Azul principal
+          foreground: "#FFFFFF",
+        },
+        secondary: {
+          DEFAULT: "#22c55e", // Verde para sucesso
+          foreground: "#FFFFFF",
+        },
+        destructive: {
+          DEFAULT: "#ef4444", // Vermelho para erros/atrasos
+          foreground: "#FFFFFF",
+        },
+        muted: {
+          DEFAULT: "#374151", // Cinza neutro
+          foreground: "#9CA3AF",
+        },
+        accent: {
+          DEFAULT: "#F3F4F6",
+          foreground: "#1F2937",
+        },
+        surface: "#FFFFFF",
       },
       keyframes: {
         "accordion-down": {
