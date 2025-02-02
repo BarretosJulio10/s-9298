@@ -12,8 +12,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { CompanyCharges } from "@/components/admin/companies/CompanyCharges";
 
 const AdminCompanies = () => {
   const { toast } = useToast();
@@ -22,13 +30,22 @@ const AdminCompanies = () => {
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["companies"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: companiesData, error: companiesError } = await supabase
         .from("profiles")
-        .select("*, plans(name)")
+        .select(`
+          *,
+          plans(name),
+          charges(
+            id,
+            status,
+            amount,
+            due_date
+          )
+        `)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      return data || [];
+      if (companiesError) throw companiesError;
+      return companiesData || [];
     },
   });
 
@@ -64,7 +81,12 @@ const AdminCompanies = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Empresas</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Empresas</h1>
+          <p className="text-muted-foreground">
+            Gerencie todas as empresas cadastradas no sistema
+          </p>
+        </div>
       </div>
 
       <Table>
@@ -75,6 +97,7 @@ const AdminCompanies = () => {
             <TableHead>Email</TableHead>
             <TableHead>Plano</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Cobranças</TableHead>
             <TableHead>Data de Cadastro</TableHead>
             <TableHead>Ações</TableHead>
           </TableRow>
@@ -104,30 +127,48 @@ const AdminCompanies = () => {
                 </Badge>
               </TableCell>
               <TableCell>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver Cobranças ({company.charges?.length || 0})
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                      <DialogTitle>Cobranças - {company.company_name}</DialogTitle>
+                    </DialogHeader>
+                    <CompanyCharges companyId={company.id} />
+                  </DialogContent>
+                </Dialog>
+              </TableCell>
+              <TableCell>
                 {format(new Date(company.created_at), "dd/MM/yyyy", {
                   locale: ptBR,
                 })}
               </TableCell>
               <TableCell>
-                {company.status !== "active" ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => updateStatus.mutate({ id: company.id, status: "active" })}
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Ativar
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => updateStatus.mutate({ id: company.id, status: "inactive" })}
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Suspender
-                  </Button>
-                )}
+                <div className="flex items-center gap-2">
+                  {company.status !== "active" ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateStatus.mutate({ id: company.id, status: "active" })}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Ativar
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateStatus.mutate({ id: company.id, status: "inactive" })}
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Suspender
+                    </Button>
+                  )}
+                </div>
               </TableCell>
             </TableRow>
           ))}
