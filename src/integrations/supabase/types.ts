@@ -35,6 +35,8 @@ export type Database = {
       }
       plans: {
         Row: {
+          active: boolean
+          billing_period: string
           created_at: string
           description: string | null
           features: Json | null
@@ -44,6 +46,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active?: boolean
+          billing_period?: string
           created_at?: string
           description?: string | null
           features?: Json | null
@@ -53,6 +57,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active?: boolean
+          billing_period?: string
           created_at?: string
           description?: string | null
           features?: Json | null
