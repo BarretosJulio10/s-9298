@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,24 +12,15 @@ interface QRCodeResponse {
   qrcode: string;
 }
 
-interface QRCodeGeneratedEvent {
-  event: string;
-  connectionKey: string;
-  qrcode: string;
-  moment: string;
-  retryCount: string;
-}
-
-interface ConnectedInstanceEvent {
-  event: string;
-  connectionKey: string;
-  connectedPhone: string;
+interface StatusResponse {
+  status: string;
+  message: string;
   connected: boolean;
-  moment: string;
 }
 
 const AdminWhatsApp = () => {
   const [qrCode, setQrCode] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
 
   // Fetch configurations from Supabase
@@ -46,61 +37,87 @@ const AdminWhatsApp = () => {
     },
   });
 
-  // Função para gerar QR code
-  const generateQRCode = async (): Promise<QRCodeResponse> => {
+  // Função para verificar status
+  const checkStatus = async () => {
     if (!config?.whatsapp_instance_id) {
       throw new Error("ID da instância do WhatsApp não configurado");
     }
 
-    try {
+    const response = await fetch(
+      `https://www.w-api.app/session/status`,
+      {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+          "Token": config.whatsapp_instance_id
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Falha ao verificar status");
+    }
+
+    const data = await response.json();
+    return data;
+  };
+
+  // Query para verificar status periodicamente
+  const { data: statusData } = useQuery({
+    queryKey: ["whatsapp-status", config?.whatsapp_instance_id],
+    queryFn: checkStatus,
+    enabled: !!config?.whatsapp_instance_id,
+    refetchInterval: 10000, // Verifica a cada 10 segundos
+  });
+
+  // Atualiza o estado de conexão baseado no status
+  useEffect(() => {
+    if (statusData?.data?.Connected && statusData?.data?.LoggedIn) {
+      setIsConnected(true);
+    } else {
+      setIsConnected(false);
+    }
+  }, [statusData]);
+
+  // Mutation para gerar QR code
+  const qrCodeMutation = useMutation({
+    mutationFn: async () => {
+      if (!config?.whatsapp_instance_id) {
+        throw new Error("ID da instância do WhatsApp não configurado");
+      }
+
       const response = await fetch(
-        `https://www.w-api.app/manager/create?adm_key=${config.whatsapp_instance_id}`,
+        `https://www.w-api.app/session/qr`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
             "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": config.whatsapp_instance_id
-          },
-          body: JSON.stringify({
-            connectionKey: config.whatsapp_instance_id,
-            syncContacts: "enable",
-            returnQrcode: "enable"
-          })
+            "Token": config.whatsapp_instance_id
+          }
         }
       );
 
       if (!response.ok) {
-        console.error("Response not OK:", await response.text());
         throw new Error("Falha ao gerar QR Code");
       }
 
       const data = await response.json();
-      console.log("QR Code response:", data);
-
-      if (data.error) {
-        throw new Error(data.message || "Falha ao gerar QR Code");
+      if (data.success && data.data?.QRCode) {
+        return data.data.QRCode;
+      } else if (data.error === "Already Loggedin") {
+        throw new Error("WhatsApp já está conectado");
+      } else {
+        throw new Error("Falha ao gerar QR Code");
       }
-
-      return data;
-    } catch (error) {
-      console.error("Error generating QR code:", error);
-      throw error;
-    }
-  };
-
-  // Mutation para gerar QR code
-  const qrCodeMutation = useMutation({
-    mutationFn: generateQRCode,
-    onSuccess: (data) => {
-      setQrCode(data.qrcode);
+    },
+    onSuccess: (qrcode) => {
+      setQrCode(qrcode);
       toast({
         title: "QR Code gerado com sucesso",
         description: "Escaneie o QR Code com seu WhatsApp",
       });
     },
     onError: (error) => {
-      console.error("Mutation error:", error);
       toast({
         variant: "destructive",
         title: "Erro ao gerar QR Code",
@@ -109,8 +126,56 @@ const AdminWhatsApp = () => {
     },
   });
 
+  // Mutation para desconectar
+  const disconnectMutation = useMutation({
+    mutationFn: async () => {
+      if (!config?.whatsapp_instance_id) {
+        throw new Error("ID da instância do WhatsApp não configurado");
+      }
+
+      const response = await fetch(
+        `https://www.w-api.app/session/logout`,
+        {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Token": config.whatsapp_instance_id
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Falha ao desconectar");
+      }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error("Falha ao desconectar");
+      }
+    },
+    onSuccess: () => {
+      setQrCode("");
+      setIsConnected(false);
+      toast({
+        title: "WhatsApp desconectado",
+        description: "A conexão foi encerrada com sucesso",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao desconectar",
+        description: error instanceof Error ? error.message : "Não foi possível desconectar. Tente novamente.",
+      });
+    },
+  });
+
   const handleConnect = () => {
     qrCodeMutation.mutate();
+  };
+
+  const handleDisconnect = () => {
+    disconnectMutation.mutate();
   };
 
   return (
@@ -134,15 +199,36 @@ const AdminWhatsApp = () => {
               ID da instância do WhatsApp não configurado. Configure-o na seção de configurações.
             </p>
           ) : (
-            <Button
-              onClick={handleConnect}
-              disabled={qrCodeMutation.isPending}
-            >
-              {qrCodeMutation.isPending ? "Gerando QR Code..." : "Gerar QR Code"}
-            </Button>
+            <>
+              <div className="flex items-center gap-4">
+                <Button
+                  onClick={handleConnect}
+                  disabled={qrCodeMutation.isPending || isConnected}
+                >
+                  {qrCodeMutation.isPending ? "Gerando QR Code..." : "Gerar QR Code"}
+                </Button>
+
+                {isConnected && (
+                  <Button
+                    variant="destructive"
+                    onClick={handleDisconnect}
+                    disabled={disconnectMutation.isPending}
+                  >
+                    {disconnectMutation.isPending ? "Desconectando..." : "Desconectar"}
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                <span className="text-sm">
+                  {isConnected ? 'Conectado' : 'Desconectado'}
+                </span>
+              </div>
+            </>
           )}
 
-          {qrCode && (
+          {qrCode && !isConnected && (
             <div className="mt-4">
               <h3 className="text-lg font-semibold mb-2">QR Code</h3>
               <img
