@@ -3,6 +3,7 @@ import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminHome from "@/pages/admin/AdminHome";
 
 interface AppRoutesProps {
   session: any;
@@ -14,7 +15,7 @@ const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
     if (!session) return <Navigate to="/auth" replace />;
     
     if (userRole === 'admin') {
-      return <AdminDashboard />;
+      return <Navigate to="/admin" replace />;
     }
     
     return <Dashboard />;
@@ -37,6 +38,18 @@ const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
           )
         }
       />
+      <Route
+        path="/admin"
+        element={
+          session && userRole === 'admin' ? (
+            <AdminDashboard />
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        }
+      >
+        <Route index element={<AdminHome />} />
+      </Route>
     </Routes>
   );
 };

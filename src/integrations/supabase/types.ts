@@ -9,6 +9,60 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      configurations: {
+        Row: {
+          asaas_api_key: string | null
+          asaas_environment: string | null
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          asaas_api_key?: string | null
+          asaas_environment?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          asaas_api_key?: string | null
+          asaas_environment?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: Json | null
+          id: string
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          name: string
+          price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           cnpj: string | null
@@ -17,6 +71,8 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          plan_id: string | null
+          status: Database["public"]["Enums"]["company_status"] | null
           updated_at: string
         }
         Insert: {
@@ -26,6 +82,8 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          plan_id?: string | null
+          status?: Database["public"]["Enums"]["company_status"] | null
           updated_at?: string
         }
         Update: {
@@ -35,9 +93,19 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          plan_id?: string | null
+          status?: Database["public"]["Enums"]["company_status"] | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -75,6 +143,7 @@ export type Database = {
       }
     }
     Enums: {
+      company_status: "active" | "inactive" | "pending"
       user_role: "admin" | "company"
     }
     CompositeTypes: {
