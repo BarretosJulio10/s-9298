@@ -12,18 +12,21 @@ const AdminWhatsApp = () => {
   // Função para gerar QR code
   const generateQRCode = async () => {
     try {
-      const response = await fetch(`https://api.w-api.app/api/instance/qrcode`, {
-        method: "GET",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-          "instanceid": instanceId,
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization"
-        },
-        mode: "cors"
-      });
+      const response = await fetch(
+        `https://api.w-api.app/instance/getQrcode?connectionKey=${instanceId}&syncContacts=enable&returnQrcode=enable`,
+        {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": instanceId,
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization"
+          },
+          mode: "cors"
+        }
+      );
 
       if (!response.ok) {
         console.error("Response not OK:", await response.text());
