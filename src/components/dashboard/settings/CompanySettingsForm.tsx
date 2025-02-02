@@ -42,10 +42,14 @@ export function CompanySettingsForm() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ["company-settings"],
     queryFn: async () => {
+      if (!session?.user?.id) {
+        throw new Error("User not authenticated");
+      }
+
       const { data, error } = await supabase
         .from("company_settings")
         .select("*")
-        .eq("company_id", session?.user?.id)
+        .eq("company_id", session.user.id)
         .maybeSingle();
 
       if (error) throw error;
@@ -55,11 +59,11 @@ export function CompanySettingsForm() {
         const { data: newSettings, error: createError } = await supabase
           .from("company_settings")
           .insert({
-            company_id: session?.user?.id,
+            company_id: session.user.id,
             ...defaultSettings,
           })
           .select()
-          .single();
+          .maybeSingle();
 
         if (createError) throw createError;
         return newSettings as CompanySettingsFormData;
@@ -67,14 +71,19 @@ export function CompanySettingsForm() {
 
       return data as CompanySettingsFormData;
     },
+    enabled: !!session?.user?.id,
   });
 
   const updateSettings = useMutation({
     mutationFn: async (data: CompanySettingsFormData) => {
+      if (!session?.user?.id) {
+        throw new Error("User not authenticated");
+      }
+
       const { error } = await supabase
         .from("company_settings")
         .upsert({
-          company_id: session?.user?.id,
+          company_id: session.user.id,
           asaas_api_key: data.asaas_api_key,
           asaas_environment: data.asaas_environment,
         });
