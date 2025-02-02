@@ -12,44 +12,39 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CheckCircle, XCircle, Eye } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { CompanyCharges } from "@/components/admin/companies/CompanyCharges";
 
 const AdminCompanies = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch companies
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["companies"],
     queryFn: async () => {
-      const { data: companiesData, error: companiesError } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select(`
           *,
-          plans(name),
-          charges(
-            id,
-            status,
-            amount,
-            due_date
-          )
+          plans(name)
         `)
         .order("created_at", { ascending: false });
 
-      if (companiesError) throw companiesError;
-      return companiesData || [];
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Erro ao carregar empresas",
+        });
+        throw error;
+      }
+      return data || [];
     },
   });
 
-  const updateStatus = useMutation({
+  // Toggle company status
+  const toggleCompanyStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: 'active' | 'inactive' }) => {
       const { error } = await supabase
         .from("profiles")
@@ -96,8 +91,8 @@ const AdminCompanies = () => {
             <TableHead>CNPJ</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Plano</TableHead>
+            <TableHead>WhatsApp</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Cobranças</TableHead>
             <TableHead>Data de Cadastro</TableHead>
             <TableHead>Ações</TableHead>
           </TableRow>
@@ -109,38 +104,13 @@ const AdminCompanies = () => {
               <TableCell>{company.cnpj || "-"}</TableCell>
               <TableCell>{company.email}</TableCell>
               <TableCell>{company.plans?.name || "Sem plano"}</TableCell>
+              <TableCell>{company.whatsapp || "-"}</TableCell>
               <TableCell>
                 <Badge
-                  variant={
-                    company.status === "active"
-                      ? "success"
-                      : company.status === "pending"
-                      ? "warning"
-                      : "destructive"
-                  }
+                  variant={company.status === "active" ? "success" : "destructive"}
                 >
-                  {company.status === "active"
-                    ? "Ativo"
-                    : company.status === "pending"
-                    ? "Pendente"
-                    : "Inativo"}
+                  {company.status === "active" ? "Ativo" : "Inativo"}
                 </Badge>
-              </TableCell>
-              <TableCell>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4 mr-2" />
-                      Ver Cobranças ({company.charges?.length || 0})
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
-                    <DialogHeader>
-                      <DialogTitle>Cobranças - {company.company_name}</DialogTitle>
-                    </DialogHeader>
-                    <CompanyCharges companyId={company.id} />
-                  </DialogContent>
-                </Dialog>
               </TableCell>
               <TableCell>
                 {format(new Date(company.created_at), "dd/MM/yyyy", {
@@ -153,7 +123,7 @@ const AdminCompanies = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => updateStatus.mutate({ id: company.id, status: "active" })}
+                      onClick={() => toggleCompanyStatus.mutate({ id: company.id, status: "active" })}
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Ativar
@@ -162,7 +132,7 @@ const AdminCompanies = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => updateStatus.mutate({ id: company.id, status: "inactive" })}
+                      onClick={() => toggleCompanyStatus.mutate({ id: company.id, status: "inactive" })}
                     >
                       <XCircle className="h-4 w-4 mr-2" />
                       Suspender
