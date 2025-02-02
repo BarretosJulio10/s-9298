@@ -50,14 +50,18 @@ export function ChargeSettingsForm() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      if (data) {
-        Object.entries(data).forEach(([key, value]) => {
-          setValue(key as keyof ChargeSettingsFormData, value);
-        });
-      }
-    },
   });
+
+  // Atualizar formulário quando as configurações forem carregadas
+  React.useEffect(() => {
+    if (settings) {
+      Object.entries(settings).forEach(([key, value]) => {
+        if (key in settings) {
+          setValue(key as keyof ChargeSettingsFormData, value as any);
+        }
+      });
+    }
+  }, [settings, setValue]);
 
   // Mutation para salvar configurações
   const mutation = useMutation({
