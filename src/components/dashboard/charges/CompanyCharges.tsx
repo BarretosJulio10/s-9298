@@ -20,10 +20,13 @@ export const CompanyCharges = ({ companyId }: CompanyChargesProps) => {
   const { data: charges = [], isLoading } = useQuery({
     queryKey: ["company-charges", companyId],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
       const { data, error } = await supabase
         .from("charges")
         .select("*")
-        .eq("company_id", companyId)
+        .eq("company_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
