@@ -150,12 +150,14 @@ const AdminWhatsApp = () => {
           ) : (
             <>
               <div className="flex items-center gap-4">
-                <Button
-                  onClick={handleGenerateQR}
-                  disabled={qrCodeMutation.isPending || isConnected}
-                >
-                  {qrCodeMutation.isPending ? "Gerando QR Code..." : "Gerar QR Code"}
-                </Button>
+                {!isConnected && !qrCode && (
+                  <Button
+                    onClick={handleGenerateQR}
+                    disabled={qrCodeMutation.isPending}
+                  >
+                    {qrCodeMutation.isPending ? "Gerando QR Code..." : "Gerar QR Code"}
+                  </Button>
+                )}
 
                 {qrCode && !isConnected && (
                   <Button
