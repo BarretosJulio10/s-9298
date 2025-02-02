@@ -37,9 +37,20 @@ export const useLoginForm = () => {
         .from('user_roles')
         .select('role')
         .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-        .single();
+        .maybeSingle();
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        throw roleError;
+      }
+
+      if (!roleData) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Perfil de usuário não encontrado. Por favor, contate o suporte.",
+        });
+        return;
+      }
 
       // Redirect based on user role
       if (roleData.role === 'admin') {
