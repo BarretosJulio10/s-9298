@@ -13,14 +13,19 @@ const AdminWhatsApp = () => {
   const generateQRCode = async () => {
     try {
       const response = await fetch(
-        `https://api.w-api.app/api/v3/qrcode/generate?connectionKey=${instanceId}&syncContacts=enable&returnQrcode=enable`,
+        "https://www.w-api.app/api/v3/qrcode/generate",
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "Accept": "application/json",
             "Content-Type": "application/json",
             "Authorization": instanceId
-          }
+          },
+          body: JSON.stringify({
+            connectionKey: instanceId,
+            syncContacts: "enable",
+            returnQrcode: "enable"
+          })
         }
       );
 
