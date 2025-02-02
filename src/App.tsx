@@ -50,16 +50,28 @@ const App = () => {
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      setUserRole(data?.role || null);
+      
+      if (!data) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Nenhum perfil encontrado para este usuário",
+        });
+        setUserRole(null);
+        return;
+      }
+      
+      setUserRole(data.role);
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Erro",
         description: "Erro ao carregar perfil do usuário",
       });
+      setUserRole(null);
     } finally {
       setLoading(false);
     }
