@@ -5,7 +5,7 @@ import { ChargesList } from "@/components/dashboard/charges/ChargesList";
 import { ChargeForm } from "@/components/dashboard/charges/ChargeForm";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Plus, ArrowUpRight, ArrowDownRight, Clock, Ban, AlertTriangle } from "lucide-react";
+import { Plus, ArrowUpRight, Clock, Ban, AlertTriangle } from "lucide-react";
 import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
 import { TemplateForm } from "@/components/dashboard/templates/TemplateForm";
 
@@ -15,6 +15,7 @@ const DashboardHome = () => {
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
+      console.log("Buscando estatísticas...");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -24,6 +25,8 @@ const DashboardHome = () => {
         .eq("company_id", user.id);
 
       if (error) throw error;
+
+      console.log("Cobranças encontradas:", charges);
 
       const total = charges?.reduce((acc, curr) => acc + Number(curr.amount), 0) || 0;
       const pending = charges?.filter(c => c.status === "pending").length || 0;
@@ -43,6 +46,19 @@ const DashboardHome = () => {
       const pendingPercentage = totalCount > 0 ? Math.round((pending / totalCount) * 100) : 0;
       const overduePercentage = totalCount > 0 ? Math.round((overdue / totalCount) * 100) : 0;
 
+      console.log("Estatísticas calculadas:", {
+        total,
+        pending,
+        paid,
+        overdue,
+        paidAmount,
+        pendingAmount,
+        overdueAmount,
+        paidPercentage,
+        pendingPercentage,
+        overduePercentage
+      });
+
       return {
         total,
         pending,
@@ -57,6 +73,8 @@ const DashboardHome = () => {
       };
     }
   });
+
+  console.log("Stats renderizados:", stats);
 
   return (
     <div className="space-y-6">
