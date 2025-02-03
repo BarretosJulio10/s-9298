@@ -1,13 +1,3 @@
-import {
-  Sidebar,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
-import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
-import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 import { useAuth } from "@/hooks/useAuth";
 import { Home, CreditCard, MessageSquare, Settings, LogOut, Users } from "lucide-react";
 import { useState } from "react";
@@ -15,7 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import DashboardHome from "./dashboard/DashboardHome";
+import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
+import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 import { ClientsList } from "@/components/dashboard/clients/ClientsList";
+import Draggable from "react-draggable";
+import { Button } from "@/components/ui/button";
 
 type ActiveSection = "home" | "charges" | "templates" | "settings" | "clients";
 
@@ -64,118 +58,61 @@ const CompanyDashboard = () => {
     }
   };
 
+  const menuItems = [
+    { icon: Home, label: "Início", section: "home" },
+    { icon: CreditCard, label: "Cobranças", section: "charges" },
+    { icon: Users, label: "Clientes", section: "clients" },
+    { icon: MessageSquare, label: "Templates", section: "templates" },
+    { icon: Settings, label: "Configurações", section: "settings" },
+  ];
+
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar className="border-r border-gray-200 bg-white">
-        <SidebarGroup>
-          <div className="px-6 py-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-primary">PagouPix</h2>
-            <p className="text-sm text-muted-foreground mt-1">Painel da Empresa</p>
-          </div>
-          <div className="py-4">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection("home")}
-                  className={`w-full ${
-                    activeSection === "home"
-                      ? "bg-primary/10 text-primary"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <Home className="h-5 w-5" />
-                  <span>Início</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection("charges")}
-                  className={`w-full ${
-                    activeSection === "charges"
-                      ? "bg-primary/10 text-primary"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <CreditCard className="h-5 w-5" />
-                  <span>Cobranças</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection("clients")}
-                  className={`w-full ${
-                    activeSection === "clients"
-                      ? "bg-primary/10 text-primary"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <Users className="h-5 w-5" />
-                  <span>Clientes</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection("templates")}
-                  className={`w-full ${
-                    activeSection === "templates"
-                      ? "bg-primary/10 text-primary"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                  <span>Templates</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => setActiveSection("settings")}
-                  className={`w-full ${
-                    activeSection === "settings"
-                      ? "bg-primary/10 text-primary"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <Settings className="h-5 w-5" />
-                  <span>Configurações</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </div>
-        </SidebarGroup>
+    <div className="min-h-screen bg-gray-50">
+      <div className="h-16 bg-white border-b border-gray-200 flex items-center px-8 sticky top-0 z-50">
+        <h1 className="text-2xl font-semibold text-gray-800">
+          {activeSection === "home" && "Dashboard"}
+          {activeSection === "charges" && "Cobranças"}
+          {activeSection === "templates" && "Templates"}
+          {activeSection === "settings" && "Configurações"}
+          {activeSection === "clients" && "Clientes"}
+        </h1>
+      </div>
 
-        <SidebarGroup className="mt-auto border-t border-gray-200 p-4">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={handleLogout}
-                  className="w-full text-red-600 hover:bg-red-50 hover:text-red-700"
+      <main className="p-8">
+        <div className="max-w-7xl mx-auto relative">
+          {menuItems.map((item, index) => (
+            <Draggable key={item.section} defaultPosition={{ x: 0, y: index * 60 }}>
+              <div className="absolute left-0">
+                <Button
+                  variant={activeSection === item.section ? "default" : "secondary"}
+                  className="w-48 flex items-center gap-2 cursor-move"
+                  onClick={() => setActiveSection(item.section as ActiveSection)}
                 >
-                  <LogOut className="h-5 w-5" />
-                  <span>Sair</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </Sidebar>
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </Button>
+              </div>
+            </Draggable>
+          ))}
 
-      <div className="flex-1 flex flex-col">
-        <div className="h-16 bg-white border-b border-gray-200 flex items-center px-8 sticky top-0">
-          <h1 className="text-2xl font-semibold text-gray-800">
-            {activeSection === "home" && "Dashboard"}
-            {activeSection === "charges" && "Cobranças"}
-            {activeSection === "templates" && "Templates"}
-            {activeSection === "settings" && "Configurações"}
-            {activeSection === "clients" && "Clientes"}
-          </h1>
-        </div>
-        <main className="flex-1 p-8 overflow-auto">
-          <div className="max-w-7xl mx-auto">
+          <div className="ml-56">
             {renderContent()}
           </div>
-        </main>
-      </div>
+
+          <Draggable defaultPosition={{ x: 0, y: menuItems.length * 60 }}>
+            <div className="absolute left-0">
+              <Button
+                variant="destructive"
+                className="w-48 flex items-center gap-2 cursor-move"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Sair</span>
+              </Button>
+            </div>
+          </Draggable>
+        </div>
+      </main>
     </div>
   );
 };
