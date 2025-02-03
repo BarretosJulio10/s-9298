@@ -41,7 +41,7 @@ export const useClientForm = (onClose: () => void) => {
           throw new Error("Usuário não autenticado");
         }
 
-        // Check if client with same email already exists
+        // Check if client with same email exists
         const { data: existingClient, error: checkError } = await supabase
           .from("clients")
           .select("id")
@@ -58,6 +58,7 @@ export const useClientForm = (onClose: () => void) => {
           throw new Error("Já existe um cliente cadastrado com este email");
         }
 
+        // Insert new client
         const { data, error } = await supabase
           .from("clients")
           .insert([{
@@ -65,11 +66,11 @@ export const useClientForm = (onClose: () => void) => {
             company_id: user.id,
           }])
           .select()
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error("Erro ao inserir cliente:", error);
-          throw new Error(error.message);
+          throw new Error("Erro ao cadastrar cliente. Por favor, tente novamente.");
         }
 
         if (!data) {
@@ -93,8 +94,7 @@ export const useClientForm = (onClose: () => void) => {
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Erro ao cadastrar cliente",
-        description: error.message,
+        title: error.message,
       });
     },
   });
