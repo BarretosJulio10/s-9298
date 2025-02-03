@@ -102,37 +102,35 @@ const CompanyDashboard = () => {
       </div>
 
       <div className="flex">
-        <div className="w-48 min-h-[calc(100vh-3rem)] bg-white border-r border-gray-200 fixed left-0 top-12">
-          <div className="flex flex-col h-full py-2">
-            <div className="flex-1 space-y-1 px-3">
-              {menuItems.map((item) => (
-                <button
-                  key={item.section}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                    activeSection === item.section
-                      ? "bg-primary text-primary-foreground"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                  onClick={() => setActiveSection(item.section as ActiveSection)}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </div>
-            
-            <div className="px-3 mt-auto space-y-2">
-              <div className="text-sm text-gray-600 px-3 py-2">
-                {userRole === 'admin' ? 'Painel Admin' : 'Painel Empresa'}
-              </div>
+        <div className="w-48 min-h-[calc(100vh-3rem)] bg-white border-r border-gray-200 fixed left-0 top-12 flex flex-col">
+          <div className="flex-1 space-y-1 px-3 py-2">
+            {menuItems.map((item) => (
               <button
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-                onClick={handleLogout}
+                key={item.section}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                  activeSection === item.section
+                    ? "bg-primary text-primary-foreground"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                onClick={() => setActiveSection(item.section as ActiveSection)}
               >
-                <LogOut className="h-5 w-5" />
-                <span>Sair</span>
+                <item.icon className="h-5 w-5" />
+                <span>{item.label}</span>
               </button>
+            ))}
+          </div>
+          
+          <div className="px-3 pb-3 border-t border-gray-200">
+            <div className="text-sm text-gray-600 px-3 py-2">
+              {userRole === 'admin' ? 'Painel Admin' : 'Painel Empresa'}
             </div>
+            <button
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Sair</span>
+            </button>
           </div>
         </div>
 
