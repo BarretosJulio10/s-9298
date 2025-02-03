@@ -31,18 +31,14 @@ export function DocumentField({ form }: DocumentFieldProps) {
     form.setValue('document', formattedCPF);
   };
 
-  const handleDocumentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    form.setValue('document', value);
-  };
-
   return (
     <FormField
       control={form.control}
       name="document"
       render={({ field }) => {
-        const cleanValue = field.value?.replace(/\D/g, '') || '';
-        const isCNPJ = cleanValue.length > 11;
+        const value = field.value || '';
+        const numericValue = value.replace(/\D/g, '');
+        const isCNPJ = numericValue.length > 11;
         
         return (
           <FormItem className="relative">
@@ -50,8 +46,11 @@ export function DocumentField({ form }: DocumentFieldProps) {
               <div className="flex gap-2">
                 <InputMask
                   mask={isCNPJ ? "99.999.999/9999-99" : "999.999.999-99"}
-                  value={field.value || ''}
-                  onChange={handleDocumentChange}
+                  value={value}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    field.onChange(newValue);
+                  }}
                   maskChar={null}
                 >
                   {(inputProps: any) => (
