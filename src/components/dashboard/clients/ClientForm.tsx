@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { FormHeader } from "./form/FormHeader";
 import { FormFooter } from "./form/FormFooter";
 import { ChargeTypeField } from "./form/ChargeTypeField";
@@ -46,6 +48,14 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px] p-0 bg-white rounded-lg shadow-lg">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute right-4 top-4"
+          onClick={onClose}
+        >
+          <X className="h-4 w-4" />
+        </Button>
         <FormHeader onClose={onClose} />
 
         <Form {...form}>
