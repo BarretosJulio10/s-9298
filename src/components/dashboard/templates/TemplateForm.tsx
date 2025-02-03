@@ -50,7 +50,6 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
         const { error } = await supabase
           .from("message_templates")
           .update({
-            company_id: user.id,
             name: values.name,
             type: values.type,
             content: values.content,
