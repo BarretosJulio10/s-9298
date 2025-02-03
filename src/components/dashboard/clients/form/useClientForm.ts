@@ -10,7 +10,7 @@ export const useClientForm = (onClose: () => void) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const validateWhatsApp = (phone: string) => {
+  const validateWhatsApp = async (phone: string): Promise<boolean> => {
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length !== 11) return false;
     if (cleanPhone[2] !== '9') return false;
@@ -32,7 +32,7 @@ export const useClientForm = (onClose: () => void) => {
 
   const mutation = useMutation({
     mutationFn: async (values: Client) => {
-      if (!validateWhatsApp(values.phone)) {
+      if (!await validateWhatsApp(values.phone)) {
         throw new Error("Número de WhatsApp inválido");
       }
 
