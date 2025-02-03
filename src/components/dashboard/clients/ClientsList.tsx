@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Send } from "lucide-react";
+import { Plus, Search, Send, Edit, Trash } from "lucide-react";
 import { useState } from "react";
 import { ClientForm } from "./ClientForm";
 import { useToast } from "@/hooks/use-toast";
@@ -112,8 +112,7 @@ export function ClientsList() {
                 <TableHead>WhatsApp</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead>Valor Cobrança</TableHead>
-                <TableHead>Cobrança rápida</TableHead>
-                <TableHead>Opções</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -132,15 +131,32 @@ export function ClientsList() {
                     }).format(client.charge_amount)}
                   </TableCell>
                   <TableCell>
-                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
-                      <Send className="h-4 w-4 mr-2" />
-                      Enviar cobrança
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="secondary" size="sm">
-                      Opções
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                        title="Enviar cobrança"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        title="Editar cliente"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        title="Excluir cliente"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
