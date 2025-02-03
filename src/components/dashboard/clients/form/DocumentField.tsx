@@ -41,67 +41,59 @@ export function DocumentField({ form }: DocumentFieldProps) {
       control={form.control}
       name="document"
       render={({ field }) => (
-        <FormItem className="space-y-4">
-          <RadioGroup 
-            defaultValue="cpf" 
-            className="grid grid-cols-2 gap-4 mb-4"
-            onValueChange={(value: 'cpf' | 'cnpj') => {
-              setDocumentType(value);
-              form.setValue('document', '');
-            }}
-          >
-            <div className="relative">
-              <RadioGroupItem value="cpf" id="cpf" className="peer sr-only" />
-              <Label
-                htmlFor="cpf"
-                className="flex items-center justify-center rounded-md border-2 border-muted bg-white p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-              >
-                CPF
-              </Label>
-            </div>
-
-            <div className="relative">
-              <RadioGroupItem value="cnpj" id="cnpj" className="peer sr-only" />
-              <Label
-                htmlFor="cnpj"
-                className="flex items-center justify-center rounded-md border-2 border-muted bg-white p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-              >
-                CNPJ
-              </Label>
-            </div>
-          </RadioGroup>
-
-          <div className="flex gap-2">
-            <InputMask
-              mask={documentType === 'cpf' ? "999.999.999-99" : "99.999.999/9999-99"}
-              value={field.value || ''}
-              onChange={(e) => {
-                field.onChange(e.target.value);
+        <FormItem>
+          <div className="flex items-center gap-4">
+            <RadioGroup 
+              defaultValue="cpf" 
+              className="flex gap-4"
+              onValueChange={(value: 'cpf' | 'cnpj') => {
+                setDocumentType(value);
+                form.setValue('document', '');
               }}
-              maskChar={null}
             >
-              {(inputProps: any) => (
-                <FormControl>
-                  <Input 
-                    placeholder={documentType === 'cpf' ? "CPF" : "CNPJ"}
-                    {...inputProps} 
-                    className="bg-white"
-                  />
-                </FormControl>
-              )}
-            </InputMask>
-            {documentType === 'cpf' && (
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={generateValidCPF}
-                title="Gerar CPF válido"
-                className="flex-shrink-0"
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="cpf" id="cpf" />
+                <Label htmlFor="cpf" className="text-sm font-medium">CPF</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="cnpj" id="cnpj" />
+                <Label htmlFor="cnpj" className="text-sm font-medium">CNPJ</Label>
+              </div>
+            </RadioGroup>
+
+            <div className="flex flex-1 gap-2">
+              <InputMask
+                mask={documentType === 'cpf' ? "999.999.999-99" : "99.999.999/9999-99"}
+                value={field.value || ''}
+                onChange={(e) => {
+                  field.onChange(e.target.value);
+                }}
+                maskChar={null}
               >
-                <Wand2 className="h-4 w-4" />
-              </Button>
-            )}
+                {(inputProps: any) => (
+                  <FormControl>
+                    <Input 
+                      placeholder={documentType === 'cpf' ? "CPF" : "CNPJ"}
+                      {...inputProps} 
+                      className="bg-white"
+                    />
+                  </FormControl>
+                )}
+              </InputMask>
+              {documentType === 'cpf' && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={generateValidCPF}
+                  title="Gerar CPF válido"
+                  className="flex-shrink-0"
+                >
+                  <Wand2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
           <FormMessage />
         </FormItem>
