@@ -9,7 +9,7 @@ import { CalendarIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -21,20 +21,41 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
   const [inputDate, setInputDate] = useState("");
 
   const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInputDate(value);
+    let value = e.target.value;
+    
+    // Remove todos os caracteres não numéricos
+    value = value.replace(/\D/g, "");
+    
+    // Aplica a máscara dd/mm/aaaa
+    if (value.length <= 2) {
+      setInputDate(value);
+    } else if (value.length <= 4) {
+      setInputDate(`${value.slice(0, 2)}/${value.slice(2)}`);
+    } else if (value.length <= 8) {
+      setInputDate(`${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`);
+    }
 
-    // Verifica se o input está no formato dd/mm/aaaa
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
-      const [day, month, year] = value.split('/').map(Number);
-      const date = new Date(year, month - 1, day);
-      
-      // Verifica se a data é válida
+    // Se tiver 8 dígitos (data completa), converte para Date
+    if (value.length === 8) {
+      const day = parseInt(value.slice(0, 2));
+      const month = parseInt(value.slice(2, 4)) - 1; // Mês começa do 0 no Date
+      const year = parseInt(value.slice(4));
+      const date = new Date(year, month, day);
+
+      // Verifica se é uma data válida
       if (!isNaN(date.getTime())) {
         form.setValue('birth_date', date);
       }
     }
   };
+
+  // Atualiza o input quando a data é selecionada pelo calendário
+  useEffect(() => {
+    const date = form.getValues('birth_date');
+    if (date) {
+      setInputDate(format(new Date(date), 'dd/MM/yyyy'));
+    }
+  }, [form.getValues('birth_date')]);
 
   return (
     <FormField
@@ -48,6 +69,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
               placeholder="dd/mm/aaaa"
               value={inputDate}
               onChange={handleDateInput}
+              maxLength={10}
               className="w-full"
             />
             <Popover>
