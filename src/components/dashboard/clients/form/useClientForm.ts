@@ -42,19 +42,18 @@ export const useClientForm = (onClose: () => void) => {
         }
 
         // Check if client with same email exists
-        const { data: existingClient, error: checkError } = await supabase
+        const { data: existingClients, error: checkError } = await supabase
           .from("clients")
           .select("id")
           .eq("email", values.email)
-          .eq("company_id", user.id)
-          .maybeSingle();
+          .eq("company_id", user.id);
 
         if (checkError) {
           console.error("Erro ao verificar email:", checkError);
           throw new Error("Erro ao verificar email do cliente");
         }
 
-        if (existingClient) {
+        if (existingClients && existingClients.length > 0) {
           throw new Error("Já existe um cliente cadastrado com este email");
         }
 
