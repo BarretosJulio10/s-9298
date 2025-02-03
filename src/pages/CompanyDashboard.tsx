@@ -65,7 +65,7 @@ const CompanyDashboard = () => {
     { icon: Settings, label: "Configurações", section: "settings" },
   ];
 
-  const grid = 60; // Grid size for snapping
+  const grid = 50; // Reduced grid size for tighter spacing
 
   const snapToGrid = (x: number, y: number) => {
     return {
@@ -88,11 +88,37 @@ const CompanyDashboard = () => {
 
       <main className="p-8">
         <div className="max-w-7xl mx-auto relative">
-          {menuItems.map((item, index) => (
+          <div className="fixed left-8 top-24 space-y-2 w-48">
+            {menuItems.map((item, index) => (
+              <Draggable
+                key={item.section}
+                defaultPosition={{ x: 0, y: index * grid }}
+                grid={[grid, grid]}
+                bounds="parent"
+                onStop={(e, data) => {
+                  const { x, y } = snapToGrid(data.x, data.y);
+                  const dragElement = e.target as HTMLElement;
+                  dragElement.style.transform = `translate(${x}px, ${y}px)`;
+                }}
+              >
+                <div 
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-move transition-all duration-200 ${
+                    activeSection === item.section 
+                      ? "bg-primary text-white shadow-lg" 
+                      : "bg-white text-gray-700 hover:bg-gray-50 hover:text-primary shadow"
+                  }`}
+                  onClick={() => setActiveSection(item.section as ActiveSection)}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
+                </div>
+              </Draggable>
+            ))}
+
             <Draggable
-              key={item.section}
-              defaultPosition={{ x: 0, y: index * grid }}
+              defaultPosition={{ x: 0, y: menuItems.length * grid }}
               grid={[grid, grid]}
+              bounds="parent"
               onStop={(e, data) => {
                 const { x, y } = snapToGrid(data.x, data.y);
                 const dragElement = e.target as HTMLElement;
@@ -100,40 +126,18 @@ const CompanyDashboard = () => {
               }}
             >
               <div 
-                className={`absolute left-0 flex items-center gap-2 rounded-lg px-4 py-2 cursor-move transition-colors ${
-                  activeSection === item.section 
-                    ? "bg-primary text-white" 
-                    : "bg-secondary text-gray-700 hover:bg-accent hover:text-accent-foreground"
-                }`}
-                onClick={() => setActiveSection(item.section as ActiveSection)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-move bg-red-500 text-white hover:bg-red-600 transition-colors duration-200 shadow-lg"
+                onClick={handleLogout}
               >
-                <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
+                <LogOut className="h-5 w-5" />
+                <span className="font-medium">Sair</span>
               </div>
             </Draggable>
-          ))}
+          </div>
 
           <div className="ml-56">
             {renderContent()}
           </div>
-
-          <Draggable
-            defaultPosition={{ x: 0, y: menuItems.length * grid }}
-            grid={[grid, grid]}
-            onStop={(e, data) => {
-              const { x, y } = snapToGrid(data.x, data.y);
-              const dragElement = e.target as HTMLElement;
-              dragElement.style.transform = `translate(${x}px, ${y}px)`;
-            }}
-          >
-            <div 
-              className="absolute left-0 flex items-center gap-2 rounded-lg px-4 py-2 cursor-move bg-destructive text-white hover:bg-destructive/90"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Sair</span>
-            </div>
-          </Draggable>
         </div>
       </main>
     </div>
