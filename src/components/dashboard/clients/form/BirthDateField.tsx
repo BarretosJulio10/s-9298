@@ -51,6 +51,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                   date < new Date()
                 }
                 initialFocus
+                locale={ptBR}
               />
             </PopoverContent>
           </Popover>
