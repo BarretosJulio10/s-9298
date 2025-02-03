@@ -105,8 +105,8 @@ const CompanyDashboard = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 ml-40 p-4">
-          <div className="max-w-7xl mx-auto">
+        <div className="flex-1 ml-40">
+          <div className="max-w-full mx-2">
             {renderContent()}
           </div>
         </div>
