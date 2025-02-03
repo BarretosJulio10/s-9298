@@ -5,7 +5,6 @@ import { Plus, Search, Send } from "lucide-react";
 import { useState } from "react";
 import { ClientForm } from "./ClientForm";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -22,24 +21,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import type { Database } from "@/integrations/supabase/types";
 
 type Client = Database["public"]["Tables"]["clients"]["Row"];
 
 export function ClientsList() {
   const [showForm, setShowForm] = useState(false);
-  const [editingClient, setEditingClient] = useState<Client | null>(null);
-  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage, setPerPage] = useState("10");
   const { toast } = useToast();
@@ -67,75 +54,21 @@ export function ClientsList() {
     }
   });
 
-  const deleteClient = useMutation({
-    mutationFn: async (clientId: string) => {
-      const { error } = await supabase
-        .from("clients")
-        .delete()
-        .eq("id", clientId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      toast({
-        title: "Cliente excluído",
-        description: "O cliente foi excluído com sucesso",
-      });
-      setClientToDelete(null);
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro ao excluir cliente",
-        description: error.message,
-      });
-    },
-  });
-
   const filteredClients = clients?.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.document.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (showForm || editingClient) {
-    return (
-      <div>
-        <ClientForm 
-          client={editingClient}
-          onCancel={() => {
-            setShowForm(false);
-            setEditingClient(null);
-          }} 
-        />
-        <Button 
-          variant="outline" 
-          onClick={() => {
-            setShowForm(false);
-            setEditingClient(null);
-          }}
-          className="mt-4"
-        >
-          Voltar para Lista
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        <Button onClick={() => setShowForm(true)} className="bg-emerald-600 hover:bg-emerald-700">
+        <Button 
+          onClick={() => setShowForm(true)} 
+          className="bg-emerald-600 hover:bg-emerald-700"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Novo Cliente
-        </Button>
-        <Button variant="outline" className="border-emerald-600 text-emerald-600">
-          <Plus className="h-4 w-4 mr-2" />
-          Novo link de cadastro
-        </Button>
-        <Button variant="outline" className="border-emerald-600 text-emerald-600">
-          Cobrança Avulsa
         </Button>
       </div>
 
@@ -213,27 +146,10 @@ export function ClientsList() {
         </div>
       )}
 
-      <AlertDialog 
-        open={clientToDelete !== null}
-        onOpenChange={(open) => !open && setClientToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir cliente</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => clientToDelete && deleteClient.mutate(clientToDelete.id)}
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ClientForm 
+        open={showForm}
+        onClose={() => setShowForm(false)}
+      />
     </div>
   );
 }
