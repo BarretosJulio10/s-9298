@@ -6,9 +6,12 @@ import { ChargeForm } from "@/components/dashboard/charges/ChargeForm";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Plus, ArrowUpRight, ArrowDownRight, Clock, Ban } from "lucide-react";
+import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
+import { TemplateForm } from "@/components/dashboard/templates/TemplateForm";
 
 const DashboardHome = () => {
   const [showChargeForm, setShowChargeForm] = useState(false);
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
@@ -27,7 +30,6 @@ const DashboardHome = () => {
       const paid = charges?.filter(c => c.status === "paid").length || 0;
       const overdue = charges?.filter(c => c.status === "overdue").length || 0;
       
-      // Calcular valores por status
       const paidAmount = charges?.reduce((acc, curr) => 
         curr.status === "paid" ? acc + Number(curr.amount) : acc, 0) || 0;
       const pendingAmount = charges?.reduce((acc, curr) => 
@@ -51,10 +53,16 @@ const DashboardHome = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <Button onClick={() => setShowChargeForm(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Nova Cobrança
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowTemplateForm(true)} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Template
+          </Button>
+          <Button onClick={() => setShowChargeForm(true)} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Nova Cobrança
+          </Button>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -131,7 +139,18 @@ const DashboardHome = () => {
         </Card>
       </div>
 
-      {showChargeForm ? (
+      {showTemplateForm ? (
+        <div className="mt-6">
+          <TemplateForm onCancel={() => setShowTemplateForm(false)} />
+          <Button 
+            variant="outline" 
+            onClick={() => setShowTemplateForm(false)}
+            className="mt-4"
+          >
+            Voltar para Lista
+          </Button>
+        </div>
+      ) : showChargeForm ? (
         <div className="mt-6">
           <ChargeForm />
           <Button 
@@ -143,8 +162,15 @@ const DashboardHome = () => {
           </Button>
         </div>
       ) : (
-        <div className="mt-6">
-          <ChargesList />
+        <div className="mt-6 space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Templates de Mensagem</h2>
+            <TemplatesList />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Cobranças</h2>
+            <ChargesList />
+          </div>
         </div>
       )}
     </div>
