@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface FormHeaderProps {
   onClose: () => void;

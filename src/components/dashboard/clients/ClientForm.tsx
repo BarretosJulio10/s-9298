@@ -12,19 +12,19 @@ import { BirthDateField } from "./form/BirthDateField";
 import { useClientForm } from "./form/useClientForm";
 
 interface ClientFormProps {
-  onCancel: () => void;
+  onClose: () => void;
   open: boolean;
 }
 
-export function ClientForm({ onCancel, open }: ClientFormProps) {
-  const { form, onSubmit, isSubmitting } = useClientForm({ onCancel });
+export function ClientForm({ onClose, open }: ClientFormProps) {
+  const { form, onSubmit, isSubmitting } = useClientForm({ onCancel: onClose });
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormHeader onClose={onCancel} />
+            <FormHeader onClose={onClose} />
 
             <div className="grid gap-6">
               <div className="grid gap-4">
@@ -43,7 +43,7 @@ export function ClientForm({ onCancel, open }: ClientFormProps) {
               </div>
             </div>
 
-            <FormFooter onClose={onCancel} />
+            <FormFooter onClose={onClose} isSubmitting={isSubmitting} />
           </form>
         </Form>
       </DialogContent>

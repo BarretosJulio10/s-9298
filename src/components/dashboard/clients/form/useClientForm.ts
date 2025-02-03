@@ -3,6 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
+
+type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 const clientSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -10,9 +13,11 @@ const clientSchema = z.object({
   document: z.string().min(1, "Documento é obrigatório"),
   phone: z.string().min(1, "Telefone é obrigatório"),
   birth_date: z.date().optional(),
-  charge_type: z.string(),
+  charge_type: z.string().default("recurring"),
   charge_amount: z.number().min(0.01, "Valor deve ser maior que zero"),
   payment_methods: z.array(z.string()).min(1, "Selecione pelo menos um método de pagamento"),
+  company_id: z.string().optional(),
+  status: z.string().optional()
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
