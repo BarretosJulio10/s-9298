@@ -61,7 +61,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
       } else {
         const { error } = await supabase
           .from("message_templates")
-          .insert([templateData]);
+          .insert(templateData);
 
         if (error) throw error;
       }
