@@ -43,7 +43,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [chargeType, setChargeType] = useState("recurring");
-  const [paymentMethod, setPaymentMethod] = useState("pix");
+  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>(["pix"]);
 
   const { data: plans = [] } = useQuery({
     queryKey: ["plans"],
@@ -106,6 +106,17 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   function onSubmit(values: Client) {
     mutation.mutate(values);
   }
+
+  const handlePaymentMethodToggle = (method: string) => {
+    setSelectedPaymentMethods(prev => {
+      if (prev.includes(method)) {
+        // Don't remove if it's the last method
+        if (prev.length === 1) return prev;
+        return prev.filter(m => m !== method);
+      }
+      return [...prev, method];
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -311,42 +322,38 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
 
             <div className="border-t pt-4 mt-6">
               <FormLabel className="mb-2 block">Método de Pagamento</FormLabel>
-              <RadioGroup
-                value={paymentMethod}
-                onValueChange={setPaymentMethod}
-                className="grid grid-cols-3 gap-4"
-              >
-                <div className={cn(
-                  "flex flex-col items-center space-y-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
-                  paymentMethod === "pix" && "border-primary bg-primary/5"
-                )}>
-                  <RadioGroupItem value="pix" id="pix" className="sr-only" />
-                  <QrCode className="h-6 w-6" />
-                  <label htmlFor="pix" className="cursor-pointer text-sm font-medium">
-                    PIX
-                  </label>
+              <div className="grid grid-cols-3 gap-4">
+                <div
+                  onClick={() => handlePaymentMethodToggle("pix")}
+                  className={cn(
+                    "flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:border-primary transition-colors",
+                    selectedPaymentMethods.includes("pix") && "border-primary bg-primary/5"
+                  )}
+                >
+                  <QrCode className="h-4 w-4" />
+                  <span className="text-sm font-medium">PIX</span>
                 </div>
-                <div className={cn(
-                  "flex flex-col items-center space-y-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
-                  paymentMethod === "boleto" && "border-primary bg-primary/5"
-                )}>
-                  <RadioGroupItem value="boleto" id="boleto" className="sr-only" />
-                  <Barcode className="h-6 w-6" />
-                  <label htmlFor="boleto" className="cursor-pointer text-sm font-medium">
-                    Boleto
-                  </label>
+                <div
+                  onClick={() => handlePaymentMethodToggle("boleto")}
+                  className={cn(
+                    "flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:border-primary transition-colors",
+                    selectedPaymentMethods.includes("boleto") && "border-primary bg-primary/5"
+                  )}
+                >
+                  <Barcode className="h-4 w-4" />
+                  <span className="text-sm font-medium">Boleto</span>
                 </div>
-                <div className={cn(
-                  "flex flex-col items-center space-y-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
-                  paymentMethod === "card" && "border-primary bg-primary/5"
-                )}>
-                  <RadioGroupItem value="card" id="card" className="sr-only" />
-                  <CreditCard className="h-6 w-6" />
-                  <label htmlFor="card" className="cursor-pointer text-sm font-medium">
-                    Cartão
-                  </label>
+                <div
+                  onClick={() => handlePaymentMethodToggle("card")}
+                  className={cn(
+                    "flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:border-primary transition-colors",
+                    selectedPaymentMethods.includes("card") && "border-primary bg-primary/5"
+                  )}
+                >
+                  <CreditCard className="h-4 w-4" />
+                  <span className="text-sm font-medium">Cartão</span>
                 </div>
-              </RadioGroup>
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t">
