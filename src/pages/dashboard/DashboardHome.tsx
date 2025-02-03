@@ -26,8 +26,6 @@ const DashboardHome = () => {
           onNewCharge={() => setShowChargeForm(true)}
         />
       </div>
-      
-      <DashboardStats />
 
       <DashboardContent 
         showTemplateForm={showTemplateForm}
@@ -36,6 +34,6 @@ const DashboardHome = () => {
       />
     </div>
   );
-};
+}
 
 export default DashboardHome;
