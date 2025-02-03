@@ -7,6 +7,7 @@ import { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -15,6 +16,8 @@ interface DocumentFieldProps {
 }
 
 export function DocumentField({ form }: DocumentFieldProps) {
+  const [documentType, setDocumentType] = useState<'cpf' | 'cnpj'>('cpf');
+
   // Função para gerar dígito verificador do CPF
   const generateVerifierDigit = (digits: number[]): number => {
     const sum = digits.reduce((acc, digit, index) => acc + digit * (digits.length + 1 - index), 0);
@@ -37,58 +40,57 @@ export function DocumentField({ form }: DocumentFieldProps) {
     <FormField
       control={form.control}
       name="document"
-      render={({ field }) => {
-        const value = field.value || '';
-        
-        return (
-          <FormItem className="space-y-4">
-            <RadioGroup 
-              defaultValue="cpf" 
-              className="grid grid-cols-2 gap-4"
-              onValueChange={(value) => {
-                form.setValue('document', '');
-              }}
-            >
-              <div>
-                <RadioGroupItem value="cpf" id="cpf" className="peer sr-only" />
-                <Label
-                  htmlFor="cpf"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                >
-                  CPF
-                </Label>
-              </div>
-              <div>
-                <RadioGroupItem value="cnpj" id="cnpj" className="peer sr-only" />
-                <Label
-                  htmlFor="cnpj"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                >
-                  CNPJ
-                </Label>
-              </div>
-            </RadioGroup>
-
-            <div className="flex gap-2">
-              <InputMask
-                mask={value.length > 11 ? "99.999.999/9999-99" : "999.999.999-99"}
-                value={value}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  const numericValue = newValue.replace(/\D/g, '');
-                  if (numericValue.length <= 14) {
-                    field.onChange(newValue);
-                  }
-                }}
-                maskChar={null}
+      render={({ field }) => (
+        <FormItem className="space-y-4">
+          <RadioGroup 
+            defaultValue="cpf" 
+            className="grid grid-cols-2 gap-4 mb-4"
+            onValueChange={(value: 'cpf' | 'cnpj') => {
+              setDocumentType(value);
+              form.setValue('document', '');
+            }}
+          >
+            <div className="relative">
+              <RadioGroupItem value="cpf" id="cpf" className="peer sr-only" />
+              <Label
+                htmlFor="cpf"
+                className="flex items-center justify-center rounded-md border-2 border-muted bg-white p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
               >
-                {(inputProps: any) => (
+                CPF
+              </Label>
+            </div>
+
+            <div className="relative">
+              <RadioGroupItem value="cnpj" id="cnpj" className="peer sr-only" />
+              <Label
+                htmlFor="cnpj"
+                className="flex items-center justify-center rounded-md border-2 border-muted bg-white p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+              >
+                CNPJ
+              </Label>
+            </div>
+          </RadioGroup>
+
+          <div className="flex gap-2">
+            <InputMask
+              mask={documentType === 'cpf' ? "999.999.999-99" : "99.999.999/9999-99"}
+              value={field.value || ''}
+              onChange={(e) => {
+                field.onChange(e.target.value);
+              }}
+              maskChar={null}
+            >
+              {(inputProps: any) => (
+                <FormControl>
                   <Input 
-                    placeholder={value.length > 11 ? "CNPJ" : "CPF"}
+                    placeholder={documentType === 'cpf' ? "CPF" : "CNPJ"}
                     {...inputProps} 
+                    className="bg-white"
                   />
-                )}
-              </InputMask>
+                </FormControl>
+              )}
+            </InputMask>
+            {documentType === 'cpf' && (
               <Button
                 type="button"
                 variant="outline"
@@ -99,11 +101,11 @@ export function DocumentField({ form }: DocumentFieldProps) {
               >
                 <Wand2 className="h-4 w-4" />
               </Button>
-            </div>
-            <FormMessage />
-          </FormItem>
-        );
-      }}
+            )}
+          </div>
+          <FormMessage />
+        </FormItem>
+      )}
     />
   );
 }
