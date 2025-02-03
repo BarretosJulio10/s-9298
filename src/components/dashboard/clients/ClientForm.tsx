@@ -1,33 +1,17 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Database } from "@/integrations/supabase/types";
-import InputMask from "react-input-mask";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { X } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { FormHeader } from "./form/FormHeader";
+import { FormFooter } from "./form/FormFooter";
 import { ChargeTypeField } from "./form/ChargeTypeField";
+import { BirthDateField } from "./form/BirthDateField";
+import { DocumentField } from "./form/DocumentField";
+import { EmailField } from "./form/EmailField";
 import { PhoneField } from "./form/PhoneField";
+import { AmountField } from "./form/AmountField";
 import { PaymentMethodsField } from "./form/PaymentMethodsField";
-
-type Client = Database["public"]["Tables"]["clients"]["Insert"];
+import { useClientForm } from "./form/useClientForm";
 
 interface ClientFormProps {
   open: boolean;
@@ -35,72 +19,9 @@ interface ClientFormProps {
 }
 
 export function ClientForm({ open, onClose }: ClientFormProps) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [chargeType, setChargeType] = useState("recurring");
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>(["pix"]);
-
-  const validateWhatsApp = (phone: string) => {
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length !== 11) return false;
-    if (cleanPhone[2] !== '9') return false;
-    const ddd = parseInt(cleanPhone.substring(0, 2));
-    if (ddd < 11 || ddd > 99) return false;
-    return true;
-  };
-
-  const form = useForm<Client>({
-    defaultValues: {
-      name: "",
-      email: "",
-      document: "",
-      phone: "",
-      status: "active",
-      birth_date: null,
-    },
-  });
-
-  const mutation = useMutation({
-    mutationFn: async (values: Client) => {
-      if (!validateWhatsApp(values.phone)) {
-        throw new Error("Número de WhatsApp inválido");
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
-
-      const { data, error } = await supabase
-        .from("clients")
-        .insert([{
-          ...values,
-          company_id: user.id,
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      toast({
-        title: "Cliente cadastrado com sucesso!",
-      });
-      onClose();
-      form.reset();
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro ao cadastrar cliente",
-        description: error instanceof Error ? error.message : "Tente novamente mais tarde",
-      });
-    },
-  });
-
-  function onSubmit(values: Client) {
-    mutation.mutate(values);
-  }
+  const { form, mutation } = useClientForm(onClose);
 
   const handlePaymentMethodToggle = (method: string) => {
     setSelectedPaymentMethods(prev => {
@@ -112,20 +33,14 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
     });
   };
 
+  function onSubmit(values: any) {
+    mutation.mutate(values);
+  }
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px] p-0 bg-white rounded-lg shadow-lg">
-        <DialogHeader className="p-6 border-b">
-          <DialogTitle className="text-lg font-medium">Criar um novo cliente</DialogTitle>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute right-4 top-4"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </DialogHeader>
+        <FormHeader onClose={onClose} />
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-6">
@@ -134,121 +49,19 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               onChange={setChargeType}
             />
 
-            <FormField
-              control={form.control}
-              name="birth_date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Data de Início da Cobrança</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(new Date(field.value), "PPP", { locale: ptBR })
-                          ) : (
-                            <span>Selecione uma data</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date()
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <BirthDateField form={form} />
 
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Nome do cliente" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <Input placeholder="Nome do cliente" {...form.register("name")} />
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input placeholder="Email do cliente" type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="document"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <InputMask
-                        mask={field.value.length <= 11 ? "999.999.999-99" : "99.999.999/9999-99"}
-                        value={field.value}
-                        onChange={field.onChange}
-                      >
-                        {(inputProps: any) => (
-                          <Input placeholder="CPF ou CNPJ" {...inputProps} />
-                        )}
-                      </InputMask>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <EmailField form={form} />
+              <DocumentField form={form} />
             </div>
 
-            <PhoneField 
-              form={form}
-              validateWhatsApp={validateWhatsApp}
-            />
+            <PhoneField form={form} />
 
             {chargeType === "recurring" && (
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input 
-                        type="number"
-                        placeholder="Valor da cobrança"
-                        step="0.01"
-                        min="0"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <AmountField form={form} />
             )}
 
             <PaymentMethodsField
@@ -256,21 +69,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               onToggle={handlePaymentMethodToggle}
             />
 
-            <div className="flex justify-end gap-2 pt-4 border-t">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onClose}
-              >
-                Fechar
-              </Button>
-              <Button 
-                type="submit"
-                className="bg-primary hover:bg-primary/90"
-              >
-                Adicionar
-              </Button>
-            </div>
+            <FormFooter onClose={onClose} />
           </form>
         </Form>
       </DialogContent>
