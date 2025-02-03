@@ -1,22 +1,21 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-
-interface FormValues {
-  customer_name: string;
-  customer_email: string;
-  customer_document: string;
-  amount: number;
-  due_date: string;
-}
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ChargeFormData } from "../schemas/chargeSchema";
 
 interface EditChargeFieldsProps {
-  form: UseFormReturn<FormValues>;
+  form: UseFormReturn<ChargeFormData>;
 }
 
 export function EditChargeFields({ form }: EditChargeFieldsProps) {
   return (
-    <>
+    <div className="space-y-4">
       <FormField
         control={form.control}
         name="customer_name"
@@ -36,7 +35,7 @@ export function EditChargeFields({ form }: EditChargeFieldsProps) {
         name="customer_email"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>E-mail do Cliente</FormLabel>
+            <FormLabel>E-mail</FormLabel>
             <FormControl>
               <Input type="email" {...field} />
             </FormControl>
@@ -50,7 +49,7 @@ export function EditChargeFields({ form }: EditChargeFieldsProps) {
         name="customer_document"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Documento do Cliente</FormLabel>
+            <FormLabel>CPF/CNPJ</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -68,7 +67,7 @@ export function EditChargeFields({ form }: EditChargeFieldsProps) {
             <FormControl>
               <Input 
                 type="number" 
-                step="0.01"
+                step="0.01" 
                 {...field}
                 onChange={(e) => field.onChange(parseFloat(e.target.value))}
               />
@@ -91,6 +90,6 @@ export function EditChargeFields({ form }: EditChargeFieldsProps) {
           </FormItem>
         )}
       />
-    </>
+    </div>
   );
 }

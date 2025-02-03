@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +7,7 @@ import { Form } from "@/components/ui/form";
 import { EditChargeFields } from "./edit-charge/EditChargeFields";
 import { EditChargeActions } from "./edit-charge/EditChargeActions";
 import { format } from "date-fns";
+import { chargeSchema, type ChargeFormData } from "./schemas/chargeSchema";
 
 interface EditChargeFormProps {
   charge: {
@@ -19,19 +21,12 @@ interface EditChargeFormProps {
   onCancel: () => void;
 }
 
-interface FormValues {
-  customer_name: string;
-  customer_email: string;
-  customer_document: string;
-  amount: number;
-  due_date: string;
-}
-
 export function EditChargeForm({ charge, onCancel }: EditChargeFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<FormValues>({
+  const form = useForm<ChargeFormData>({
+    resolver: zodResolver(chargeSchema),
     defaultValues: {
       customer_name: charge.customer_name,
       customer_email: charge.customer_email,
@@ -42,7 +37,7 @@ export function EditChargeForm({ charge, onCancel }: EditChargeFormProps) {
   });
 
   const updateCharge = useMutation({
-    mutationFn: async (values: FormValues) => {
+    mutationFn: async (values: ChargeFormData) => {
       const { data: settings, error: settingsError } = await supabase
         .from("company_settings")
         .select("asaas_api_key, asaas_environment")
@@ -112,7 +107,7 @@ export function EditChargeForm({ charge, onCancel }: EditChargeFormProps) {
     },
   });
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: ChargeFormData) => {
     updateCharge.mutate(values);
   };
 
