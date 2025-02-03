@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChargeSettingsForm } from "@/components/admin/settings/ChargeSettingsForm";
 import { NotificationRulesForm } from "./NotificationRulesForm";
-import { PaymentGatewayForm } from "./payment/PaymentGatewayForm";
+import { AsaasGatewayForm } from "./payment/gateways/AsaasGatewayForm";
+import { MercadoPagoGatewayForm } from "./payment/gateways/MercadoPagoGatewayForm";
 import { PaymentMethodSettings } from "./payment/PaymentMethodSettings";
 
 export function CompanySettingsForm() {
@@ -16,7 +17,8 @@ export function CompanySettingsForm() {
         <ChargeSettingsForm />
       </TabsContent>
       <TabsContent value="payment" className="space-y-6">
-        <PaymentGatewayForm />
+        <AsaasGatewayForm />
+        <MercadoPagoGatewayForm />
         <PaymentMethodSettings />
       </TabsContent>
       <TabsContent value="notifications">

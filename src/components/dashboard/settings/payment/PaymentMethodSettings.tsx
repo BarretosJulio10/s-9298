@@ -8,14 +8,14 @@ import { Label } from "@/components/ui/label";
 
 interface PaymentGateway {
   id: string;
-  gateway: string;
+  gateway: "mercadopago" | "asaas" | "paghiper" | "picpay" | "pagbank";
   enabled: boolean;
 }
 
 interface PaymentMethod {
   id: string;
   gateway_id: string;
-  method: string;
+  method: "pix" | "credit_card" | "boleto";
   enabled: boolean;
 }
 
@@ -61,23 +61,25 @@ export function PaymentMethodSettings() {
     loadSettings();
   }, [session?.user?.id, toast]);
 
-  const toggleMethod = async (gatewayId: string, method: string, enabled: boolean) => {
+  const toggleMethod = async (
+    gatewayId: string,
+    method: "pix" | "credit_card" | "boleto",
+    enabled: boolean
+  ) => {
     if (!session?.user?.id) return;
 
     try {
-      const { error } = await supabase
-        .from("payment_method_settings")
-        .upsert({
-          company_id: session.user.id,
-          gateway_id: gatewayId,
-          method,
-          enabled,
-        });
+      const { error } = await supabase.from("payment_method_settings").upsert({
+        company_id: session.user.id,
+        gateway_id: gatewayId,
+        method,
+        enabled,
+      });
 
       if (error) throw error;
 
-      setMethods(prev =>
-        prev.map(m =>
+      setMethods((prev) =>
+        prev.map((m) =>
           m.gateway_id === gatewayId && m.method === method
             ? { ...m, enabled }
             : m
@@ -110,11 +112,23 @@ export function PaymentMethodSettings() {
         <div className="space-y-6">
           {gateways.map((gateway) => (
             <div key={gateway.id} className="space-y-4">
-              <h3 className="font-medium">{gateway.gateway}</h3>
+              <h3 className="font-medium">
+                {gateway.gateway === "mercadopago"
+                  ? "Mercado Pago"
+                  : gateway.gateway === "asaas"
+                  ? "ASAAS"
+                  : gateway.gateway === "paghiper"
+                  ? "PagHiper"
+                  : gateway.gateway === "picpay"
+                  ? "PicPay"
+                  : "PagBank"}
+              </h3>
               <div className="grid gap-4">
                 {["pix", "credit_card", "boleto"].map((method) => {
                   const methodSetting = methods.find(
-                    (m) => m.gateway_id === gateway.id && m.method === method
+                    (m) =>
+                      m.gateway_id === gateway.id &&
+                      m.method === method
                   );
                   return (
                     <div
@@ -131,7 +145,11 @@ export function PaymentMethodSettings() {
                       <Switch
                         checked={methodSetting?.enabled ?? false}
                         onCheckedChange={(checked) =>
-                          toggleMethod(gateway.id, method, checked)
+                          toggleMethod(
+                            gateway.id,
+                            method as "pix" | "credit_card" | "boleto",
+                            checked
+                          )
                         }
                         disabled={!gateway.enabled}
                       />
