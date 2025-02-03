@@ -44,7 +44,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
 
       // Verifica se é uma data válida
       if (!isNaN(date.getTime())) {
-        form.setValue('birth_date', date);
+        form.setValue('birth_date', date.toISOString().split('T')[0]);
       }
     }
   };
@@ -89,8 +89,8 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                   mode="single"
                   selected={field.value ? new Date(field.value) : undefined}
                   onSelect={(date) => {
-                    field.onChange(date);
                     if (date) {
+                      field.onChange(date.toISOString().split('T')[0]);
                       setInputDate(format(date, 'dd/MM/yyyy'));
                     }
                   }}

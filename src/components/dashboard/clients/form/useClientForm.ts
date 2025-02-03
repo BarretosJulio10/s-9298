@@ -19,20 +19,19 @@ export const useClientForm = (onClose: () => void) => {
     return true;
   };
 
-  const form = useForm<Client & { amount?: number }>({
+  const form = useForm<Client>({
     defaultValues: {
       name: "",
       email: "",
       document: "",
       phone: "",
       status: "active",
-      birth_date: null,
-      amount: 0,
+      birth_date: undefined,
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: Client & { amount?: number }) => {
+    mutationFn: async (values: Client) => {
       if (!validateWhatsApp(values.phone)) {
         throw new Error("Número de WhatsApp inválido");
       }
