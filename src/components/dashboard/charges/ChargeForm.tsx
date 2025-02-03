@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -32,12 +32,58 @@ interface ChargeFormData {
   payment_method: "pix" | "boleto" | "credit_card";
 }
 
+interface PaymentGateway {
+  id: string;
+  gateway: string;
+  enabled: boolean;
+}
+
+interface PaymentMethod {
+  id: string;
+  gateway_id: string;
+  method: string;
+  enabled: boolean;
+}
+
 export function ChargeForm() {
   const { toast } = useToast();
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const form = useForm<ChargeFormData>();
   const [isLoading, setIsLoading] = useState(false);
+  const [availableMethods, setAvailableMethods] = useState<PaymentMethod[]>([]);
+
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const loadPaymentMethods = async () => {
+      try {
+        const { data: methods, error } = await supabase
+          .from("payment_method_settings")
+          .select(`
+            id,
+            gateway_id,
+            method,
+            enabled,
+            payment_gateway_settings!inner(
+              id,
+              gateway,
+              enabled
+            )
+          `)
+          .eq("company_id", session.user.id)
+          .eq("enabled", true)
+          .eq("payment_gateway_settings.enabled", true);
+
+        if (error) throw error;
+        setAvailableMethods(methods || []);
+      } catch (error: any) {
+        console.error("Error loading payment methods:", error);
+      }
+    };
+
+    loadPaymentMethods();
+  }, [session?.user?.id]);
 
   const createCharge = useMutation({
     mutationFn: async (data: ChargeFormData) => {
@@ -45,7 +91,6 @@ export function ChargeForm() {
         throw new Error("Usuário não autenticado");
       }
 
-      // Primeiro, busca as configurações da empresa
       const { data: settings, error: settingsError } = await supabase
         .from("company_settings")
         .select("*")
@@ -57,7 +102,6 @@ export function ChargeForm() {
         throw new Error("Chave API do Asaas não configurada");
       }
 
-      // Cria a cobrança no Asaas usando Edge Function
       const asaasResponse = await fetch("/api/asaas/create-charge", {
         method: "POST",
         headers: {
@@ -86,7 +130,6 @@ export function ChargeForm() {
 
       const asaasData = await asaasResponse.json();
 
-      // Salva a cobrança no banco de dados
       const { error: chargeError } = await supabase.from("charges").insert({
         company_id: session.user.id,
         customer_name: data.customer_name,
@@ -231,9 +274,15 @@ export function ChargeForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="pix">PIX</SelectItem>
-                      <SelectItem value="boleto">Boleto</SelectItem>
-                      <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
+                      {availableMethods.map((method) => (
+                        <SelectItem key={method.id} value={method.method}>
+                          {method.method === "pix"
+                            ? "PIX"
+                            : method.method === "credit_card"
+                            ? "Cartão de Crédito"
+                            : "Boleto"}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />

@@ -388,6 +388,95 @@ export type Database = {
           },
         ]
       }
+      payment_gateway_settings: {
+        Row: {
+          api_key: string | null
+          api_secret: string | null
+          company_id: string
+          created_at: string
+          enabled: boolean | null
+          environment: string | null
+          gateway: Database["public"]["Enums"]["payment_gateway_type"]
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          api_key?: string | null
+          api_secret?: string | null
+          company_id: string
+          created_at?: string
+          enabled?: boolean | null
+          environment?: string | null
+          gateway: Database["public"]["Enums"]["payment_gateway_type"]
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string | null
+          api_secret?: string | null
+          company_id?: string
+          created_at?: string
+          enabled?: boolean | null
+          environment?: string | null
+          gateway?: Database["public"]["Enums"]["payment_gateway_type"]
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_gateway_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_method_settings: {
+        Row: {
+          company_id: string
+          created_at: string
+          enabled: boolean | null
+          gateway_id: string
+          id: string
+          method: Database["public"]["Enums"]["payment_method_type"]
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          enabled?: boolean | null
+          gateway_id: string
+          id?: string
+          method: Database["public"]["Enums"]["payment_method_type"]
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          enabled?: boolean | null
+          gateway_id?: string
+          id?: string
+          method?: Database["public"]["Enums"]["payment_method_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_method_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_method_settings_gateway_id_fkey"
+            columns: ["gateway_id"]
+            isOneToOne: false
+            referencedRelation: "payment_gateway_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           active: boolean
@@ -509,7 +598,14 @@ export type Database = {
     Enums: {
       charge_status: "pending" | "paid" | "overdue" | "cancelled"
       company_status: "active" | "inactive" | "pending"
+      payment_gateway_type:
+        | "mercadopago"
+        | "asaas"
+        | "paghiper"
+        | "picpay"
+        | "pagbank"
       payment_method: "pix" | "boleto" | "credit_card"
+      payment_method_type: "pix" | "credit_card" | "boleto"
       user_role: "admin" | "company"
     }
     CompositeTypes: {
