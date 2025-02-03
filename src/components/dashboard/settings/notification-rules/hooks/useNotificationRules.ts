@@ -41,13 +41,15 @@ export function useNotificationRules() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      if (data && data.length > 0) {
-        setRules(data);
-      } else {
-        initializeDefaultRule();
+    meta: {
+      onSuccess: (data) => {
+        if (data && data.length > 0) {
+          setRules(data);
+        } else {
+          initializeDefaultRule();
+        }
       }
-    },
+    }
   });
 
   const initializeDefaultRule = async () => {
