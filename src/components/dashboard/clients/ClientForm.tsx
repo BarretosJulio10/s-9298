@@ -156,6 +156,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-6">
+            <div className="space-y-2">
               <FormLabel>Tipo de Cobrança</FormLabel>
               <RadioGroup
                 value={chargeType}
