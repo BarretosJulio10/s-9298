@@ -1,171 +1,131 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
-import { corsHeaders } from "../_shared/cors.ts";
+import { createClient } from '@supabase/supabase-js';
+import { corsHeaders } from '../_shared/cors';
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-interface NotificationRule {
-  id: string;
-  company_id: string;
-  days_before: number;
-  days_after: number;
-  template_id: string;
-  active: boolean;
-}
+const supabase = createClient(supabaseUrl, supabaseServiceRole);
 
-interface MessageTemplate {
-  id: string;
-  content: string;
-}
-
-async function processNotifications() {
-  console.log("Starting notification processing...");
-
-  // Buscar todas as regras ativas
-  const { data: rules, error: rulesError } = await supabase
-    .from("notification_rules")
-    .select(`
-      *,
-      message_templates (
-        id,
-        content
-      )
-    `)
-    .eq("active", true);
-
-  if (rulesError) {
-    console.error("Error fetching rules:", rulesError);
-    throw rulesError;
-  }
-
-  // Para cada regra, buscar cobranças relevantes
-  for (const rule of rules) {
-    console.log(`Processing rule ${rule.id} for company ${rule.company_id}`);
-
-    const today = new Date();
-    const { data: charges, error: chargesError } = await supabase
-      .from("charges")
-      .select("*")
-      .eq("company_id", rule.company_id)
-      .eq("notification_sent", false)
-      .in("status", ["pending", "overdue"]);
-
-    if (chargesError) {
-      console.error("Error fetching charges:", chargesError);
-      continue;
-    }
-
-    for (const charge of charges) {
-      const dueDate = new Date(charge.due_date);
-      const daysDiff = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-      // Verificar se a cobrança se enquadra nas regras de notificação
-      if (
-        (daysDiff === rule.days_before) || // Notificação antes do vencimento
-        (daysDiff === -rule.days_after && charge.status === "overdue") // Notificação após o vencimento
-      ) {
-        console.log(`Sending notification for charge ${charge.id}`);
-
-        try {
-          // Enviar notificação via WhatsApp
-          const response = await fetch(`${supabaseUrl}/functions/v1/whatsapp`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${supabaseKey}`,
-            },
-            body: JSON.stringify({
-              action: "sendMessage",
-              params: {
-                phone: charge.customer_phone,
-                message: rule.message_templates.content
-                  .replace("{nome}", charge.customer_name)
-                  .replace("{valor}", new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL"
-                  }).format(charge.amount))
-                  .replace("{vencimento}", new Date(charge.due_date).toLocaleDateString("pt-BR"))
-                  .replace("{link}", charge.payment_link || ""),
-              },
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error(`WhatsApp API error: ${response.statusText}`);
-          }
-
-          // Registrar o envio da notificação
-          const { error: historyError } = await supabase
-            .from("notification_history")
-            .insert({
-              charge_id: charge.id,
-              type: daysDiff > 0 ? "reminder" : "overdue",
-              status: "sent",
-              message: rule.message_templates.content,
-            });
-
-          if (historyError) {
-            console.error("Error recording notification history:", historyError);
-          }
-
-          // Atualizar o status de notificação da cobrança
-          const { error: updateError } = await supabase
-            .from("charges")
-            .update({
-              notification_sent: true,
-              notification_date: new Date().toISOString(),
-            })
-            .eq("id", charge.id);
-
-          if (updateError) {
-            console.error("Error updating charge notification status:", updateError);
-          }
-
-        } catch (error) {
-          console.error("Error processing notification:", error);
-          
-          // Registrar falha no histórico
-          await supabase
-            .from("notification_history")
-            .insert({
-              charge_id: charge.id,
-              type: daysDiff > 0 ? "reminder" : "overdue",
-              status: "failed",
-              message: error.message,
-            });
-        }
-      }
-    }
-  }
-
-  console.log("Notification processing completed");
-}
-
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    await processNotifications();
-    
+    // Buscar todas as regras de notificação ativas
+    const { data: rules, error: rulesError } = await supabase
+      .from('notification_rules')
+      .select(`
+        *,
+        message_templates (
+          content
+        )
+      `)
+      .eq('active', true);
+
+    if (rulesError) throw rulesError;
+
+    // Buscar todas as cobranças que precisam de notificação
+    const { data: charges, error: chargesError } = await supabase
+      .from('charges')
+      .select(`
+        *,
+        profiles (
+          whatsapp
+        )
+      `)
+      .in('status', ['pending', 'overdue'])
+      .eq('notification_sent', false);
+
+    if (chargesError) throw chargesError;
+
+    const notifications = [];
+
+    for (const charge of charges) {
+      for (const rule of rules) {
+        const dueDate = new Date(charge.due_date);
+        const today = new Date();
+        const diffDays = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+        // Verificar se a cobrança se enquadra nas regras de notificação
+        if (
+          (rule.days_before > 0 && diffDays === rule.days_before) || // Notificação antes
+          (rule.days_after > 0 && diffDays === -rule.days_after) || // Notificação depois
+          (diffDays === 0) // No dia
+        ) {
+          // Preparar a mensagem
+          const template = rule.message_templates?.content || '';
+          const message = template
+            .replace('{nome}', charge.customer_name)
+            .replace('{valor}', new Intl.NumberFormat('pt-BR', {
+              style: 'currency',
+              currency: 'BRL'
+            }).format(charge.amount))
+            .replace('{vencimento}', new Date(charge.due_date).toLocaleDateString('pt-BR'))
+            .replace('{link}', charge.payment_link || '');
+
+          // Enviar notificação via WhatsApp
+          if (charge.profiles?.whatsapp) {
+            const whatsappResponse = await fetch(`${supabaseUrl}/functions/v1/whatsapp`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabaseServiceRole}`
+              },
+              body: JSON.stringify({
+                phone: charge.profiles.whatsapp,
+                message: message
+              })
+            });
+
+            if (whatsappResponse.ok) {
+              // Registrar notificação enviada
+              const { error: historyError } = await supabase
+                .from('notification_history')
+                .insert({
+                  charge_id: charge.id,
+                  type: 'whatsapp',
+                  status: 'sent',
+                  message: message
+                });
+
+              if (historyError) throw historyError;
+
+              // Atualizar status da notificação na cobrança
+              const { error: updateError } = await supabase
+                .from('charges')
+                .update({
+                  notification_sent: true,
+                  notification_date: new Date().toISOString()
+                })
+                .eq('id', charge.id);
+
+              if (updateError) throw updateError;
+
+              notifications.push({
+                charge_id: charge.id,
+                status: 'success'
+              });
+            }
+          }
+        }
+      }
+    }
+
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, notifications }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
     );
+
   } catch (error) {
-    console.error("Error in process-notifications function:", error);
-    
     return new Response(
       JSON.stringify({ error: error.message }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
       }
     );
   }
