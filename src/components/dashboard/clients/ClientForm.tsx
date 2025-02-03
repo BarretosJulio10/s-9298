@@ -19,18 +19,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 import InputMask from "react-input-mask";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { X, CreditCard, Barcode, QrCode, Check } from "lucide-react";
+import { X } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
+import { ChargeTypeField } from "./form/ChargeTypeField";
+import { PhoneField } from "./form/PhoneField";
+import { PaymentMethodsField } from "./form/PaymentMethodsField";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -147,33 +149,10 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-6">
-            <div className="space-y-2">
-              <FormLabel>Tipo de Cobrança</FormLabel>
-              <RadioGroup
-                value={chargeType}
-                onValueChange={setChargeType}
-                className="grid grid-cols-2 gap-4"
-              >
-                <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary">
-                  <RadioGroupItem value="recurring" id="recurring" />
-                  <label htmlFor="recurring" className="cursor-pointer flex-1">
-                    <div className="font-medium">Recorrente</div>
-                    <p className="text-sm text-muted-foreground">
-                      Cobranças automáticas mensais
-                    </p>
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary">
-                  <RadioGroupItem value="single" id="single" />
-                  <label htmlFor="single" className="cursor-pointer flex-1">
-                    <div className="font-medium">Avulsa</div>
-                    <p className="text-sm text-muted-foreground">
-                      Cobrança única
-                    </p>
-                  </label>
-                </div>
-              </RadioGroup>
-            </div>
+            <ChargeTypeField 
+              value={chargeType}
+              onChange={setChargeType}
+            />
 
             <FormField
               control={form.control}
@@ -266,53 +245,9 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <div className="flex">
-                      <div className="w-12 relative border border-r-0 border-input rounded-l-md overflow-hidden">
-                        <div className="absolute inset-0 bg-[#009c3b]" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-8 h-4 relative">
-                            <div className="absolute inset-[15%] bg-[#ffdf00]" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
-                            <div className="absolute inset-[30%] bg-[#002776] rounded-full" />
-                          </div>
-                        </div>
-                      </div>
-                      <InputMask
-                        mask="(99) 99999-9999"
-                        value={field.value}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          if (e.target.value.replace(/\D/g, '').length === 11) {
-                            if (!validateWhatsApp(e.target.value)) {
-                              form.setError('phone', {
-                                type: 'manual',
-                                message: 'Número de WhatsApp inválido'
-                              });
-                            } else {
-                              form.clearErrors('phone');
-                            }
-                          }
-                        }}
-                        className="flex-1"
-                      >
-                        {(inputProps: any) => (
-                          <Input 
-                            {...inputProps} 
-                            placeholder="Digite o WhatsApp"
-                            className="rounded-l-none"
-                          />
-                        )}
-                      </InputMask>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <PhoneField 
+              form={form}
+              validateWhatsApp={validateWhatsApp}
             />
 
             {chargeType === "recurring" && (
@@ -350,56 +285,10 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               />
             )}
 
-            <div className="border-t pt-4 mt-6">
-              <FormLabel className="mb-2 block">Método de Pagamento</FormLabel>
-              <div className="grid grid-cols-3 gap-4">
-                <div
-                  onClick={() => handlePaymentMethodToggle("pix")}
-                  className={cn(
-                    "flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:border-primary transition-colors",
-                    selectedPaymentMethods.includes("pix") && "border-primary bg-primary/5"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <QrCode className="h-4 w-4" />
-                    <span className="text-sm font-medium">PIX</span>
-                  </div>
-                  {selectedPaymentMethods.includes("pix") && (
-                    <Check className="h-4 w-4 ml-auto text-primary" />
-                  )}
-                </div>
-                <div
-                  onClick={() => handlePaymentMethodToggle("boleto")}
-                  className={cn(
-                    "flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:border-primary transition-colors",
-                    selectedPaymentMethods.includes("boleto") && "border-primary bg-primary/5"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <Barcode className="h-4 w-4" />
-                    <span className="text-sm font-medium">Boleto</span>
-                  </div>
-                  {selectedPaymentMethods.includes("boleto") && (
-                    <Check className="h-4 w-4 ml-auto text-primary" />
-                  )}
-                </div>
-                <div
-                  onClick={() => handlePaymentMethodToggle("card")}
-                  className={cn(
-                    "flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:border-primary transition-colors",
-                    selectedPaymentMethods.includes("card") && "border-primary bg-primary/5"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4" />
-                    <span className="text-sm font-medium">Cartão</span>
-                  </div>
-                  {selectedPaymentMethods.includes("card") && (
-                    <Check className="h-4 w-4 ml-auto text-primary" />
-                  )}
-                </div>
-              </div>
-            </div>
+            <PaymentMethodsField
+              selectedMethods={selectedPaymentMethods}
+              onToggle={handlePaymentMethodToggle}
+            />
 
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button 
