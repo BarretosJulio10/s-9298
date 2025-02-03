@@ -1,8 +1,8 @@
 -- Criar um agendamento para executar a função a cada hora
 select
   cron.schedule(
-    'process-notifications', -- nome do agendamento
-    '0 * * * *', -- executar a cada hora (minuto 0)
+    'process-notifications',           -- nome do agendamento
+    '0 * * * *',                      -- executar a cada hora (minuto 0)
     $$
     select
       net.http_post(
