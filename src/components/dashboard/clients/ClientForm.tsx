@@ -60,7 +60,9 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               <PhoneField form={form} validateWhatsApp={validateWhatsApp} />
               <div className="grid grid-cols-2 gap-4">
                 <DocumentField form={form} />
-                <AmountField form={form} />
+                <div className="flex justify-end">
+                  <AmountField form={form} />
+                </div>
               </div>
             </div>
 
