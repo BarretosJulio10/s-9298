@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Edit, Trash } from "lucide-react";
 import { useState } from "react";
 import { ClientForm } from "./ClientForm";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,11 +36,17 @@ export function ClientsList() {
 
       const { data, error } = await supabase
         .from("clients")
-        .select("*")
-        .eq("company_id", user.id);
+        .select(`
+          *,
+          plans (
+            name
+          )
+        `)
+        .eq("company_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Client[];
+      return data as (Client & { plans: { name: string } | null })[];
     }
   });
 
@@ -68,6 +75,19 @@ export function ClientsList() {
       });
     },
   });
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "active":
+        return <Badge variant="success">Ativo</Badge>;
+      case "inactive":
+        return <Badge variant="secondary">Inativo</Badge>;
+      case "blocked":
+        return <Badge variant="destructive">Bloqueado</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
 
   if (showForm || editingClient) {
     return (
@@ -109,12 +129,23 @@ export function ClientsList() {
         <div className="grid gap-4">
           {clients?.map((client) => (
             <Card key={client.id} className="p-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-medium">{client.name}</h3>
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium">{client.name}</h3>
+                    {getStatusBadge(client.status)}
+                  </div>
                   <p className="text-sm text-gray-500">{client.email}</p>
                   <p className="text-sm text-gray-500">{client.document}</p>
                   <p className="text-sm text-gray-500">{client.phone}</p>
+                  {client.plans && (
+                    <p className="text-sm text-gray-500">Plano: {client.plans.name}</p>
+                  )}
+                  {client.address_city && client.address_state && (
+                    <p className="text-sm text-gray-500">
+                      {client.address_city}, {client.address_state}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <Button 
@@ -122,14 +153,14 @@ export function ClientsList() {
                     size="sm"
                     onClick={() => setEditingClient(client)}
                   >
-                    Editar
+                    <Edit className="h-4 w-4" />
                   </Button>
                   <Button 
                     variant="destructive" 
                     size="sm"
                     onClick={() => setClientToDelete(client)}
                   >
-                    Excluir
+                    <Trash className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

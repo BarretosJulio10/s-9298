@@ -126,33 +126,66 @@ export type Database = {
       }
       clients: {
         Row: {
+          address_city: string | null
+          address_complement: string | null
+          address_neighborhood: string | null
+          address_number: string | null
+          address_state: string | null
+          address_street: string | null
+          address_zip: string | null
+          birth_date: string | null
           company_id: string
           created_at: string
           document: string
           email: string
           id: string
           name: string
+          notes: string | null
           phone: string
+          plan_id: string | null
+          status: string
           updated_at: string
         }
         Insert: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          birth_date?: string | null
           company_id: string
           created_at?: string
           document: string
           email: string
           id?: string
           name: string
+          notes?: string | null
           phone: string
+          plan_id?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          birth_date?: string | null
           company_id?: string
           created_at?: string
           document?: string
           email?: string
           id?: string
           name?: string
+          notes?: string | null
           phone?: string
+          plan_id?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: [
@@ -161,6 +194,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
             referencedColumns: ["id"]
           },
         ]

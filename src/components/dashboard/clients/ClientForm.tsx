@@ -11,9 +11,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
@@ -23,6 +25,17 @@ const formSchema = z.object({
   email: z.string().email("Email inválido"),
   document: z.string().min(11, "CPF/CNPJ inválido"),
   phone: z.string().min(10, "Telefone inválido"),
+  birth_date: z.string().optional(),
+  status: z.string(),
+  notes: z.string().optional(),
+  address_street: z.string().optional(),
+  address_number: z.string().optional(),
+  address_complement: z.string().optional(),
+  address_neighborhood: z.string().optional(),
+  address_city: z.string().optional(),
+  address_state: z.string().optional(),
+  address_zip: z.string().optional(),
+  plan_id: z.string().optional(),
 });
 
 interface ClientFormProps {
@@ -34,6 +47,20 @@ export function ClientForm({ client, onCancel }: ClientFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch available plans
+  const { data: plans = [] } = useQuery({
+    queryKey: ["plans"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plans")
+        .select("*")
+        .eq("active", true);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,6 +68,17 @@ export function ClientForm({ client, onCancel }: ClientFormProps) {
       email: client?.email || "",
       document: client?.document || "",
       phone: client?.phone || "",
+      birth_date: client?.birth_date || "",
+      status: client?.status || "active",
+      notes: client?.notes || "",
+      address_street: client?.address_street || "",
+      address_number: client?.address_number || "",
+      address_complement: client?.address_complement || "",
+      address_neighborhood: client?.address_neighborhood || "",
+      address_city: client?.address_city || "",
+      address_state: client?.address_state || "",
+      address_zip: client?.address_zip || "",
+      plan_id: client?.plan_id || "",
     },
   });
 
@@ -101,56 +139,237 @@ export function ClientForm({ client, onCancel }: ClientFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type="email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="document"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>CPF/CNPJ</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Telefone</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="birth_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Data de Nascimento</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="plan_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plano</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um plano" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {plans.map((plan) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="active">Ativo</SelectItem>
+                    <SelectItem value="inactive">Inativo</SelectItem>
+                    <SelectItem value="blocked">Bloqueado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Endereço</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="address_street"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rua</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address_complement"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Complemento</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address_neighborhood"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bairro</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address_city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cidade</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address_state"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address_zip"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CEP</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
         <FormField
           control={form.control}
-          name="email"
+          name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Observações</FormLabel>
               <FormControl>
-                <Input type="email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="document"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>CPF/CNPJ</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Telefone</FormLabel>
-              <FormControl>
-                <Input {...field} />
+                <Textarea {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
