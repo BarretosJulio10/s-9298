@@ -78,7 +78,7 @@ const CompanyDashboard = () => {
 
       <main className="p-8">
         <div className="max-w-7xl mx-auto relative">
-          <div className="fixed left-8 top-24 w-48 space-y-2">
+          <div className="fixed left-6 top-24 w-40 space-y-2">
             {menuItems.map((item) => (
               <button
                 key={item.section}
@@ -103,7 +103,7 @@ const CompanyDashboard = () => {
             </button>
           </div>
 
-          <div className="ml-56">
+          <div className="ml-44">
             {renderContent()}
           </div>
         </div>
