@@ -30,12 +30,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useState } from "react";
+import { EditChargeForm } from "./EditChargeForm";
 
 export function ChargesList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedChargeId, setSelectedChargeId] = useState<string | null>(null);
+  const [editingCharge, setEditingCharge] = useState<any | null>(null);
 
   const { data: charges, isLoading } = useQuery({
     queryKey: ["charges"],
@@ -56,7 +64,6 @@ export function ChargesList() {
 
   const cancelCharge = useMutation({
     mutationFn: async (chargeId: string) => {
-      // Primeiro, busca as configurações da empresa
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -71,7 +78,6 @@ export function ChargesList() {
         throw new Error("Chave API do Asaas não configurada");
       }
 
-      // Busca os dados da cobrança
       const { data: charge, error: chargeError } = await supabase
         .from("charges")
         .select("asaas_id")
@@ -80,7 +86,6 @@ export function ChargesList() {
 
       if (chargeError) throw chargeError;
 
-      // Cancela a cobrança no Asaas
       const asaasResponse = await fetch("/api/asaas/cancel-charge", {
         method: "POST",
         headers: {
@@ -98,7 +103,6 @@ export function ChargesList() {
         throw new Error(error.message || "Erro ao cancelar cobrança no Asaas");
       }
 
-      // Atualiza o status da cobrança no banco de dados
       const { error: updateError } = await supabase
         .from("charges")
         .update({ status: "cancelled" })
@@ -183,129 +187,146 @@ export function ChargesList() {
   };
 
   return (
-    <div className="rounded-md border bg-white">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Cliente</TableHead>
-            <TableHead>Documento</TableHead>
-            <TableHead>Valor</TableHead>
-            <TableHead>Vencimento</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Método</TableHead>
-            <TableHead>Pagamento</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {charges?.map((charge) => (
-            <TableRow key={charge.id}>
-              <TableCell>
-                <div>
-                  <p className="font-medium">{charge.customer_name}</p>
-                  <p className="text-sm text-muted-foreground">{charge.customer_email}</p>
-                </div>
-              </TableCell>
-              <TableCell>{charge.customer_document}</TableCell>
-              <TableCell className="font-medium">
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(charge.amount)}
-              </TableCell>
-              <TableCell>
-                {format(new Date(charge.due_date), "dd/MM/yyyy", {
-                  locale: ptBR,
-                })}
-              </TableCell>
-              <TableCell>
-                <Badge variant={getStatusColor(charge.status)}>
-                  {formatStatus(charge.status)}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {formatPaymentMethod(charge.payment_method)}
-              </TableCell>
-              <TableCell>
-                {charge.payment_date
-                  ? format(new Date(charge.payment_date), "dd/MM/yyyy", {
-                      locale: ptBR,
-                    })
-                  : "-"}
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  {charge.payment_link && charge.status !== "cancelled" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => copyPaymentLink(charge.payment_link!)}
-                        title="Copiar link"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => window.open(charge.payment_link, '_blank')}
-                        title="Abrir link"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
-                  {charge.status !== "cancelled" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        title="Editar"
-                        disabled={charge.status === "paid"}
-                      >
-                        <FileEdit className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="text-destructive hover:bg-destructive/10"
-                            title="Cancelar"
-                            disabled={charge.status === "paid"}
-                            onClick={() => setSelectedChargeId(charge.id)}
-                          >
-                            <Ban className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Cancelar cobrança</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza que deseja cancelar esta cobrança? Esta ação não pode ser desfeita.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setSelectedChargeId(null)}>
-                              Não, manter cobrança
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => selectedChargeId && cancelCharge.mutate(selectedChargeId)}
-                              className="bg-destructive hover:bg-destructive/90"
-                            >
-                              Sim, cancelar cobrança
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </>
-                  )}
-                </div>
-              </TableCell>
+    <>
+      <div className="rounded-md border bg-white">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Documento</TableHead>
+              <TableHead>Valor</TableHead>
+              <TableHead>Vencimento</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Método</TableHead>
+              <TableHead>Pagamento</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {charges?.map((charge) => (
+              <TableRow key={charge.id}>
+                <TableCell>
+                  <div>
+                    <p className="font-medium">{charge.customer_name}</p>
+                    <p className="text-sm text-muted-foreground">{charge.customer_email}</p>
+                  </div>
+                </TableCell>
+                <TableCell>{charge.customer_document}</TableCell>
+                <TableCell className="font-medium">
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(charge.amount)}
+                </TableCell>
+                <TableCell>
+                  {format(new Date(charge.due_date), "dd/MM/yyyy", {
+                    locale: ptBR,
+                  })}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={getStatusColor(charge.status)}>
+                    {formatStatus(charge.status)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {formatPaymentMethod(charge.payment_method)}
+                </TableCell>
+                <TableCell>
+                  {charge.payment_date
+                    ? format(new Date(charge.payment_date), "dd/MM/yyyy", {
+                        locale: ptBR,
+                      })
+                    : "-"}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    {charge.payment_link && charge.status !== "cancelled" && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => copyPaymentLink(charge.payment_link!)}
+                          title="Copiar link"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => window.open(charge.payment_link, '_blank')}
+                          title="Abrir link"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                    {charge.status !== "cancelled" && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          title="Editar"
+                          disabled={charge.status === "paid"}
+                          onClick={() => setEditingCharge(charge)}
+                        >
+                          <FileEdit className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="text-destructive hover:bg-destructive/10"
+                              title="Cancelar"
+                              disabled={charge.status === "paid"}
+                              onClick={() => setSelectedChargeId(charge.id)}
+                            >
+                              <Ban className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Cancelar cobrança</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja cancelar esta cobrança? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setSelectedChargeId(null)}>
+                                Não, manter cobrança
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => selectedChargeId && cancelCharge.mutate(selectedChargeId)}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Sim, cancelar cobrança
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Dialog open={editingCharge !== null} onOpenChange={() => setEditingCharge(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Cobrança</DialogTitle>
+          </DialogHeader>
+          {editingCharge && (
+            <EditChargeForm
+              charge={editingCharge}
+              onCancel={() => setEditingCharge(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
