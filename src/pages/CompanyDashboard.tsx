@@ -8,8 +8,9 @@ import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
 import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 import { DashboardSidebarMenu } from "@/components/dashboard/sidebar/DashboardSidebarMenu";
 import { DashboardSidebarFooter } from "@/components/dashboard/sidebar/DashboardSidebarFooter";
+import { ClientsList } from "@/components/dashboard/clients/ClientsList";
 
-type ActiveSection = "home" | "charges" | "templates" | "settings";
+type ActiveSection = "home" | "clients" | "plans" | "wallet" | "charges" | "templates" | "settings";
 
 const CompanyDashboard = () => {
   const { session } = useAuth();
@@ -68,6 +69,12 @@ const CompanyDashboard = () => {
     switch (activeSection) {
       case "home":
         return <DashboardHome />;
+      case "clients":
+        return <ClientsList />;
+      case "plans":
+        return <div>Em desenvolvimento</div>;
+      case "wallet":
+        return <div>Em desenvolvimento</div>;
       case "charges":
         return <CompanyCharges companyId={session?.user?.id || ""} />;
       case "settings":

@@ -1,4 +1,4 @@
-import { Home, CreditCard, MessageSquare, Settings } from "lucide-react";
+import { Home, CreditCard, User, Wallet } from "lucide-react";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface DashboardSidebarMenuProps {
@@ -12,6 +12,9 @@ export function DashboardSidebarMenu({
 }: DashboardSidebarMenuProps) {
   const menuItems = [
     { icon: Home, label: "Início", section: "home" },
+    { icon: User, label: "Clientes", section: "clients" },
+    { icon: CreditCard, label: "Planos", section: "plans" },
+    { icon: Wallet, label: "Carteira", section: "wallet" },
     { icon: CreditCard, label: "Cobranças", section: "charges" },
     { icon: MessageSquare, label: "Templates", section: "templates" },
     { icon: Settings, label: "Configurações", section: "settings" },
