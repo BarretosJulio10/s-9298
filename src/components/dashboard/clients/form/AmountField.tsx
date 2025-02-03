@@ -15,7 +15,7 @@ export function AmountField({ form }: AmountFieldProps) {
       control={form.control}
       name="amount"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="w-48">
           <div className="text-sm font-medium text-muted-foreground mb-2">
             Valor da Cobrança
           </div>
