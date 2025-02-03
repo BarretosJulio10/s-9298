@@ -37,10 +37,32 @@
 }
 
 .glass {
-  @apply bg-white bg-opacity-10 backdrop-blur-lg border-2 border-white border-opacity-20;
+  @apply bg-white bg-opacity-100 backdrop-blur-lg border-2 border-white border-opacity-20;
 }
 
 .dot-pattern {
   background-image: radial-gradient(circle at 1px 1px, #828179 2px, transparent 0);
   background-size: 24px 24px;
+}
+
+/* Calendar overrides */
+.rdp {
+  @apply bg-white rounded-lg shadow-lg p-2;
+}
+
+.rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+  @apply bg-gray-100;
+}
+
+.rdp-day_selected {
+  @apply bg-primary text-white;
+}
+
+.rdp-day_selected:hover {
+  @apply bg-primary/90;
+}
+
+/* Popover overrides */
+[data-radix-popper-content-wrapper] {
+  @apply bg-white rounded-lg shadow-lg border border-gray-200;
 }

@@ -29,7 +29,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full pl-3 text-left font-normal",
+                    "w-full pl-3 text-left font-normal bg-white",
                     !field.value && "text-muted-foreground"
                   )}
                 >
@@ -42,7 +42,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                 </Button>
               </FormControl>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 bg-white" align="start">
               <Calendar
                 mode="single"
                 selected={field.value ? new Date(field.value) : undefined}
