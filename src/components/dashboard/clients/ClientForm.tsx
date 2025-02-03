@@ -12,14 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 import InputMask from "react-input-mask";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -55,19 +48,6 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
     if (ddd < 11 || ddd > 99) return false;
     return true;
   };
-
-  const { data: plans = [] } = useQuery({
-    queryKey: ["plans"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("plans")
-        .select("*")
-        .eq("active", true);
-
-      if (error) throw error;
-      return data;
-    },
-  });
 
   const form = useForm<Client>({
     defaultValues: {
@@ -253,32 +233,18 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
             {chargeType === "recurring" && (
               <FormField
                 control={form.control}
-                name="plan_id"
+                name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecionar pacote" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {plans.map((plan) => (
-                          <SelectItem key={plan.id} value={plan.id}>
-                            {plan.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <div className="mt-1">
-                      <Button 
-                        variant="link" 
-                        className="h-auto p-0 text-primary"
-                        type="button"
-                      >
-                        Criar novo plano agora
-                      </Button>
-                    </div>
+                    <FormControl>
+                      <Input 
+                        type="number"
+                        placeholder="Valor da cobrança"
+                        step="0.01"
+                        min="0"
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
