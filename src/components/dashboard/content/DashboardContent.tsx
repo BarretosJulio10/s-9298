@@ -2,6 +2,7 @@ import { ChargeForm } from "@/components/dashboard/charges/ChargeForm";
 import { ChargesList } from "@/components/dashboard/charges/ChargesList";
 import { TemplateForm } from "@/components/dashboard/templates/TemplateForm";
 import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
+import { DashboardStats } from "@/components/dashboard/stats/DashboardStats";
 import { Button } from "@/components/ui/button";
 
 interface DashboardContentProps {
@@ -47,6 +48,8 @@ export function DashboardContent({
 
   return (
     <div className="mt-6 space-y-8">
+      <DashboardStats />
+
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Cobranças</h2>
