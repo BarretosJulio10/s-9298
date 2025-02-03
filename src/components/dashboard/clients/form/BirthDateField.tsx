@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
@@ -38,13 +38,19 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
     // Se tiver 8 dígitos (data completa), converte para Date
     if (value.length === 8) {
       const day = parseInt(value.slice(0, 2));
-      const month = parseInt(value.slice(2, 4)) - 1; // Mês começa do 0 no Date
+      const month = parseInt(value.slice(2, 4)) - 1;
       const year = parseInt(value.slice(4));
       const date = new Date(year, month, day);
 
-      // Verifica se é uma data válida
+      // Verifica se é uma data válida e ajusta para o fuso horário local
       if (!isNaN(date.getTime())) {
-        form.setValue('birth_date', date.toISOString().split('T')[0]);
+        const isoDate = new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate(),
+          12 // Define meio-dia para evitar problemas de timezone
+        ).toISOString().split('T')[0];
+        form.setValue('birth_date', isoDate);
       }
     }
   };
@@ -53,7 +59,9 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
   useEffect(() => {
     const date = form.getValues('birth_date');
     if (date) {
-      setInputDate(format(new Date(date), 'dd/MM/yyyy'));
+      const parsedDate = new Date(date);
+      parsedDate.setHours(12); // Define meio-dia para evitar problemas de timezone
+      setInputDate(format(parsedDate, 'dd/MM/yyyy'));
     }
   }, [form.getValues('birth_date')]);
 
@@ -90,8 +98,11 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                   selected={field.value ? new Date(field.value) : undefined}
                   onSelect={(date) => {
                     if (date) {
-                      field.onChange(date.toISOString().split('T')[0]);
-                      setInputDate(format(date, 'dd/MM/yyyy'));
+                      // Ajusta a data para meio-dia para evitar problemas de timezone
+                      const adjustedDate = new Date(date);
+                      adjustedDate.setHours(12);
+                      field.onChange(adjustedDate.toISOString().split('T')[0]);
+                      setInputDate(format(adjustedDate, 'dd/MM/yyyy'));
                     }
                   }}
                   disabled={(date) =>
