@@ -6,18 +6,23 @@ import { ChargeTableRow } from "./ChargeTableRow";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChargesListProps {
-  companyId: string;
+  companyId?: string;
 }
 
 export function ChargesList({ companyId }: ChargesListProps) {
   const { data: charges, isLoading } = useQuery({
-    queryKey: ["charges"],
+    queryKey: ["charges", companyId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("charges")
         .select("*")
-        .eq("company_id", companyId)
         .order("due_date", { ascending: false });
+
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Erro ao buscar cobranças:", error);
