@@ -35,32 +35,40 @@ export const useClientForm = (onClose: () => void) => {
 
   const mutation = useMutation({
     mutationFn: async (values: Client) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error("Usuário não autenticado");
+        }
 
-      // Check if client with same email already exists
-      const { data: existingClient } = await supabase
-        .from("clients")
-        .select("id")
-        .eq("email", values.email)
-        .eq("company_id", user.id)
-        .single();
+        // Check if client with same email already exists
+        const { data: existingClient, error: checkError } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("email", values.email)
+          .eq("company_id", user.id)
+          .maybeSingle();
 
-      if (existingClient) {
-        throw new Error("Já existe um cliente cadastrado com este email");
+        if (checkError) throw checkError;
+        if (existingClient) {
+          throw new Error("Já existe um cliente cadastrado com este email");
+        }
+
+        const { data, error } = await supabase
+          .from("clients")
+          .insert([{
+            ...values,
+            company_id: user.id,
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } catch (error: any) {
+        console.error("Erro ao cadastrar cliente:", error);
+        throw new Error(error.message || "Erro ao cadastrar cliente. Tente novamente mais tarde.");
       }
-
-      const { data, error } = await supabase
-        .from("clients")
-        .insert([{
-          ...values,
-          company_id: user.id,
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -70,11 +78,11 @@ export const useClientForm = (onClose: () => void) => {
       onClose();
       form.reset();
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         variant: "destructive",
         title: "Erro ao cadastrar cliente",
-        description: error instanceof Error ? error.message : "Tente novamente mais tarde",
+        description: error.message,
       });
     },
   });
