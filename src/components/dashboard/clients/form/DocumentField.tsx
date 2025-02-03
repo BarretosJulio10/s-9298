@@ -31,6 +31,11 @@ export function DocumentField({ form }: DocumentFieldProps) {
     form.setValue('document', formattedCPF);
   };
 
+  const handleDocumentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    form.setValue('document', value);
+  };
+
   return (
     <FormField
       control={form.control}
@@ -45,8 +50,9 @@ export function DocumentField({ form }: DocumentFieldProps) {
               <div className="flex gap-2">
                 <InputMask
                   mask={isCNPJ ? "99.999.999/9999-99" : "999.999.999-99"}
-                  value={field.value}
-                  onChange={field.onChange}
+                  value={field.value || ''}
+                  onChange={handleDocumentChange}
+                  maskChar={null}
                 >
                   {(inputProps: any) => (
                     <Input placeholder="CPF ou CNPJ" {...inputProps} />
