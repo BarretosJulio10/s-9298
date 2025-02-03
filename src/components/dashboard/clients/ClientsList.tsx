@@ -111,7 +111,7 @@ export function ClientsList() {
                 }).format(client.charge_amount)}
               </TableCell>
               <TableCell>
-                <div className="flex items-center justify-end gap-1 pr-6">
+                <div className="flex items-center justify-end gap-1 pr-4">
                   <Button
                     variant="ghost"
                     size="icon"
