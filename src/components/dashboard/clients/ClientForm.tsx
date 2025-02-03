@@ -1,6 +1,7 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,9 +12,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 import InputMask from "react-input-mask";
@@ -21,16 +27,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { X } from "lucide-react";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
-
-const formSchema = z.object({
-  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  email: z.string().email("Email inválido"),
-  document: z.string().min(11, "CPF/CNPJ inválido"),
-  phone: z.string().min(10, "Telefone inválido"),
-  birth_date: z.string().optional(),
-  status: z.string(),
-  plan_id: z.string().optional(),
-});
 
 interface ClientFormProps {
   open: boolean;
@@ -40,6 +36,7 @@ interface ClientFormProps {
 export function ClientForm({ open, onClose }: ClientFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [chargeType, setChargeType] = useState("recurring");
 
   const { data: plans = [] } = useQuery({
     queryKey: ["plans"],
@@ -54,21 +51,18 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
     },
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<Client>({
     defaultValues: {
       name: "",
       email: "",
       document: "",
       phone: "",
-      birth_date: "",
       status: "active",
-      plan_id: "",
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: z.infer<typeof formSchema>) => {
+    mutationFn: async (values: Client) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -77,7 +71,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
         .insert([{
           ...values,
           company_id: user.id,
-        } as Client])
+        }])
         .select()
         .single();
 
@@ -101,7 +95,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: Client) {
     mutation.mutate(values);
   }
 
@@ -202,51 +196,68 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="birth_date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-2">
+              <FormLabel>Tipo de Cobrança</FormLabel>
+              <RadioGroup
+                value={chargeType}
+                onValueChange={setChargeType}
+                className="grid grid-cols-2 gap-4"
+              >
+                <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary">
+                  <RadioGroupItem value="recurring" id="recurring" />
+                  <label htmlFor="recurring" className="cursor-pointer">
+                    <div className="font-medium">Recorrente</div>
+                    <p className="text-sm text-muted-foreground">
+                      Cobranças automáticas mensais
+                    </p>
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary">
+                  <RadioGroupItem value="single" id="single" />
+                  <label htmlFor="single" className="cursor-pointer">
+                    <div className="font-medium">Avulsa</div>
+                    <p className="text-sm text-muted-foreground">
+                      Cobrança única
+                    </p>
+                  </label>
+                </div>
+              </RadioGroup>
+            </div>
 
-            <FormField
-              control={form.control}
-              name="plan_id"
-              render={({ field }) => (
-                <FormItem>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecionar pacote" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {plans.map((plan) => (
-                        <SelectItem key={plan.id} value={plan.id}>
-                          {plan.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="mt-1">
-                    <Button 
-                      variant="link" 
-                      className="h-auto p-0 text-primary"
-                      type="button"
-                    >
-                      Criar novo plano agora
-                    </Button>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {chargeType === "recurring" && (
+              <FormField
+                control={form.control}
+                name="plan_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecionar pacote" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {plans.map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id}>
+                            {plan.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="mt-1">
+                      <Button 
+                        variant="link" 
+                        className="h-auto p-0 text-primary"
+                        type="button"
+                      >
+                        Criar novo plano agora
+                      </Button>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button 
