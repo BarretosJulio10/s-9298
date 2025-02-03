@@ -1,4 +1,4 @@
-import { DashboardHome } from "@/pages/dashboard/DashboardHome";
+import DashboardHome from "@/pages/dashboard/DashboardHome";
 import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
 import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 import { PaymentGatewayForm } from "@/components/dashboard/settings/payment/PaymentGatewayForm";
