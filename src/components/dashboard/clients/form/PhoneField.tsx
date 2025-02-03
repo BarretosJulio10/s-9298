@@ -20,6 +20,7 @@ export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
           <FormControl>
             <Input 
               placeholder="WhatsApp"
+              className="bg-white border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent"
               {...field}
               onChange={(e) => {
                 const value = e.target.value;
