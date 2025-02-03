@@ -1,9 +1,8 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { ChargeCustomer } from "./charge-list/ChargeCustomer";
-import { ChargeStatus } from "./charge-list/ChargeStatus";
-import { ChargeActions } from "./charge-list/ChargeActions";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
 
 interface ChargeTableRowProps {
   charge: {
@@ -24,25 +23,16 @@ interface ChargeTableRowProps {
 }
 
 export function ChargeTableRow({ charge, onCopyLink, onEdit, onCancel }: ChargeTableRowProps) {
-  const formatPaymentMethod = (method: string) => {
-    switch (method) {
-      case "pix":
-        return "PIX";
-      case "boleto":
-        return "Boleto";
-      case "credit_card":
-        return "Cartão de Crédito";
-      default:
-        return method;
-    }
-  };
-
   return (
     <TableRow>
-      <TableCell>
-        <ChargeCustomer name={charge.customer_name} email={charge.customer_email} />
-      </TableCell>
+      <TableCell>{charge.id.slice(0, 4)}</TableCell>
+      <TableCell>{charge.customer_name}</TableCell>
       <TableCell>{charge.customer_document}</TableCell>
+      <TableCell>
+        {format(new Date(charge.due_date), "dd/MM/yyyy", {
+          locale: ptBR,
+        })}
+      </TableCell>
       <TableCell className="font-medium">
         {new Intl.NumberFormat("pt-BR", {
           style: "currency",
@@ -50,31 +40,15 @@ export function ChargeTableRow({ charge, onCopyLink, onEdit, onCancel }: ChargeT
         }).format(charge.amount)}
       </TableCell>
       <TableCell>
-        {format(new Date(charge.due_date), "dd/MM/yyyy", {
-          locale: ptBR,
-        })}
-      </TableCell>
-      <TableCell>
-        <ChargeStatus status={charge.status} />
-      </TableCell>
-      <TableCell>
-        {formatPaymentMethod(charge.payment_method)}
-      </TableCell>
-      <TableCell>
-        {charge.payment_date
-          ? format(new Date(charge.payment_date), "dd/MM/yyyy", {
-              locale: ptBR,
-            })
-          : "-"}
+        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+          <Send className="h-4 w-4 mr-2" />
+          Enviar cobrança
+        </Button>
       </TableCell>
       <TableCell className="text-right">
-        <ChargeActions
-          paymentLink={charge.payment_link}
-          status={charge.status}
-          onCopyLink={onCopyLink}
-          onEdit={onEdit}
-          onCancel={onCancel}
-        />
+        <Button variant="secondary" size="sm">
+          Opções
+        </Button>
       </TableCell>
     </TableRow>
   );
