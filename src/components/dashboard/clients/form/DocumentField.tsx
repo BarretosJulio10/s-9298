@@ -31,17 +31,12 @@ export function DocumentField({ form }: DocumentFieldProps) {
     form.setValue('document', formattedCPF);
   };
 
-  const handleDocumentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.replace(/\D/g, '');
-    form.setValue('document', value);
-  };
-
   return (
     <FormField
       control={form.control}
       name="document"
       render={({ field }) => {
-        const cleanValue = field.value.replace(/\D/g, '');
+        const cleanValue = field.value?.replace(/\D/g, '') || '';
         const isCNPJ = cleanValue.length > 11;
         
         return (
@@ -51,10 +46,7 @@ export function DocumentField({ form }: DocumentFieldProps) {
                 <InputMask
                   mask={isCNPJ ? "99.999.999/9999-99" : "999.999.999-99"}
                   value={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    handleDocumentChange(e);
-                  }}
+                  onChange={field.onChange}
                 >
                   {(inputProps: any) => (
                     <Input placeholder="CPF ou CNPJ" {...inputProps} />
