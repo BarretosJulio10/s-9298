@@ -38,6 +38,8 @@ export function ClientsList() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      console.log("ID da empresa logada:", user.id);
+
       const { data, error } = await supabase
         .from("clients")
         .select(`
@@ -60,7 +62,12 @@ export function ClientsList() {
         .eq("company_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao buscar clientes:", error);
+        throw error;
+      }
+
+      console.log("Clientes encontrados:", data);
       return data as (Client & { plans: { name: string } | null })[];
     }
   });
@@ -122,6 +129,7 @@ export function ClientsList() {
                 <TableHead>WhatsApp</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead>Plano</TableHead>
+                <TableHead>Valor Cobrança</TableHead>
                 <TableHead>Cobrança rápida</TableHead>
                 <TableHead>Opções</TableHead>
               </TableRow>
@@ -134,6 +142,12 @@ export function ClientsList() {
                   <TableCell>{client.phone}</TableCell>
                   <TableCell>{new Date(client.created_at).toLocaleDateString('pt-BR')}</TableCell>
                   <TableCell>{client.plans?.name || "****"}</TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    }).format(client.charge_amount)}
+                  </TableCell>
                   <TableCell>
                     <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
                       <Send className="h-4 w-4 mr-2" />
