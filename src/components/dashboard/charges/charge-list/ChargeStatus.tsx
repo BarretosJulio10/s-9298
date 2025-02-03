@@ -1,5 +1,3 @@
-import { Badge } from "@/components/ui/badge";
-
 interface ChargeStatusProps {
   status: string;
 }
@@ -8,19 +6,19 @@ export function ChargeStatus({ status }: ChargeStatusProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "paid":
-        return "success";
+        return "bg-green-100 text-green-800";
       case "pending":
-        return "warning";
+        return "bg-yellow-100 text-yellow-800";
       case "overdue":
-        return "destructive";
+        return "bg-red-100 text-red-800";
       case "cancelled":
-        return "secondary";
+        return "bg-gray-100 text-gray-800";
       default:
-        return "secondary";
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const formatStatus = (status: string) => {
+  const getStatusText = (status: string) => {
     switch (status) {
       case "paid":
         return "Pago";
@@ -36,8 +34,12 @@ export function ChargeStatus({ status }: ChargeStatusProps) {
   };
 
   return (
-    <Badge variant={getStatusColor(status)}>
-      {formatStatus(status)}
-    </Badge>
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+        status
+      )}`}
+    >
+      {getStatusText(status)}
+    </span>
   );
 }

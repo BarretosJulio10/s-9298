@@ -10,7 +10,7 @@ export function ChargeTableHeader() {
         <TableHead>Vencimento</TableHead>
         <TableHead>Status</TableHead>
         <TableHead>Método</TableHead>
-        <TableHead>Pagamento</TableHead>
+        <TableHead>Data Pagamento</TableHead>
         <TableHead className="text-right">Ações</TableHead>
       </TableRow>
     </TableHeader>
