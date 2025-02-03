@@ -1,19 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Table, TableBody } from "@/components/ui/table";
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { ChargeTableHeader } from "./ChargeTableHeader";
 import { ChargeTableRow } from "./ChargeTableRow";
-import { CancelChargeDialog } from "./CancelChargeDialog";
-import { EditChargeDialog } from "./charge-list/EditChargeDialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function ChargesList() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [selectedChargeId, setSelectedChargeId] = useState<string | null>(null);
-  const [editingCharge, setEditingCharge] = useState<any | null>(null);
-
   const { data: charges, isLoading } = useQuery({
     queryKey: ["charges"],
     queryFn: async () => {
@@ -22,7 +14,13 @@ export function ChargesList() {
 
       const { data, error } = await supabase
         .from("charges")
-        .select("*")
+        .select(`
+          *,
+          clients (
+            charge_type,
+            payment_methods
+          )
+        `)
         .eq("company_id", user.id)
         .order("due_date", { ascending: false });
 
@@ -31,115 +29,26 @@ export function ChargesList() {
     },
   });
 
-  const cancelCharge = useMutation({
-    mutationFn: async (chargeId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
-
-      const { data: settings } = await supabase
-        .from("company_settings")
-        .select("*")
-        .eq("company_id", user.id)
-        .maybeSingle();
-
-      if (!settings?.asaas_api_key) {
-        throw new Error("Chave API do Asaas não configurada");
-      }
-
-      const { data: charge } = await supabase
-        .from("charges")
-        .select("asaas_id")
-        .eq("id", chargeId)
-        .maybeSingle();
-
-      if (!charge) throw new Error("Cobrança não encontrada");
-
-      const asaasResponse = await fetch("/api/asaas/cancel-charge", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          apiKey: settings.asaas_api_key,
-          environment: settings.asaas_environment,
-          chargeId: charge.asaas_id,
-        }),
-      });
-
-      if (!asaasResponse.ok) {
-        const error = await asaasResponse.json();
-        throw new Error(error.message || "Erro ao cancelar cobrança no Asaas");
-      }
-
-      const { error: updateError } = await supabase
-        .from("charges")
-        .update({ status: "cancelled" })
-        .eq("id", chargeId);
-
-      if (updateError) throw updateError;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["charges"] });
-      toast({
-        title: "Cobrança cancelada",
-        description: "A cobrança foi cancelada com sucesso",
-      });
-      setSelectedChargeId(null);
-    },
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro ao cancelar cobrança",
-        description: error.message,
-      });
-    },
-  });
-
-  const copyPaymentLink = (link: string) => {
-    navigator.clipboard.writeText(link);
-    toast({
-      title: "Link copiado!",
-      description: "O link de pagamento foi copiado para sua área de transferência.",
-    });
-  };
-
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Carregando cobranças...</p>
+      <div className="space-y-3">
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-20 w-full" />
       </div>
     );
   }
 
   return (
-    <>
-      <div className="rounded-md border bg-white">
-        <Table>
-          <ChargeTableHeader />
-          <TableBody>
-            {charges?.map((charge) => (
-              <ChargeTableRow
-                key={charge.id}
-                charge={charge}
-                onCopyLink={copyPaymentLink}
-                onEdit={() => setEditingCharge(charge)}
-                onCancel={() => setSelectedChargeId(charge.id)}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <EditChargeDialog 
-        charge={editingCharge} 
-        onClose={() => setEditingCharge(null)} 
-      />
-
-      <CancelChargeDialog
-        open={selectedChargeId !== null}
-        onOpenChange={(open) => !open && setSelectedChargeId(null)}
-        onConfirm={() => selectedChargeId && cancelCharge.mutate(selectedChargeId)}
-      />
-    </>
+    <div className="rounded-md border bg-white">
+      <Table>
+        <ChargeTableHeader />
+        <TableBody>
+          {charges?.map((charge) => (
+            <ChargeTableRow key={charge.id} charge={charge} />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

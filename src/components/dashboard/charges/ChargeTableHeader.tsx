@@ -5,12 +5,15 @@ export function ChargeTableHeader() {
     <TableHeader>
       <TableRow>
         <TableHead>ID</TableHead>
-        <TableHead>Nome</TableHead>
-        <TableHead>WhatsApp</TableHead>
-        <TableHead>Data</TableHead>
-        <TableHead>Valor Cobrança</TableHead>
-        <TableHead>Cobrança rápida</TableHead>
-        <TableHead className="text-right">Opções</TableHead>
+        <TableHead>Cliente</TableHead>
+        <TableHead>Documento</TableHead>
+        <TableHead>Valor</TableHead>
+        <TableHead>Vencimento</TableHead>
+        <TableHead>Status</TableHead>
+        <TableHead>Tipo</TableHead>
+        <TableHead>Método</TableHead>
+        <TableHead>Data Pagamento</TableHead>
+        <TableHead className="text-right">Ações</TableHead>
       </TableRow>
     </TableHeader>
   );
