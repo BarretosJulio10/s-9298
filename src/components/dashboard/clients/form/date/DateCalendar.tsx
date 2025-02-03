@@ -31,8 +31,21 @@ export function DateCalendar({ value, onSelect }: DateCalendarProps) {
       modifiers={{
         selected: (date) => selected ? date.getTime() === selected.getTime() : false
       }}
-      classNames={{
-        day: "cursor-pointer m-0.5 w-9 h-9 p-0 font-normal aria-selected:bg-primary aria-selected:text-primary-foreground hover:bg-gray-100 rounded-md transition-colors flex items-center justify-center"
+      styles={{
+        day: { 
+          cursor: 'pointer',
+          margin: '2px',
+          width: '35px',
+          height: '35px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '4px',
+          transition: 'background-color 0.2s',
+          '&:hover': {
+            backgroundColor: '#e5e7eb'
+          }
+        }
       }}
     />
   );
