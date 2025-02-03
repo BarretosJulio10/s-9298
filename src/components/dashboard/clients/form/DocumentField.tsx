@@ -82,20 +82,25 @@ export function DocumentField({ form }: DocumentFieldProps) {
     return true;
   };
 
-  // Função para gerar dígito verificador do CPF
-  const generateVerifierDigit = (digits: number[]): number => {
-    const sum = digits.reduce((acc, digit, index) => acc + digit * (digits.length + 1 - index), 0);
-    const remainder = sum % 11;
-    return remainder < 2 ? 0 : 11 - remainder;
-  };
-
   // Função para gerar CPF válido
   const generateValidCPF = () => {
     const numbers = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10));
-    const digit1 = generateVerifierDigit(numbers);
-    const digit2 = generateVerifierDigit([...numbers, digit1]);
     
-    const cpf = [...numbers, digit1, digit2].join('');
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += numbers[i] * (10 - i);
+    }
+    const digit1 = 11 - (sum % 11);
+    numbers.push(digit1 >= 10 ? 0 : digit1);
+    
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += numbers[i] * (11 - i);
+    }
+    const digit2 = 11 - (sum % 11);
+    numbers.push(digit2 >= 10 ? 0 : digit2);
+    
+    const cpf = numbers.join('');
     const formattedCPF = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     form.setValue('document', formattedCPF);
     setIsValidDocument(true);
@@ -146,10 +151,10 @@ export function DocumentField({ form }: DocumentFieldProps) {
       name="document"
       render={({ field }) => (
         <FormItem>
-          <div className="flex items-center gap-4">
+          <div className="space-y-4">
             <RadioGroup 
               defaultValue="cpf" 
-              className="flex gap-4"
+              className="flex gap-6 mb-2"
               onValueChange={(value: 'cpf' | 'cnpj') => {
                 setDocumentType(value);
                 form.setValue('document', '');
@@ -167,8 +172,8 @@ export function DocumentField({ form }: DocumentFieldProps) {
               </div>
             </RadioGroup>
 
-            <div className="flex flex-1 gap-2">
-              <div className="flex-1 relative min-w-[180px]">
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
                 <InputMask
                   mask={documentType === 'cpf' ? "999.999.999-99" : "99.999.999/9999-99"}
                   value={field.value || ''}
@@ -195,18 +200,16 @@ export function DocumentField({ form }: DocumentFieldProps) {
                   </span>
                 )}
               </div>
-              {(documentType === 'cpf' || documentType === 'cnpj') && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={documentType === 'cpf' ? generateValidCPF : generateValidCNPJ}
-                  title={`Gerar ${documentType.toUpperCase()} válido`}
-                  className="flex-shrink-0"
-                >
-                  <Wand2 className="h-4 w-4" />
-                </Button>
-              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={documentType === 'cpf' ? generateValidCPF : generateValidCNPJ}
+                title={`Gerar ${documentType.toUpperCase()} válido`}
+                className="flex-shrink-0"
+              >
+                <Wand2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
           <FormMessage />
