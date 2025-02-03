@@ -273,11 +273,13 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                 <FormItem>
                   <FormControl>
                     <div className="flex">
-                      <div className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
-                        <div className="w-6 h-4 relative rounded overflow-hidden">
-                          <div className="absolute inset-0 bg-[#009c3b]" />
-                          <div className="absolute inset-[15%] bg-[#ffdf00]" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
-                          <div className="absolute inset-[30%] bg-[#002776] rounded-full" />
+                      <div className="w-12 relative border border-r-0 border-input rounded-l-md overflow-hidden">
+                        <div className="absolute inset-0 bg-[#009c3b]" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-8 h-4 relative">
+                            <div className="absolute inset-[15%] bg-[#ffdf00]" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
+                            <div className="absolute inset-[30%] bg-[#002776] rounded-full" />
+                          </div>
                         </div>
                       </div>
                       <InputMask
