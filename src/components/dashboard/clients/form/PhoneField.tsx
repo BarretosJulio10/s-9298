@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import InputMask from "react-input-mask";
 import { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -11,7 +13,32 @@ interface PhoneFieldProps {
   validateWhatsApp: (phone: string) => boolean;
 }
 
+interface Country {
+  code: string;
+  flag: string;
+  name: string;
+  ddi: string;
+}
+
+const countries: Country[] = [
+  { code: "BR", flag: "🇧🇷", name: "Brasil", ddi: "55" },
+  { code: "US", flag: "🇺🇸", name: "Estados Unidos", ddi: "1" },
+  { code: "PT", flag: "🇵🇹", name: "Portugal", ddi: "351" },
+  { code: "ES", flag: "🇪🇸", name: "Espanha", ddi: "34" },
+  { code: "FR", flag: "🇫🇷", name: "França", ddi: "33" },
+  { code: "IT", flag: "🇮🇹", name: "Itália", ddi: "39" },
+  { code: "DE", flag: "🇩🇪", name: "Alemanha", ddi: "49" },
+  { code: "UK", flag: "🇬🇧", name: "Reino Unido", ddi: "44" },
+];
+
 export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
+  const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
+
+  const handleCountryChange = (countryCode: string) => {
+    const country = countries.find(c => c.code === countryCode) || countries[0];
+    setSelectedCountry(country);
+  };
+
   return (
     <FormField
       control={form.control}
@@ -20,21 +47,42 @@ export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
         <FormItem>
           <FormControl>
             <div className="flex">
-              <div className="w-12 relative border border-r-0 border-input rounded-l-md overflow-hidden">
-                <div className="absolute inset-0 bg-[#009c3b]" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-8 h-4 relative">
-                    <div className="absolute inset-[15%] bg-[#ffdf00]" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
-                    <div className="absolute inset-[30%] bg-[#002776] rounded-full" />
-                  </div>
-                </div>
-              </div>
+              <Select
+                value={selectedCountry.code}
+                onValueChange={handleCountryChange}
+              >
+                <SelectTrigger className="w-[100px] border border-r-0 rounded-r-none">
+                  <SelectValue>
+                    <span className="flex items-center gap-2">
+                      <span className="text-xl">{selectedCountry.flag}</span>
+                      <span className="text-sm text-muted-foreground">
+                        +{selectedCountry.ddi}
+                      </span>
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map((country) => (
+                    <SelectItem
+                      key={country.code}
+                      value={country.code}
+                      className="flex items-center gap-2"
+                    >
+                      <span className="text-xl">{country.flag}</span>
+                      <span>{country.name}</span>
+                      <span className="text-muted-foreground">
+                        +{country.ddi}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <InputMask
-                mask="(99) 99999-9999"
+                mask={selectedCountry.code === "BR" ? "(99) 99999-9999" : "999999999999"}
                 value={field.value}
                 onChange={(e) => {
                   field.onChange(e);
-                  if (e.target.value.replace(/\D/g, '').length === 11) {
+                  if (selectedCountry.code === "BR" && e.target.value.replace(/\D/g, '').length === 11) {
                     if (!validateWhatsApp(e.target.value)) {
                       form.setError('phone', {
                         type: 'manual',
@@ -50,7 +98,7 @@ export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
                 {(inputProps: any) => (
                   <Input 
                     {...inputProps} 
-                    placeholder="Digite o WhatsApp"
+                    placeholder="Digite o número"
                     className="rounded-l-none"
                   />
                 )}
