@@ -62,17 +62,17 @@ const CompanyDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="h-12 bg-white border-b border-gray-200 flex items-center px-4 sticky top-0 z-50">
+      <div className="h-12 bg-white border-r border-gray-200 flex items-center px-4 sticky top-0 z-50">
         <h1 className="text-2xl font-semibold text-gray-800">
           Dashboard
         </h1>
       </div>
 
       <div className="flex">
-        {/* Sidebar */}
-        <div className="w-40 min-h-[calc(100vh-3rem)] bg-white border-r border-gray-200 fixed left-0 top-12">
+        {/* Sidebar - Aumentada para w-48 (aproximadamente 1cm a mais que w-40) */}
+        <div className="w-48 min-h-[calc(100vh-3rem)] bg-white border-r border-gray-200 fixed left-0 top-12">
           <div className="flex flex-col h-full py-2">
-            <div className="flex-1 space-y-1 px-2">
+            <div className="flex-1 space-y-1 px-3">
               {menuItems.map((item) => (
                 <button
                   key={item.section}
@@ -89,7 +89,7 @@ const CompanyDashboard = () => {
               ))}
             </div>
             
-            <div className="px-2">
+            <div className="px-3">
               <button
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
                 onClick={handleLogout}
@@ -101,9 +101,9 @@ const CompanyDashboard = () => {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 ml-40">
-          <div className="max-w-full mx-2">
+        {/* Main Content - Ajustado margin-left para corresponder à nova largura do sidebar e adicionado padding */}
+        <div className="flex-1 ml-48">
+          <div className="max-w-full mx-4 py-4">
             {renderContent()}
           </div>
         </div>
