@@ -17,6 +17,47 @@ interface DocumentFieldProps {
 
 export function DocumentField({ form }: DocumentFieldProps) {
   const [documentType, setDocumentType] = useState<'cpf' | 'cnpj'>('cpf');
+  const [isValidCNPJ, setIsValidCNPJ] = useState(false);
+
+  // Função para validar CNPJ
+  const validateCNPJ = (cnpj: string) => {
+    cnpj = cnpj.replace(/[^\d]/g, '');
+    
+    if (cnpj.length !== 14) return false;
+    
+    // Elimina CNPJs inválidos conhecidos
+    if (/^(\d)\1+$/.test(cnpj)) return false;
+    
+    // Valida DVs
+    let tamanho = cnpj.length - 2;
+    let numeros = cnpj.substring(0, tamanho);
+    const digitos = cnpj.substring(tamanho);
+    let soma = 0;
+    let pos = tamanho - 7;
+    
+    for (let i = tamanho; i >= 1; i--) {
+      soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    
+    let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+    if (resultado !== parseInt(digitos.charAt(0))) return false;
+    
+    tamanho = tamanho + 1;
+    numeros = cnpj.substring(0, tamanho);
+    soma = 0;
+    pos = tamanho - 7;
+    
+    for (let i = tamanho; i >= 1; i--) {
+      soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    
+    resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+    if (resultado !== parseInt(digitos.charAt(1))) return false;
+    
+    return true;
+  };
 
   // Função para gerar dígito verificador do CPF
   const generateVerifierDigit = (digits: number[]): number => {
@@ -49,6 +90,7 @@ export function DocumentField({ form }: DocumentFieldProps) {
               onValueChange={(value: 'cpf' | 'cnpj') => {
                 setDocumentType(value);
                 form.setValue('document', '');
+                setIsValidCNPJ(false);
               }}
             >
               <div className="flex items-center space-x-2">
@@ -63,24 +105,35 @@ export function DocumentField({ form }: DocumentFieldProps) {
             </RadioGroup>
 
             <div className="flex flex-1 gap-2">
-              <InputMask
-                mask={documentType === 'cpf' ? "999.999.999-99" : "99.999.999/9999-99"}
-                value={field.value || ''}
-                onChange={(e) => {
-                  field.onChange(e.target.value);
-                }}
-                maskChar={null}
-              >
-                {(inputProps: any) => (
-                  <FormControl>
-                    <Input 
-                      placeholder={documentType === 'cpf' ? "CPF" : "CNPJ"}
-                      {...inputProps} 
-                      className="bg-white"
-                    />
-                  </FormControl>
+              <div className="flex-1 relative">
+                <InputMask
+                  mask={documentType === 'cpf' ? "999.999.999-99" : "99.999.999/9999-99"}
+                  value={field.value || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    field.onChange(value);
+                    if (documentType === 'cnpj') {
+                      setIsValidCNPJ(validateCNPJ(value));
+                    }
+                  }}
+                  maskChar={null}
+                >
+                  {(inputProps: any) => (
+                    <FormControl>
+                      <Input 
+                        placeholder={documentType === 'cpf' ? "CPF" : "CNPJ"}
+                        {...inputProps} 
+                        className="bg-white"
+                      />
+                    </FormControl>
+                  )}
+                </InputMask>
+                {documentType === 'cnpj' && field.value && (
+                  <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm ${isValidCNPJ ? 'text-green-500' : 'text-red-500'}`}>
+                    {isValidCNPJ ? 'Válido' : 'Inválido'}
+                  </span>
                 )}
-              </InputMask>
+              </div>
               {documentType === 'cpf' && (
                 <Button
                   type="button"
