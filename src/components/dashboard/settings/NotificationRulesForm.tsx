@@ -54,16 +54,17 @@ export function NotificationRulesForm() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      if (data && data.length > 0) {
-        setRules(data);
-      } else {
-        setRules([{ days_before: 2, days_after: 3, template_id: null, active: true }]);
-      }
-    },
   });
 
-  // Mutation para salvar regras
+  // Atualizar regras quando os dados forem carregados
+  React.useEffect(() => {
+    if (existingRules && existingRules.length > 0) {
+      setRules(existingRules);
+    } else {
+      setRules([{ days_before: 2, days_after: 3, template_id: null, active: true }]);
+    }
+  }, [existingRules]);
+
   const mutation = useMutation({
     mutationFn: async (rules: NotificationRule[]) => {
       const { data: { user } } = await supabase.auth.getUser();

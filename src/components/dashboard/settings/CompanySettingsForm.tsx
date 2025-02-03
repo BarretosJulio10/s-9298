@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChargeSettingsForm } from "./ChargeSettingsForm";
+import { ChargeSettingsForm } from "@/components/admin/settings/ChargeSettingsForm";
 import { NotificationRulesForm } from "./NotificationRulesForm";
 
 export function CompanySettingsForm() {
