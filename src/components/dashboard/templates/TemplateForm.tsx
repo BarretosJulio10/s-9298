@@ -16,8 +16,15 @@ const templateSchema = z.object({
   content: z.string().min(1, "Conteúdo é obrigatório"),
 });
 
+type TemplateFormData = z.infer<typeof templateSchema>;
+
 interface TemplateFormProps {
-  template?: any;
+  template?: {
+    id: string;
+    name: string;
+    type: string;
+    content: string;
+  };
   onCancel: () => void;
 }
 
@@ -25,7 +32,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<z.infer<typeof templateSchema>>({
+  const form = useForm<TemplateFormData>({
     resolver: zodResolver(templateSchema),
     defaultValues: template || {
       name: "",
@@ -35,12 +42,14 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: z.infer<typeof templateSchema>) => {
+    mutationFn: async (values: TemplateFormData) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
       const templateData = {
-        ...values,
+        name: values.name,
+        type: values.type,
+        content: values.content,
         company_id: user.id,
       };
 
