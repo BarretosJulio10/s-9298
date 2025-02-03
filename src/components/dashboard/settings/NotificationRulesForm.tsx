@@ -48,23 +48,27 @@ export function NotificationRulesForm() {
   });
 
   React.useEffect(() => {
-    if (existingRules && existingRules.length > 0) {
-      setRules(existingRules);
-    } else {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    const initializeRules = async () => {
+      if (existingRules && existingRules.length > 0) {
+        setRules(existingRules);
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-      setRules([{
-        id: crypto.randomUUID(),
-        company_id: user.id,
-        days_before: 2,
-        days_after: 3,
-        template_id: null,
-        active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }]);
-    }
+        setRules([{
+          id: crypto.randomUUID(),
+          company_id: user.id,
+          days_before: 2,
+          days_after: 3,
+          template_id: null,
+          active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
+      }
+    };
+
+    initializeRules();
   }, [existingRules]);
 
   const mutation = useMutation({
