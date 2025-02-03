@@ -102,7 +102,7 @@ const CompanyDashboard = () => {
       </div>
 
       <div className="flex">
-        <div className="w-48 min-h-[calc(100vh-3rem)] bg-white border-r border-gray-200 fixed left-0 top-12 flex flex-col">
+        <div className="w-48 h-[calc(100vh-3rem)] bg-white border-r border-gray-200 fixed left-0 top-12 flex flex-col">
           <div className="flex-1 space-y-1 px-3 py-2">
             {menuItems.map((item) => (
               <button
@@ -120,12 +120,12 @@ const CompanyDashboard = () => {
             ))}
           </div>
           
-          <div className="px-3 pb-3 border-t border-gray-200">
+          <div className="mt-auto border-t border-gray-200">
             <div className="text-sm text-gray-600 px-3 py-2">
               {userRole === 'admin' ? 'Painel Admin' : 'Painel Empresa'}
             </div>
             <button
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 transition-colors"
               onClick={handleLogout}
             >
               <LogOut className="h-5 w-5" />
