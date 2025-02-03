@@ -8,9 +8,14 @@ import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { callWhatsAppAPI } from "@/lib/whatsapp";
+import { MessageSquare } from "lucide-react";
 
 const notificationSchema = z.object({
-  phone: z.string().min(1, "Telefone é obrigatório"),
+  phone: z.string()
+    .min(1, "Telefone é obrigatório")
+    .regex(/^[0-9]+$/, "Apenas números são permitidos")
+    .min(10, "Telefone deve ter no mínimo 10 dígitos")
+    .max(11, "Telefone deve ter no máximo 11 dígitos"),
 });
 
 type NotificationFormData = z.infer<typeof notificationSchema>;
@@ -28,6 +33,9 @@ export function SendNotificationDialog({ open, onOpenChange, template }: SendNot
   const { toast } = useToast();
   const form = useForm<NotificationFormData>({
     resolver: zodResolver(notificationSchema),
+    defaultValues: {
+      phone: "",
+    },
   });
 
   const sendNotification = useMutation({
@@ -40,7 +48,7 @@ export function SendNotificationDialog({ open, onOpenChange, template }: SendNot
     onSuccess: () => {
       toast({
         title: "Mensagem enviada",
-        description: "A mensagem foi enviada com sucesso",
+        description: "A notificação foi enviada com sucesso",
       });
       onOpenChange(false);
       form.reset();
@@ -63,7 +71,10 @@ export function SendNotificationDialog({ open, onOpenChange, template }: SendNot
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Enviar Notificação</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" />
+            Enviar Notificação
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -74,21 +85,28 @@ export function SendNotificationDialog({ open, onOpenChange, template }: SendNot
                 <FormItem>
                   <FormLabel>Telefone</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: 5511999999999" {...field} />
+                    <Input 
+                      placeholder="Ex: 11999999999" 
+                      {...field} 
+                      maxLength={11}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="mt-4 text-sm text-muted-foreground">
-              <p>Conteúdo da mensagem:</p>
-              <p className="mt-2 whitespace-pre-wrap">{template?.content}</p>
+            <div className="mt-4">
+              <div className="text-sm font-medium text-gray-700">Conteúdo da mensagem:</div>
+              <div className="mt-2 p-3 bg-gray-50 rounded-md text-sm text-gray-600 whitespace-pre-wrap">
+                {template?.content}
+              </div>
             </div>
             <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
+                disabled={sendNotification.isPending}
               >
                 Cancelar
               </Button>
