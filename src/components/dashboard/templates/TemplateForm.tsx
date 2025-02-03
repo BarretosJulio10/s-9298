@@ -46,9 +46,12 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // Ensure all required fields are present
       const templateData = {
-        ...values,
         company_id: user.id,
+        name: values.name,
+        type: values.type,
+        content: values.content,
       };
 
       if (template?.id) {
