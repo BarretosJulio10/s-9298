@@ -1,43 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { 
-  Copy, 
-  FileEdit, 
-  Ban,
-  ExternalLink,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Table, TableBody } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { EditChargeForm } from "./EditChargeForm";
+import { ChargeTableHeader } from "./ChargeTableHeader";
+import { ChargeTableRow } from "./ChargeTableRow";
+import { CancelChargeDialog } from "./CancelChargeDialog";
 
 export function ChargesList() {
   const { toast } = useToast();
@@ -143,172 +113,20 @@ export function ChargesList() {
     );
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "success";
-      case "pending":
-        return "warning";
-      case "overdue":
-        return "destructive";
-      case "cancelled":
-        return "secondary";
-      default:
-        return "secondary";
-    }
-  };
-
-  const formatStatus = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "Pago";
-      case "pending":
-        return "Pendente";
-      case "overdue":
-        return "Vencido";
-      case "cancelled":
-        return "Cancelado";
-      default:
-        return status;
-    }
-  };
-
-  const formatPaymentMethod = (method: string) => {
-    switch (method) {
-      case "pix":
-        return "PIX";
-      case "boleto":
-        return "Boleto";
-      case "credit_card":
-        return "Cartão de Crédito";
-      default:
-        return method;
-    }
-  };
-
   return (
     <>
       <div className="rounded-md border bg-white">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Documento</TableHead>
-              <TableHead>Valor</TableHead>
-              <TableHead>Vencimento</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Método</TableHead>
-              <TableHead>Pagamento</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ChargeTableHeader />
           <TableBody>
             {charges?.map((charge) => (
-              <TableRow key={charge.id}>
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{charge.customer_name}</p>
-                    <p className="text-sm text-muted-foreground">{charge.customer_email}</p>
-                  </div>
-                </TableCell>
-                <TableCell>{charge.customer_document}</TableCell>
-                <TableCell className="font-medium">
-                  {new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  }).format(charge.amount)}
-                </TableCell>
-                <TableCell>
-                  {format(new Date(charge.due_date), "dd/MM/yyyy", {
-                    locale: ptBR,
-                  })}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getStatusColor(charge.status)}>
-                    {formatStatus(charge.status)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {formatPaymentMethod(charge.payment_method)}
-                </TableCell>
-                <TableCell>
-                  {charge.payment_date
-                    ? format(new Date(charge.payment_date), "dd/MM/yyyy", {
-                        locale: ptBR,
-                      })
-                    : "-"}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    {charge.payment_link && charge.status !== "cancelled" && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => copyPaymentLink(charge.payment_link!)}
-                          title="Copiar link"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => window.open(charge.payment_link, '_blank')}
-                          title="Abrir link"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                    {charge.status !== "cancelled" && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          title="Editar"
-                          disabled={charge.status === "paid"}
-                          onClick={() => setEditingCharge(charge)}
-                        >
-                          <FileEdit className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="text-destructive hover:bg-destructive/10"
-                              title="Cancelar"
-                              disabled={charge.status === "paid"}
-                              onClick={() => setSelectedChargeId(charge.id)}
-                            >
-                              <Ban className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Cancelar cobrança</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Tem certeza que deseja cancelar esta cobrança? Esta ação não pode ser desfeita.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel onClick={() => setSelectedChargeId(null)}>
-                                Não, manter cobrança
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => selectedChargeId && cancelCharge.mutate(selectedChargeId)}
-                                className="bg-destructive hover:bg-destructive/90"
-                              >
-                                Sim, cancelar cobrança
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
+              <ChargeTableRow
+                key={charge.id}
+                charge={charge}
+                onCopyLink={copyPaymentLink}
+                onEdit={() => setEditingCharge(charge)}
+                onCancel={() => setSelectedChargeId(charge.id)}
+              />
             ))}
           </TableBody>
         </Table>
@@ -327,6 +145,12 @@ export function ChargesList() {
           )}
         </DialogContent>
       </Dialog>
+
+      <CancelChargeDialog
+        open={selectedChargeId !== null}
+        onOpenChange={(open) => !open && setSelectedChargeId(null)}
+        onConfirm={() => selectedChargeId && cancelCharge.mutate(selectedChargeId)}
+      />
     </>
   );
 }
