@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Send } from "lucide-react";
@@ -30,7 +30,6 @@ export function ClientsList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage, setPerPage] = useState("10");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const { data: clients, isLoading } = useQuery({
     queryKey: ["clients"],
@@ -130,7 +129,7 @@ export function ClientsList() {
                       currency: 'BRL',
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
-                    }).format(Number(client.charge_amount) || 0)}
+                    }).format(Number(client.charge_amount))}
                   </TableCell>
                   <TableCell>
                     <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">

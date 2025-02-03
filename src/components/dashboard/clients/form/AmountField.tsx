@@ -1,7 +1,6 @@
-import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
-import InputMask from "react-input-mask";
+import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import type { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
@@ -12,7 +11,7 @@ interface AmountFieldProps {
 
 export function AmountField({ form }: AmountFieldProps) {
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove todos os caracteres não numéricos e converte para número
+    // Remove todos os caracteres não numéricos
     const rawValue = event.target.value.replace(/\D/g, '');
     
     // Converte o valor para reais (divide por 100 para considerar os centavos)
@@ -28,9 +27,10 @@ export function AmountField({ form }: AmountFieldProps) {
   const formatAmount = (value: number | undefined) => {
     if (!value && value !== 0) return '';
     return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-      useGrouping: true,
     }).format(value);
   };
 
@@ -39,28 +39,15 @@ export function AmountField({ form }: AmountFieldProps) {
       control={form.control}
       name="charge_amount"
       render={({ field }) => (
-        <FormItem className="w-36">
+        <FormItem>
+          <FormLabel>Valor da Cobrança</FormLabel>
           <FormControl>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg text-muted-foreground">
-                R$
-              </span>
-              <InputMask
-                mask={field.value ? "999.999,99" : ""}
-                maskChar={null}
-                value={formatAmount(field.value)}
-                onChange={handleAmountChange}
-              >
-                {(inputProps: any) => (
-                  <Input 
-                    {...inputProps}
-                    className="pl-10 text-lg h-10"
-                  />
-                )}
-              </InputMask>
-            </div>
+            <Input
+              placeholder="R$ 0,00"
+              onChange={handleAmountChange}
+              value={formatAmount(field.value)}
+            />
           </FormControl>
-          <FormMessage />
         </FormItem>
       )}
     />
