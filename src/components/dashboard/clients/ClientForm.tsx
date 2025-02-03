@@ -9,6 +9,7 @@ import { DocumentField } from "./form/DocumentField";
 import { EmailField } from "./form/EmailField";
 import { PhoneField } from "./form/PhoneField";
 import { PaymentMethodsField } from "./form/PaymentMethodsField";
+import { AmountField } from "./form/AmountField";
 import { useClientForm } from "./form/useClientForm";
 
 interface ClientFormProps {
@@ -32,7 +33,12 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   };
 
   function onSubmit(values: any) {
-    mutation.mutate(values);
+    const formData = {
+      ...values,
+      payment_methods: selectedPaymentMethods,
+      charge_type: chargeType,
+    };
+    mutation.mutate(formData);
   }
 
   return (
@@ -53,6 +59,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               <EmailField form={form} />
               <PhoneField form={form} validateWhatsApp={validateWhatsApp} />
               <DocumentField form={form} />
+              <AmountField form={form} />
             </div>
 
             <PaymentMethodsField

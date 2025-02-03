@@ -19,7 +19,7 @@ export const useClientForm = (onClose: () => void) => {
     return true;
   };
 
-  const form = useForm<Client>({
+  const form = useForm<Client & { amount?: number }>({
     defaultValues: {
       name: "",
       email: "",
@@ -27,11 +27,12 @@ export const useClientForm = (onClose: () => void) => {
       phone: "",
       status: "active",
       birth_date: undefined,
+      charge_amount: 0,
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: Client) => {
+    mutationFn: async (values: Client & { amount?: number }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -40,6 +41,7 @@ export const useClientForm = (onClose: () => void) => {
         .insert([{
           ...values,
           company_id: user.id,
+          charge_amount: values.amount || 0,
         }])
         .select()
         .single();
