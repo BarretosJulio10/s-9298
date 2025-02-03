@@ -17,7 +17,8 @@ const clientSchema = z.object({
   charge_amount: z.number().min(0.01, "Valor deve ser maior que zero"),
   payment_methods: z.array(z.string()).min(1, "Selecione pelo menos um método de pagamento"),
   company_id: z.string().optional(),
-  status: z.string().optional()
+  status: z.string().optional(),
+  template_id: z.string().optional()
 });
 
 interface UseClientFormProps {
