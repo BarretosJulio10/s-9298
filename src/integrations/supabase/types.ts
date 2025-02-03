@@ -124,6 +124,44 @@ export type Database = {
           },
         ]
       }
+      client_charges: {
+        Row: {
+          amount: number
+          client_id: string | null
+          created_at: string
+          due_date: string
+          id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          client_id?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_charges_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address_city: string | null
@@ -134,6 +172,7 @@ export type Database = {
           address_street: string | null
           address_zip: string | null
           birth_date: string | null
+          charge_type: string | null
           company_id: string
           created_at: string
           document: string
@@ -141,6 +180,7 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          payment_methods: string[] | null
           phone: string
           plan_id: string | null
           status: string
@@ -155,6 +195,7 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           birth_date?: string | null
+          charge_type?: string | null
           company_id: string
           created_at?: string
           document: string
@@ -162,6 +203,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          payment_methods?: string[] | null
           phone: string
           plan_id?: string | null
           status?: string
@@ -176,6 +218,7 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           birth_date?: string | null
+          charge_type?: string | null
           company_id?: string
           created_at?: string
           document?: string
@@ -183,6 +226,7 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          payment_methods?: string[] | null
           phone?: string
           plan_id?: string | null
           status?: string
