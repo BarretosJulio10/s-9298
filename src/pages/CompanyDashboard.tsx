@@ -65,7 +65,7 @@ const CompanyDashboard = () => {
     { icon: Settings, label: "Configurações", section: "settings" },
   ];
 
-  const grid = 50; // Reduced grid size for tighter spacing
+  const grid = 40; // Reduced grid size for even tighter spacing
 
   const snapToGrid = (x: number, y: number) => {
     return {
@@ -88,35 +88,37 @@ const CompanyDashboard = () => {
 
       <main className="p-8">
         <div className="max-w-7xl mx-auto relative">
-          <div className="fixed left-8 top-24 space-y-2 w-48">
-            {menuItems.map((item, index) => (
-              <Draggable
-                key={item.section}
-                defaultPosition={{ x: 0, y: index * grid }}
-                grid={[grid, grid]}
-                bounds="parent"
-                onStop={(e, data) => {
-                  const { x, y } = snapToGrid(data.x, data.y);
-                  const dragElement = e.target as HTMLElement;
-                  dragElement.style.transform = `translate(${x}px, ${y}px)`;
-                }}
-              >
-                <div 
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-move transition-all duration-200 ${
-                    activeSection === item.section 
-                      ? "bg-primary text-white shadow-lg" 
-                      : "bg-white text-gray-700 hover:bg-gray-50 hover:text-primary shadow"
-                  }`}
-                  onClick={() => setActiveSection(item.section as ActiveSection)}
+          <div className="fixed left-8 top-24 flex flex-col justify-between h-[calc(100vh-8rem)] w-48">
+            <div className="space-y-1">
+              {menuItems.map((item, index) => (
+                <Draggable
+                  key={item.section}
+                  defaultPosition={{ x: 0, y: index * grid }}
+                  grid={[grid, grid]}
+                  bounds="parent"
+                  onStop={(e, data) => {
+                    const { x, y } = snapToGrid(data.x, data.y);
+                    const dragElement = e.target as HTMLElement;
+                    dragElement.style.transform = `translate(${x}px, ${y}px)`;
+                  }}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
-                </div>
-              </Draggable>
-            ))}
+                  <div 
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-move transition-all duration-200 ${
+                      activeSection === item.section 
+                        ? "bg-primary text-white shadow-lg" 
+                        : "bg-white text-gray-700 hover:bg-gray-50 hover:text-primary shadow"
+                    }`}
+                    onClick={() => setActiveSection(item.section as ActiveSection)}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span className="font-medium text-sm">{item.label}</span>
+                  </div>
+                </Draggable>
+              ))}
+            </div>
 
             <Draggable
-              defaultPosition={{ x: 0, y: menuItems.length * grid }}
+              defaultPosition={{ x: 0, y: 0 }}
               grid={[grid, grid]}
               bounds="parent"
               onStop={(e, data) => {
@@ -126,11 +128,11 @@ const CompanyDashboard = () => {
               }}
             >
               <div 
-                className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-move bg-red-500 text-white hover:bg-red-600 transition-colors duration-200 shadow-lg"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-move bg-red-500 text-white hover:bg-red-600 transition-colors duration-200 shadow-lg"
                 onClick={handleLogout}
               >
-                <LogOut className="h-5 w-5" />
-                <span className="font-medium">Sair</span>
+                <LogOut className="h-4 w-4" />
+                <span className="font-medium text-sm">Sair</span>
               </div>
             </Draggable>
           </div>
