@@ -37,7 +37,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                 <Button
                   variant="outline"
                   className={cn(
-                    "px-2",
+                    "px-2 hover:bg-gray-100",
                     !field.value && "text-muted-foreground"
                   )}
                 >
