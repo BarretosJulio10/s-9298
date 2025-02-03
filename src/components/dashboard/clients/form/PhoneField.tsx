@@ -6,7 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 interface PhoneFieldProps {
-  form: UseFormReturn<Client & { amount?: number }>;
+  form: UseFormReturn<Client>;
   validateWhatsApp: (phone: string) => boolean;
 }
 

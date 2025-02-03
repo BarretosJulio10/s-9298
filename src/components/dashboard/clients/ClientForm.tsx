@@ -9,7 +9,6 @@ import { BirthDateField } from "./form/BirthDateField";
 import { DocumentField } from "./form/DocumentField";
 import { EmailField } from "./form/EmailField";
 import { PhoneField } from "./form/PhoneField";
-import { AmountField } from "./form/AmountField";
 import { PaymentMethodsField } from "./form/PaymentMethodsField";
 import { useClientForm } from "./form/useClientForm";
 
@@ -59,10 +58,6 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
             </div>
 
             <PhoneField form={form} validateWhatsApp={validateWhatsApp} />
-
-            {chargeType === "recurring" && (
-              <AmountField form={form} />
-            )}
 
             <PaymentMethodsField
               selectedMethods={selectedPaymentMethods}
