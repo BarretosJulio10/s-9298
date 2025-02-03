@@ -112,7 +112,7 @@ export function ClientsList() {
                 <TableHead>WhatsApp</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead>Valor Cobrança</TableHead>
-                <TableHead className="w-[100px] text-right pr-4">Ações</TableHead>
+                <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -131,7 +131,7 @@ export function ClientsList() {
                     }).format(client.charge_amount)}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center justify-end gap-1 pr-2">
+                    <div className="flex items-center justify-center gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
