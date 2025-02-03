@@ -2,9 +2,10 @@ import { Button } from "@/components/ui/button";
 
 interface FormFooterProps {
   onClose: () => void;
+  isSubmitting: boolean;
 }
 
-export function FormFooter({ onClose }: FormFooterProps) {
+export function FormFooter({ onClose, isSubmitting }: FormFooterProps) {
   return (
     <div className="flex justify-end gap-2 pt-4 border-t">
       <Button 
@@ -17,8 +18,9 @@ export function FormFooter({ onClose }: FormFooterProps) {
       <Button 
         type="submit"
         className="bg-primary hover:bg-primary/90"
+        disabled={isSubmitting}
       >
-        Adicionar
+        {isSubmitting ? "Adicionando..." : "Adicionar"}
       </Button>
     </div>
   );

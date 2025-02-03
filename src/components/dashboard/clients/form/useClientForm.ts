@@ -12,15 +12,13 @@ const clientSchema = z.object({
   email: z.string().email("E-mail inválido"),
   document: z.string().min(1, "Documento é obrigatório"),
   phone: z.string().min(1, "Telefone é obrigatório"),
-  birth_date: z.date().optional(),
+  birth_date: z.string().optional(),
   charge_type: z.string().default("recurring"),
   charge_amount: z.number().min(0.01, "Valor deve ser maior que zero"),
   payment_methods: z.array(z.string()).min(1, "Selecione pelo menos um método de pagamento"),
   company_id: z.string().optional(),
   status: z.string().optional()
 });
-
-type ClientFormData = z.infer<typeof clientSchema>;
 
 interface UseClientFormProps {
   onCancel: () => void;
@@ -29,7 +27,7 @@ interface UseClientFormProps {
 export function useClientForm({ onCancel }: UseClientFormProps) {
   const { toast } = useToast();
 
-  const form = useForm<ClientFormData>({
+  const form = useForm<Client>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
       name: "",
@@ -39,10 +37,11 @@ export function useClientForm({ onCancel }: UseClientFormProps) {
       charge_type: "recurring",
       charge_amount: 0,
       payment_methods: ["pix"],
+      status: "active"
     },
   });
 
-  const onSubmit = async (data: ClientFormData) => {
+  const onSubmit = async (data: Client) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
@@ -51,7 +50,6 @@ export function useClientForm({ onCancel }: UseClientFormProps) {
         ...data,
         company_id: user.id,
         status: "active",
-        birth_date: data.birth_date?.toISOString().split('T')[0],
       };
 
       const { error } = await supabase
