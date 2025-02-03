@@ -10,7 +10,7 @@ interface DashboardHomeProps {
   activeSection: string;
 }
 
-export const DashboardHome = ({ 
+const DashboardHome = ({ 
   showTemplateForm, 
   showChargeForm, 
   onBack,
@@ -26,10 +26,12 @@ export const DashboardHome = ({
           </p>
         </div>
         <DashboardActions 
-          onNewTemplate={() => setShowTemplateForm(true)}
-          onNewCharge={() => setShowChargeForm(true)}
+          onNewTemplate={() => {}}
+          onNewCharge={() => {}}
         />
       </div>
+
+      <DashboardStats />
 
       <DashboardContent 
         showTemplateForm={showTemplateForm}

@@ -5,7 +5,6 @@ import { PaymentGatewayForm } from "@/components/dashboard/settings/payment/Paym
 import { TemplateForm } from "@/components/dashboard/templates/TemplateForm";
 import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
 import { ClientsList } from "@/components/dashboard/clients/ClientsList";
-import { ClientForm } from "@/components/dashboard/clients/ClientForm";
 import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardContentProps {
@@ -58,7 +57,7 @@ export function DashboardContent({
 
   if (activeSection === "templates") {
     if (showTemplateForm) {
-      return <TemplateForm onBack={onBack} />;
+      return <TemplateForm onBack={onBack} showBackButton />;
     }
     return <TemplatesList />;
   }
