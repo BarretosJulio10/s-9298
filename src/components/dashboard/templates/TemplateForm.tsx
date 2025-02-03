@@ -39,17 +39,22 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      const templateData = {
+        ...values,
+        company_id: user.id,
+      };
+
       if (template) {
         const { error } = await supabase
           .from("message_templates")
-          .update(values)
+          .update(templateData)
           .eq("id", template.id);
 
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("message_templates")
-          .insert([{ ...values, company_id: user.id }]);
+          .insert([templateData]);
 
         if (error) throw error;
       }
