@@ -29,6 +29,7 @@ export const useClientForm = (onClose: () => void) => {
       charge_amount: 0,
       payment_methods: ['pix'],
       charge_type: 'recurring',
+      template_id: null,
     },
   });
 
@@ -40,7 +41,6 @@ export const useClientForm = (onClose: () => void) => {
           throw new Error("Usuário não autenticado");
         }
 
-        // Garante que charge_amount é um número
         const charge_amount = typeof values.charge_amount === 'string' 
           ? parseFloat(values.charge_amount) 
           : values.charge_amount;
@@ -51,7 +51,6 @@ export const useClientForm = (onClose: () => void) => {
           charge_amount 
         });
 
-        // Verifica se já existe cliente com mesmo email
         const { data: existingClients, error: checkError } = await supabase
           .from("clients")
           .select("id")
@@ -68,13 +67,12 @@ export const useClientForm = (onClose: () => void) => {
           throw new Error("Já existe um cliente cadastrado com este email");
         }
 
-        // Insere o novo cliente
         const { data, error } = await supabase
           .from("clients")
           .insert([{
             ...values,
             company_id: user.id,
-            charge_amount: charge_amount || 0, // Garante que sempre temos um número válido
+            charge_amount: charge_amount || 0,
           }])
           .select()
           .maybeSingle();

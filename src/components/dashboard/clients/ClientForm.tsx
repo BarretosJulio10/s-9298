@@ -11,6 +11,7 @@ import { PhoneField } from "./form/PhoneField";
 import { PaymentMethodsField } from "./form/PaymentMethodsField";
 import { AmountField } from "./form/AmountField";
 import { BirthDateField } from "./form/BirthDateField";
+import { TemplateField } from "./form/TemplateField";
 import { useClientForm } from "./form/useClientForm";
 
 interface ClientFormProps {
@@ -66,6 +67,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                 </div>
               </div>
               <BirthDateField form={form} />
+              <TemplateField form={form} />
             </div>
 
             <PaymentMethodsField
