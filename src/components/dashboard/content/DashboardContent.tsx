@@ -4,6 +4,7 @@ import { TemplateForm } from "@/components/dashboard/templates/TemplateForm";
 import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
 import { DashboardStats } from "@/components/dashboard/stats/DashboardStats";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardContentProps {
   showTemplateForm: boolean;
@@ -16,6 +17,8 @@ export function DashboardContent({
   showChargeForm, 
   onBack 
 }: DashboardContentProps) {
+  const { session } = useAuth();
+
   if (showTemplateForm) {
     return (
       <div className="mt-6">
@@ -54,7 +57,7 @@ export function DashboardContent({
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Cobranças</h2>
         </div>
-        <ChargesList />
+        {session?.user?.id && <ChargesList companyId={session.user.id} />}
       </div>
 
       <div>
