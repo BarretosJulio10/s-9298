@@ -24,7 +24,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 import InputMask from "react-input-mask";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { X, CreditCard, Barcode, QrCode, Check } from "lucide-react";
+import { X, CreditCard, Barcode, QrCode, Check, Flag } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -44,6 +44,22 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   const queryClient = useQueryClient();
   const [chargeType, setChargeType] = useState("recurring");
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>(["pix"]);
+
+  const validateWhatsApp = (phone: string) => {
+    // Remove all non-numeric characters
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    // Check if it's a valid Brazilian WhatsApp number
+    // Must be 11 digits (including DDD), and start with 9
+    if (cleanPhone.length !== 11) return false;
+    if (cleanPhone[2] !== '9') return false;
+    
+    // Check if DDD is valid (11-99)
+    const ddd = parseInt(cleanPhone.substring(0, 2));
+    if (ddd < 11 || ddd > 99) return false;
+    
+    return true;
+  };
 
   const { data: plans = [] } = useQuery({
     queryKey: ["plans"],
@@ -71,6 +87,11 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (values: Client) => {
+      // Validate WhatsApp before submitting
+      if (!validateWhatsApp(values.phone)) {
+        throw new Error("Número de WhatsApp inválido");
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -94,11 +115,11 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
       onClose();
       form.reset();
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         variant: "destructive",
         title: "Erro ao cadastrar cliente",
-        description: "Tente novamente mais tarde",
+        description: error instanceof Error ? error.message : "Tente novamente mais tarde",
       });
     },
   });
@@ -135,7 +156,6 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-6">
-            <div className="space-y-2">
               <FormLabel>Tipo de Cobrança</FormLabel>
               <RadioGroup
                 value={chargeType}
@@ -261,13 +281,27 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                 <FormItem>
                   <FormControl>
                     <div className="flex">
-                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
-                        🇧🇷 +55
-                      </span>
+                      <div className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
+                        <Flag className="h-4 w-4 mr-1" />
+                        <span>+55</span>
+                      </div>
                       <InputMask
                         mask="(99) 99999-9999"
                         value={field.value}
-                        onChange={field.onChange}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          // Show validation feedback as user types
+                          if (e.target.value.replace(/\D/g, '').length === 11) {
+                            if (!validateWhatsApp(e.target.value)) {
+                              form.setError('phone', {
+                                type: 'manual',
+                                message: 'Número de WhatsApp inválido'
+                              });
+                            } else {
+                              form.clearErrors('phone');
+                            }
+                          }
+                        }}
                         className="flex-1"
                       >
                         {(inputProps: any) => (
