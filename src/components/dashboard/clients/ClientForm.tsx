@@ -58,8 +58,10 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
             <div className="grid grid-cols-1 gap-4">
               <EmailField form={form} />
               <PhoneField form={form} validateWhatsApp={validateWhatsApp} />
-              <DocumentField form={form} />
-              <AmountField form={form} />
+              <div className="grid grid-cols-2 gap-4">
+                <DocumentField form={form} />
+                <AmountField form={form} />
+              </div>
             </div>
 
             <PaymentMethodsField
