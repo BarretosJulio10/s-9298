@@ -127,8 +127,10 @@ export function ClientsList() {
                   <TableCell>
                     {new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
-                      currency: 'BRL'
-                    }).format(client.charge_amount)}
+                      currency: 'BRL',
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }).format(Number(client.charge_amount) || 0)}
                   </TableCell>
                   <TableCell>
                     <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">

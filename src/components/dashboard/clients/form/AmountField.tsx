@@ -12,23 +12,26 @@ interface AmountFieldProps {
 
 export function AmountField({ form }: AmountFieldProps) {
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value
-      .replace(/\D/g, '')  // Remove tudo que não é número
-      .replace(/^0+/, ''); // Remove zeros à esquerda
+    // Remove todos os caracteres não numéricos e converte para número
+    const rawValue = event.target.value.replace(/\D/g, '');
     
-    // Converte para número com 2 casas decimais
-    const numericValue = value ? Number(value) / 100 : 0;
-    console.log('Valor numérico sendo definido:', numericValue); // Debug
+    // Converte o valor para reais (divide por 100 para considerar os centavos)
+    const numericValue = rawValue ? parseFloat(rawValue) / 100 : 0;
+    
+    console.log('Valor original:', event.target.value);
+    console.log('Valor processado:', rawValue);
+    console.log('Valor final:', numericValue);
+    
     form.setValue('charge_amount', numericValue);
   };
 
   const formatAmount = (value: number | undefined) => {
     if (!value && value !== 0) return '';
-    return value.toLocaleString('pt-BR', {
+    return new Intl.NumberFormat('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
       useGrouping: true,
-    }).replace('R$', '').trim();
+    }).format(value);
   };
 
   return (
