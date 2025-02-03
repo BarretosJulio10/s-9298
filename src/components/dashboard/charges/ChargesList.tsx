@@ -14,13 +14,7 @@ export function ChargesList() {
 
       const { data, error } = await supabase
         .from("charges")
-        .select(`
-          *,
-          clients (
-            charge_type,
-            payment_methods
-          )
-        `)
+        .select("*")
         .eq("company_id", user.id)
         .order("due_date", { ascending: false });
 

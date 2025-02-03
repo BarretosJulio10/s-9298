@@ -16,10 +16,6 @@ interface ChargeTableRowProps {
     payment_method: string;
     payment_date: string | null;
     payment_link?: string;
-    clients?: {
-      charge_type: string;
-      payment_methods: string[];
-    } | null;
   };
 }
 
@@ -54,17 +50,6 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
     }
   };
 
-  const formatChargeType = (type: string) => {
-    switch (type) {
-      case "recurring":
-        return "Recorrente";
-      case "one_time":
-        return "Avulsa";
-      default:
-        return type;
-    }
-  };
-
   return (
     <TableRow>
       <TableCell>{charge.id.slice(0, 8)}</TableCell>
@@ -85,9 +70,6 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
         <Badge variant={getStatusColor(charge.status)}>
           {formatStatus(charge.status)}
         </Badge>
-      </TableCell>
-      <TableCell>
-        {charge.clients ? formatChargeType(charge.clients.charge_type) : "-"}
       </TableCell>
       <TableCell className="capitalize">
         {charge.payment_method === "pix" ? "PIX" : charge.payment_method}
