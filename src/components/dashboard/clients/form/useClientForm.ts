@@ -49,7 +49,11 @@ export const useClientForm = (onClose: () => void) => {
           .eq("company_id", user.id)
           .maybeSingle();
 
-        if (checkError) throw checkError;
+        if (checkError) {
+          console.error("Erro ao verificar email:", checkError);
+          throw new Error("Erro ao verificar email do cliente");
+        }
+
         if (existingClient) {
           throw new Error("Já existe um cliente cadastrado com este email");
         }
@@ -63,7 +67,15 @@ export const useClientForm = (onClose: () => void) => {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Erro ao inserir cliente:", error);
+          throw new Error(error.message);
+        }
+
+        if (!data) {
+          throw new Error("Erro ao cadastrar cliente: nenhum dado retornado");
+        }
+
         return data;
       } catch (error: any) {
         console.error("Erro ao cadastrar cliente:", error);
