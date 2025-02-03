@@ -41,7 +41,17 @@ export function ClientsList() {
       const { data, error } = await supabase
         .from("clients")
         .select(`
-          *,
+          id,
+          name,
+          email,
+          document,
+          phone,
+          status,
+          birth_date,
+          charge_amount,
+          payment_methods,
+          charge_type,
+          company_id,
           plans (
             name
           )
