@@ -13,7 +13,7 @@ export function TemplateNameField({ form }: TemplateNameFieldProps) {
       control={form.control}
       name="name"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="space-y-2">
           <FormLabel>Nome do Template</FormLabel>
           <FormControl>
             <Input placeholder="Ex: Lembrete de Pagamento" {...field} />

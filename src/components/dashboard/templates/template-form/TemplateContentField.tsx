@@ -13,16 +13,19 @@ export function TemplateContentField({ form }: TemplateContentFieldProps) {
       control={form.control}
       name="content"
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>Conteúdo</FormLabel>
+        <FormItem className="space-y-2">
+          <FormLabel>Conteúdo da Mensagem</FormLabel>
           <FormControl>
             <Textarea
-              placeholder="Digite o conteúdo da mensagem..."
-              className="min-h-[100px]"
+              placeholder="Digite o conteúdo do template..."
+              className="min-h-[150px] resize-y"
               {...field}
             />
           </FormControl>
           <FormMessage />
+          <p className="text-sm text-muted-foreground">
+            Você pode usar variáveis como {"{nome}"}, {"{valor}"}, {"{vencimento}"} no conteúdo.
+          </p>
         </FormItem>
       )}
     />
