@@ -3,19 +3,15 @@ import { DashboardStats } from "@/components/dashboard/stats/DashboardStats";
 import { DashboardActions } from "@/components/dashboard/actions/DashboardActions";
 import { DashboardContent } from "@/components/dashboard/content/DashboardContent";
 
-interface DashboardHomeProps {
-  showTemplateForm: boolean;
-  showChargeForm: boolean;
-  onBack: () => void;
-  activeSection: string;
-}
+const DashboardHome = () => {
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
+  const [showChargeForm, setShowChargeForm] = useState(false);
 
-const DashboardHome = ({ 
-  showTemplateForm, 
-  showChargeForm, 
-  onBack,
-  activeSection 
-}: DashboardHomeProps) => {
+  const handleBack = () => {
+    setShowTemplateForm(false);
+    setShowChargeForm(false);
+  };
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
@@ -26,21 +22,19 @@ const DashboardHome = ({
           </p>
         </div>
         <DashboardActions 
-          onNewTemplate={() => {}}
-          onNewCharge={() => {}}
+          onNewTemplate={() => setShowTemplateForm(true)}
+          onNewCharge={() => setShowChargeForm(true)}
         />
       </div>
-
-      <DashboardStats />
 
       <DashboardContent 
         showTemplateForm={showTemplateForm}
         showChargeForm={showChargeForm}
-        onBack={onBack}
-        activeSection={activeSection}
+        onBack={handleBack}
+        activeSection="home"
       />
     </div>
   );
-};
+}
 
 export default DashboardHome;

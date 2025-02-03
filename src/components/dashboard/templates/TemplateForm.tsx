@@ -15,11 +15,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { ImageUpload } from "./template-form/ImageUpload";
 import { useTemplateForm } from "./hooks/useTemplateForm";
 
-interface TemplateFormProps {
-  onBack?: () => void;
-  showBackButton?: boolean;
-}
-
 const templateTypes = {
   payment_reminder: {
     label: "Lembrete de Pagamento",
@@ -61,7 +56,7 @@ Em caso de dúvidas, estamos à disposição.`
   }
 };
 
-export function TemplateForm({ onBack, showBackButton }: TemplateFormProps) {
+export function TemplateForm() {
   const { toast } = useToast();
   const { form, onSubmit, isSubmitting } = useTemplateForm();
   const [selectedType, setSelectedType] = useState<string>("");
@@ -109,11 +104,6 @@ export function TemplateForm({ onBack, showBackButton }: TemplateFormProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Novo Template</h2>
-        {showBackButton && onBack && (
-          <Button variant="outline" onClick={onBack}>
-            Voltar
-          </Button>
-        )}
       </div>
 
       <Form {...form}>
