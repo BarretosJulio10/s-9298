@@ -59,12 +59,18 @@ export const useClientForm = (onClose: () => void) => {
           throw new Error("Já existe um cliente cadastrado com este email");
         }
 
-        // Insert new client
+        // Ensure charge_amount is a number
+        const charge_amount = typeof values.charge_amount === 'string' 
+          ? parseFloat(values.charge_amount) 
+          : values.charge_amount;
+
+        // Insert new client with the correct charge_amount
         const { data, error } = await supabase
           .from("clients")
           .insert([{
             ...values,
             company_id: user.id,
+            charge_amount: charge_amount || 0, // Ensure we always have a valid number
           }])
           .select()
           .maybeSingle();
