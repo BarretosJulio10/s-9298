@@ -1,13 +1,6 @@
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
-import { format } from "date-fns";
 
 interface FormValues {
   customer_name: string;
@@ -43,9 +36,9 @@ export function EditChargeFields({ form }: EditChargeFieldsProps) {
         name="customer_email"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>E-mail</FormLabel>
+            <FormLabel>E-mail do Cliente</FormLabel>
             <FormControl>
-              <Input {...field} type="email" />
+              <Input type="email" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -57,7 +50,7 @@ export function EditChargeFields({ form }: EditChargeFieldsProps) {
         name="customer_document"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Documento</FormLabel>
+            <FormLabel>Documento do Cliente</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -73,7 +66,12 @@ export function EditChargeFields({ form }: EditChargeFieldsProps) {
           <FormItem>
             <FormLabel>Valor</FormLabel>
             <FormControl>
-              <Input {...field} type="number" step="0.01" />
+              <Input 
+                type="number" 
+                step="0.01"
+                {...field}
+                onChange={(e) => field.onChange(parseFloat(e.target.value))}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -87,7 +85,7 @@ export function EditChargeFields({ form }: EditChargeFieldsProps) {
           <FormItem>
             <FormLabel>Data de Vencimento</FormLabel>
             <FormControl>
-              <Input {...field} type="date" />
+              <Input type="date" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
