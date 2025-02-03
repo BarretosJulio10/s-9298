@@ -13,10 +13,12 @@ interface AmountFieldProps {
 export function AmountField({ form }: AmountFieldProps) {
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value
-      .replace(/\D/g, '')
-      .replace(/^0+/, '');
+      .replace(/\D/g, '')  // Remove tudo que não é número
+      .replace(/^0+/, ''); // Remove zeros à esquerda
     
+    // Converte para número com 2 casas decimais
     const numericValue = value ? Number(value) / 100 : 0;
+    console.log('Valor numérico sendo definido:', numericValue); // Debug
     form.setValue('charge_amount', numericValue);
   };
 

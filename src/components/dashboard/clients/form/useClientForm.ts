@@ -40,9 +40,18 @@ export const useClientForm = (onClose: () => void) => {
           throw new Error("Usuário não autenticado");
         }
 
-        console.log("Dados a serem enviados:", { ...values, company_id: user.id });
+        // Garante que charge_amount é um número
+        const charge_amount = typeof values.charge_amount === 'string' 
+          ? parseFloat(values.charge_amount) 
+          : values.charge_amount;
 
-        // Check if client with same email exists
+        console.log("Dados a serem enviados:", { 
+          ...values, 
+          company_id: user.id,
+          charge_amount 
+        });
+
+        // Verifica se já existe cliente com mesmo email
         const { data: existingClients, error: checkError } = await supabase
           .from("clients")
           .select("id")
@@ -59,18 +68,13 @@ export const useClientForm = (onClose: () => void) => {
           throw new Error("Já existe um cliente cadastrado com este email");
         }
 
-        // Ensure charge_amount is a number
-        const charge_amount = typeof values.charge_amount === 'string' 
-          ? parseFloat(values.charge_amount) 
-          : values.charge_amount;
-
-        // Insert new client with the correct charge_amount
+        // Insere o novo cliente
         const { data, error } = await supabase
           .from("clients")
           .insert([{
             ...values,
             company_id: user.id,
-            charge_amount: charge_amount || 0, // Ensure we always have a valid number
+            charge_amount: charge_amount || 0, // Garante que sempre temos um número válido
           }])
           .select()
           .maybeSingle();
