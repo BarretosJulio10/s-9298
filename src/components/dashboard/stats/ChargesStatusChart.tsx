@@ -56,7 +56,14 @@ export function ChargesStatusChart() {
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
-          <ChartContainer>
+          <ChartContainer 
+            config={{
+              paid: { color: COLORS.paid },
+              pending: { color: COLORS.pending },
+              overdue: { color: COLORS.overdue },
+              cancelled: { color: COLORS.cancelled }
+            }}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

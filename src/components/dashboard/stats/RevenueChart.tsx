@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
-import { startOfMonth, endOfMonth, eachDayOfInterval, format } from "date-fns";
+import { startOfMonth, endOfMonth, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function RevenueChart() {
@@ -48,18 +48,25 @@ export function RevenueChart() {
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
-          <ChartContainer>
+          <ChartContainer
+            config={{
+              amount: { color: "#22c55e" }
+            }}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <XAxis dataKey="date" />
                 <YAxis 
-                  tickFormatter={(value) => 
-                    new Intl.NumberFormat('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL',
-                      notation: 'compact'
-                    }).format(value)
-                  }
+                  tickFormatter={(value) => {
+                    if (typeof value === 'number') {
+                      return new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                        notation: 'compact'
+                      }).format(value);
+                    }
+                    return '';
+                  }}
                 />
                 <Tooltip
                   content={({ active, payload }) => {
@@ -75,7 +82,7 @@ export function RevenueChart() {
                               {new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
                                 currency: 'BRL'
-                              }).format(payload[0].value)}
+                              }).format(Number(payload[0].value))}
                             </span>
                           </div>
                         </div>
