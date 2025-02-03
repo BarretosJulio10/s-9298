@@ -61,7 +61,7 @@ export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
                     </span>
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border shadow-md min-w-[200px]">
                   {countries.map((country) => (
                     <SelectItem
                       key={country.code}
