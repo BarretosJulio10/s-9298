@@ -168,7 +168,7 @@ export function DocumentField({ form }: DocumentFieldProps) {
             </RadioGroup>
 
             <div className="flex flex-1 gap-2">
-              <div className="flex-1 relative min-w-[250px]">
+              <div className="flex-1 relative min-w-[200px]">
                 <InputMask
                   mask={documentType === 'cpf' ? "999.999.999-99" : "99.999.999/9999-99"}
                   value={field.value || ''}
