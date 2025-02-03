@@ -24,7 +24,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 import InputMask from "react-input-mask";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { X, CreditCard, Barcode, QrCode } from "lucide-react";
+import { X, CreditCard, Barcode, QrCode, Check } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -330,8 +330,13 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                     selectedPaymentMethods.includes("pix") && "border-primary bg-primary/5"
                   )}
                 >
-                  <QrCode className="h-4 w-4" />
-                  <span className="text-sm font-medium">PIX</span>
+                  <div className="flex items-center gap-2">
+                    <QrCode className="h-4 w-4" />
+                    <span className="text-sm font-medium">PIX</span>
+                  </div>
+                  {selectedPaymentMethods.includes("pix") && (
+                    <Check className="h-4 w-4 ml-auto text-primary" />
+                  )}
                 </div>
                 <div
                   onClick={() => handlePaymentMethodToggle("boleto")}
@@ -340,8 +345,13 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                     selectedPaymentMethods.includes("boleto") && "border-primary bg-primary/5"
                   )}
                 >
-                  <Barcode className="h-4 w-4" />
-                  <span className="text-sm font-medium">Boleto</span>
+                  <div className="flex items-center gap-2">
+                    <Barcode className="h-4 w-4" />
+                    <span className="text-sm font-medium">Boleto</span>
+                  </div>
+                  {selectedPaymentMethods.includes("boleto") && (
+                    <Check className="h-4 w-4 ml-auto text-primary" />
+                  )}
                 </div>
                 <div
                   onClick={() => handlePaymentMethodToggle("card")}
@@ -350,8 +360,13 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                     selectedPaymentMethods.includes("card") && "border-primary bg-primary/5"
                   )}
                 >
-                  <CreditCard className="h-4 w-4" />
-                  <span className="text-sm font-medium">Cartão</span>
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    <span className="text-sm font-medium">Cartão</span>
+                  </div>
+                  {selectedPaymentMethods.includes("card") && (
+                    <Check className="h-4 w-4 ml-auto text-primary" />
+                  )}
                 </div>
               </div>
             </div>
