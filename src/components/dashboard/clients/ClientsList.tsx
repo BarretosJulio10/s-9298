@@ -107,8 +107,8 @@ export function ClientsList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Nome</TableHead>
+                <TableHead className="w-[80px]">ID</TableHead>
+                <TableHead className="w-[200px]">Nome</TableHead>
                 <TableHead className="text-center">WhatsApp</TableHead>
                 <TableHead className="text-center">Data</TableHead>
                 <TableHead className="text-center">Valor Cobrança</TableHead>
