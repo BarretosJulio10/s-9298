@@ -51,7 +51,7 @@ export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
                 value={selectedCountry.code}
                 onValueChange={handleCountryChange}
               >
-                <SelectTrigger className="w-[100px] border border-r-0 rounded-r-none">
+                <SelectTrigger className="w-[100px] border-[0.5px] border-r-0 rounded-r-none focus:ring-0 focus:ring-offset-0">
                   <SelectValue>
                     <span className="flex items-center gap-2">
                       <span className="text-xl">{selectedCountry.flag}</span>
@@ -66,11 +66,11 @@ export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
                     <SelectItem
                       key={country.code}
                       value={country.code}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 py-2 px-3 hover:bg-gray-50"
                     >
                       <span className="text-xl">{country.flag}</span>
-                      <span>{country.name}</span>
-                      <span className="text-muted-foreground">
+                      <span className="ml-2">{country.name}</span>
+                      <span className="text-muted-foreground ml-auto">
                         +{country.ddi}
                       </span>
                     </SelectItem>
@@ -99,7 +99,7 @@ export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
                   <Input 
                     {...inputProps} 
                     placeholder="Digite o número"
-                    className="rounded-l-none"
+                    className="rounded-l-none border-[0.5px] focus:ring-0 focus:ring-offset-0"
                   />
                 )}
               </InputMask>
