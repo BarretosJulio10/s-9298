@@ -29,10 +29,18 @@ export function useDateField(form: UseFormReturn<Client>) {
       const month = parseInt(value.slice(2, 4)) - 1;
       const year = parseInt(value.slice(4));
       
-      const date = new Date(year, month, day, 12, 0, 0);
+      // Criar a data usando o fuso horário de São Paulo
+      const now = new Date();
+      const date = new Date(year, month, day, 
+        now.getHours(), 
+        now.getMinutes(), 
+        now.getSeconds()
+      );
       
       if (!isNaN(date.getTime())) {
-        form.setValue('birth_date', date.toISOString().split('T')[0]);
+        // Converter para o fuso horário de São Paulo antes de salvar
+        const zonedDate = toZonedTime(date, timeZone);
+        form.setValue('birth_date', zonedDate.toISOString().split('T')[0]);
       }
     }
   };
@@ -41,7 +49,9 @@ export function useDateField(form: UseFormReturn<Client>) {
     const date = form.getValues('birth_date');
     if (date) {
       const utcDate = new Date(date);
-      setInputDate(format(utcDate, 'dd/MM/yyyy'));
+      // Converter para o fuso horário de São Paulo ao exibir
+      const zonedDate = toZonedTime(utcDate, timeZone);
+      setInputDate(format(zonedDate, 'dd/MM/yyyy'));
     }
   }, [form.getValues('birth_date')]);
 
