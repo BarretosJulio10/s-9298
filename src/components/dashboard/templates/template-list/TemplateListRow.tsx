@@ -1,6 +1,6 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, Send } from "lucide-react";
 
 interface TemplateListRowProps {
   template: {
@@ -11,6 +11,7 @@ interface TemplateListRowProps {
   };
   onEdit: (template: any) => void;
   onDelete: (templateId: string) => void;
+  onSend: (template: any) => void;
   templateTypeTranslations: Record<string, string>;
 }
 
@@ -18,6 +19,7 @@ export function TemplateListRow({
   template, 
   onEdit, 
   onDelete,
+  onSend,
   templateTypeTranslations 
 }: TemplateListRowProps) {
   return (
@@ -30,7 +32,16 @@ export function TemplateListRow({
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => onSend(template)}
+            title="Enviar mensagem"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => onEdit(template)}
+            title="Editar template"
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -39,6 +50,7 @@ export function TemplateListRow({
             size="icon"
             className="text-destructive"
             onClick={() => onDelete(template.id)}
+            title="Excluir template"
           >
             <Trash className="h-4 w-4" />
           </Button>

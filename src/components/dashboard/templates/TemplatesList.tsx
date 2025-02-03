@@ -7,6 +7,7 @@ import { TemplateListHeader } from "./template-list/TemplateListHeader";
 import { TemplateListRow } from "./template-list/TemplateListRow";
 import { DeleteTemplateDialog } from "./template-list/DeleteTemplateDialog";
 import { EditTemplateDialog } from "./template-list/EditTemplateDialog";
+import { SendNotificationDialog } from "./SendNotificationDialog";
 import { templateTypeTranslations } from "./constants/templateTypes";
 
 export function TemplatesList() {
@@ -14,6 +15,7 @@ export function TemplatesList() {
   const queryClient = useQueryClient();
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+  const [sendingTemplate, setSendingTemplate] = useState<any | null>(null);
 
   const { data: templates, isLoading } = useQuery({
     queryKey: ["templates"],
@@ -78,6 +80,7 @@ export function TemplatesList() {
                 template={template}
                 onEdit={setEditingTemplate}
                 onDelete={setTemplateToDelete}
+                onSend={setSendingTemplate}
                 templateTypeTranslations={templateTypeTranslations}
               />
             ))}
@@ -95,6 +98,12 @@ export function TemplatesList() {
         open={templateToDelete !== null}
         onOpenChange={(open) => !open && setTemplateToDelete(null)}
         onConfirm={() => templateToDelete && deleteTemplate.mutate(templateToDelete)}
+      />
+
+      <SendNotificationDialog
+        open={sendingTemplate !== null}
+        onOpenChange={(open) => !open && setSendingTemplate(null)}
+        template={sendingTemplate}
       />
     </>
   );
