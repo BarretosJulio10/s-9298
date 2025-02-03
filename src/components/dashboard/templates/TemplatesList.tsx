@@ -1,21 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Table, TableBody } from "@/components/ui/table";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { TemplateForm } from "./TemplateForm";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-const templateTypeTranslations: Record<string, string> = {
-  "payment_reminder": "Lembrete de Pagamento",
-  "payment_confirmation": "Confirmação de Pagamento",
-  "payment_overdue": "Pagamento Atrasado",
-  "welcome": "Boas-vindas",
-  "general": "Geral"
-};
+import { TemplateListHeader } from "./template-list/TemplateListHeader";
+import { TemplateListRow } from "./template-list/TemplateListRow";
+import { DeleteTemplateDialog } from "./template-list/DeleteTemplateDialog";
+import { EditTemplateDialog } from "./template-list/EditTemplateDialog";
+import { templateTypeTranslations } from "./constants/templateTypes";
 
 export function TemplatesList() {
   const { toast } = useToast();
@@ -78,78 +70,32 @@ export function TemplatesList() {
     <>
       <div className="rounded-md border bg-white">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Conteúdo</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
+          <TemplateListHeader />
           <TableBody>
             {templates?.map((template) => (
-              <TableRow key={template.id}>
-                <TableCell>{template.name}</TableCell>
-                <TableCell>{templateTypeTranslations[template.type] || template.type}</TableCell>
-                <TableCell className="max-w-md truncate">{template.content}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditingTemplate(template)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive"
-                      onClick={() => setTemplateToDelete(template.id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+              <TemplateListRow
+                key={template.id}
+                template={template}
+                onEdit={setEditingTemplate}
+                onDelete={setTemplateToDelete}
+                templateTypeTranslations={templateTypeTranslations}
+              />
             ))}
           </TableBody>
         </Table>
       </div>
 
-      <Dialog open={editingTemplate !== null} onOpenChange={() => setEditingTemplate(null)}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Editar Template</DialogTitle>
-          </DialogHeader>
-          {editingTemplate && (
-            <TemplateForm
-              template={editingTemplate}
-              onCancel={() => setEditingTemplate(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <EditTemplateDialog
+        open={editingTemplate !== null}
+        onOpenChange={(open) => !open && setEditingTemplate(null)}
+        template={editingTemplate}
+      />
 
-      <AlertDialog open={templateToDelete !== null} onOpenChange={() => setTemplateToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir Template</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => templateToDelete && deleteTemplate.mutate(templateToDelete)}
-            >
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteTemplateDialog
+        open={templateToDelete !== null}
+        onOpenChange={(open) => !open && setTemplateToDelete(null)}
+        onConfirm={() => templateToDelete && deleteTemplate.mutate(templateToDelete)}
+      />
     </>
   );
 }
