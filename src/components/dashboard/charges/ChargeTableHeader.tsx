@@ -4,9 +4,7 @@ export function ChargeTableHeader() {
   return (
     <TableHeader>
       <TableRow>
-        <TableHead>ID</TableHead>
         <TableHead>Cliente</TableHead>
-        <TableHead>Documento</TableHead>
         <TableHead>Valor</TableHead>
         <TableHead>Vencimento</TableHead>
         <TableHead>Status</TableHead>
