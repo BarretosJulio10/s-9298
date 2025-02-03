@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Home, CreditCard, MessageSquare, Settings, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +15,25 @@ const CompanyDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<ActiveSection>("home");
+  const [companyName, setCompanyName] = useState<string>("");
+
+  useEffect(() => {
+    const fetchCompanyName = async () => {
+      if (session?.user?.id) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('company_name')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!error && data) {
+          setCompanyName(data.company_name || '');
+        }
+      }
+    };
+
+    fetchCompanyName();
+  }, [session?.user?.id]);
 
   const handleLogout = async () => {
     try {
@@ -62,10 +81,13 @@ const CompanyDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="h-12 bg-white border-r border-gray-200 flex items-center px-4 sticky top-0 z-50">
+      <div className="h-12 bg-white border-r border-gray-200 flex items-center justify-between px-4 sticky top-0 z-50">
         <h1 className="text-2xl font-semibold text-gray-800">
-          Dashboard
+          PagouPix
         </h1>
+        <span className="text-gray-600">
+          {companyName}
+        </span>
       </div>
 
       <div className="flex">
