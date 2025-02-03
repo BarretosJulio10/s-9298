@@ -46,7 +46,7 @@ export function ChargeSettingsForm() {
       const { data, error } = await supabase
         .from("charge_settings")
         .select("*")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
