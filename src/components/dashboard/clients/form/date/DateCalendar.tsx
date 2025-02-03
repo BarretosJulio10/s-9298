@@ -9,23 +9,18 @@ interface DateCalendarProps {
 export function DateCalendar({ value, onSelect }: DateCalendarProps) {
   const selected = value ? new Date(value) : undefined;
 
-  const handleSelect = (date: Date | undefined) => {
-    if (date) {
-      // Ensure we're working with a proper Date object
-      const selectedDate = new Date(date);
-      onSelect(selectedDate);
-    }
-  };
-
   return (
     <Calendar
       mode="single"
       selected={selected}
-      onSelect={handleSelect}
+      onSelect={onSelect}
       locale={ptBR}
       initialFocus
-      className="bg-white"
+      className="bg-white rounded-md border shadow-sm"
       disabled={(date) => date < new Date("1900-01-01")}
+      fromDate={new Date("1900-01-01")}
+      captionLayout="dropdown-buttons"
+      showOutsideDays={false}
     />
   );
 }

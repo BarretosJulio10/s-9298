@@ -50,7 +50,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                   onSelect={(date) => {
                     if (date) {
                       field.onChange(date.toISOString().split('T')[0]);
-                      setOpen(false); // Close the popover after selection
+                      setOpen(false);
                     }
                   }}
                 />
