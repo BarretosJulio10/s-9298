@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Home, CreditCard, MessageSquare, Settings, LogOut, Users } from "lucide-react";
+import { Home, CreditCard, MessageSquare, Settings, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,9 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import DashboardHome from "./dashboard/DashboardHome";
 import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
 import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
-import { ClientsList } from "@/components/dashboard/clients/ClientsList";
 
-type ActiveSection = "home" | "charges" | "templates" | "settings" | "clients";
+type ActiveSection = "home" | "charges" | "templates" | "settings";
 
 const CompanyDashboard = () => {
   const { session } = useAuth();
@@ -34,6 +33,13 @@ const CompanyDashboard = () => {
     }
   };
 
+  const menuItems = [
+    { icon: Home, label: "Início", section: "home" },
+    { icon: CreditCard, label: "Cobranças", section: "charges" },
+    { icon: MessageSquare, label: "Templates", section: "templates" },
+    { icon: Settings, label: "Configurações", section: "settings" },
+  ];
+
   const renderContent = () => {
     switch (activeSection) {
       case "home":
@@ -42,8 +48,6 @@ const CompanyDashboard = () => {
         return <CompanyCharges companyId={session?.user?.id || ""} />;
       case "settings":
         return <CompanySettingsForm />;
-      case "clients":
-        return <ClientsList />;
       default:
         return (
           <div className="text-center">
@@ -56,58 +60,57 @@ const CompanyDashboard = () => {
     }
   };
 
-  const menuItems = [
-    { icon: Home, label: "Início", section: "home" },
-    { icon: CreditCard, label: "Cobranças", section: "charges" },
-    { icon: Users, label: "Clientes", section: "clients" },
-    { icon: MessageSquare, label: "Templates", section: "templates" },
-    { icon: Settings, label: "Configurações", section: "settings" },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="h-12 bg-white border-b border-gray-200 flex items-center px-8 sticky top-0 z-50">
+      <div className="h-12 bg-white border-b border-gray-200 flex items-center px-4 sticky top-0 z-50">
         <h1 className="text-2xl font-semibold text-gray-800">
           {activeSection === "home" && "Dashboard"}
           {activeSection === "charges" && "Cobranças"}
           {activeSection === "templates" && "Templates"}
           {activeSection === "settings" && "Configurações"}
-          {activeSection === "clients" && "Clientes"}
         </h1>
       </div>
 
-      <main className="p-4">
-        <div className="max-w-7xl mx-auto relative">
-          <div className="fixed left-6 top-16 w-40 space-y-2">
-            {menuItems.map((item) => (
-              <button
-                key={item.section}
-                className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  activeSection === item.section
-                    ? "bg-primary text-primary-foreground"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-                onClick={() => setActiveSection(item.section as ActiveSection)}
-              >
-                <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
-              </button>
-            ))}
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="w-40 min-h-[calc(100vh-3rem)] bg-white border-r border-gray-200 fixed left-0 top-12">
+          <div className="flex flex-col h-full py-2">
+            <div className="flex-1 space-y-1 px-2">
+              {menuItems.map((item) => (
+                <button
+                  key={item.section}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                    activeSection === item.section
+                      ? "bg-primary text-primary-foreground"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setActiveSection(item.section as ActiveSection)}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
             
-            <button
-              className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors mt-auto"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Sair</span>
-            </button>
+            <div className="px-2">
+              <button
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Sair</span>
+              </button>
+            </div>
           </div>
+        </div>
 
-          <div className="ml-44">
+        {/* Main Content */}
+        <div className="flex-1 ml-40 p-4">
+          <div className="max-w-7xl mx-auto">
             {renderContent()}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
