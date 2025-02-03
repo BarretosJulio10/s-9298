@@ -40,6 +40,16 @@ export function DocumentField({ form }: DocumentFieldProps) {
         const numericValue = value.replace(/\D/g, '');
         const isCNPJ = numericValue.length > 11;
         
+        const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const newValue = e.target.value;
+          const numericValue = newValue.replace(/\D/g, '');
+          
+          // Permite a entrada de até 14 dígitos (CNPJ)
+          if (numericValue.length <= 14) {
+            field.onChange(newValue);
+          }
+        };
+        
         return (
           <FormItem className="relative">
             <FormControl>
@@ -47,11 +57,14 @@ export function DocumentField({ form }: DocumentFieldProps) {
                 <InputMask
                   mask={isCNPJ ? "99.999.999/9999-99" : "999.999.999-99"}
                   value={value}
-                  onChange={field.onChange}
+                  onChange={handleChange}
                   maskChar={null}
                 >
                   {(inputProps: any) => (
-                    <Input placeholder="CPF ou CNPJ" {...inputProps} />
+                    <Input 
+                      placeholder={isCNPJ ? "CNPJ" : "CPF"} 
+                      {...inputProps} 
+                    />
                   )}
                 </InputMask>
                 <Button
