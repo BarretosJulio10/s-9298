@@ -143,7 +143,7 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           due_date: string
-          id: string
+          id?: string
           payment_link?: string | null
           payment_method?: string | null
           status?: string | null
@@ -412,7 +412,7 @@ export type Database = {
           created_at?: string
           days_after?: number
           days_before?: number
-          id: string
+          id?: string
           template_id?: string | null
           updated_at?: string
         }

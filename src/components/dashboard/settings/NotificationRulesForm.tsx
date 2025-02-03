@@ -6,14 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationRulesHeader } from "./notification-rules/NotificationRulesHeader";
 import { NotificationRulesList } from "./notification-rules/NotificationRulesList";
 import { NotificationRulesActions } from "./notification-rules/NotificationRulesActions";
+import type { Database } from "@/integrations/supabase/types";
 
-interface NotificationRule {
-  id?: string;
-  days_before: number;
-  days_after: number;
-  template_id: string | null;
-  active: boolean;
-}
+type NotificationRule = Database["public"]["Tables"]["notification_rules"]["Row"];
 
 export function NotificationRulesForm() {
   const { toast } = useToast();
@@ -56,7 +51,19 @@ export function NotificationRulesForm() {
     if (existingRules && existingRules.length > 0) {
       setRules(existingRules);
     } else {
-      setRules([{ days_before: 2, days_after: 3, template_id: null, active: true }]);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      setRules([{
+        id: crypto.randomUUID(),
+        company_id: user.id,
+        days_before: 2,
+        days_after: 3,
+        template_id: null,
+        active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }]);
     }
   }, [existingRules]);
 
@@ -67,12 +74,7 @@ export function NotificationRulesForm() {
 
       const { error } = await supabase
         .from("notification_rules")
-        .upsert(
-          rules.map(rule => ({
-            ...rule,
-            company_id: user.id,
-          }))
-        );
+        .upsert(rules);
 
       if (error) throw error;
     },
@@ -92,8 +94,20 @@ export function NotificationRulesForm() {
     },
   });
 
-  const addRule = () => {
-    setRules([...rules, { days_before: 2, days_after: 3, template_id: null, active: true }]);
+  const addRule = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    setRules([...rules, {
+      id: crypto.randomUUID(),
+      company_id: user.id,
+      days_before: 2,
+      days_after: 3,
+      template_id: null,
+      active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }]);
   };
 
   const removeRule = (index: number) => {

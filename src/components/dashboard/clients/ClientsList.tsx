@@ -42,23 +42,7 @@ export function ClientsList() {
 
       const { data, error } = await supabase
         .from("clients")
-        .select(`
-          id,
-          name,
-          email,
-          document,
-          phone,
-          status,
-          birth_date,
-          charge_amount,
-          payment_methods,
-          charge_type,
-          company_id,
-          created_at,
-          plans (
-            name
-          )
-        `)
+        .select("*")
         .eq("company_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -68,7 +52,7 @@ export function ClientsList() {
       }
 
       console.log("Clientes encontrados:", data);
-      return data as (Client & { plans: { name: string } | null })[];
+      return data;
     }
   });
 
@@ -128,7 +112,6 @@ export function ClientsList() {
                 <TableHead>Nome</TableHead>
                 <TableHead>WhatsApp</TableHead>
                 <TableHead>Data</TableHead>
-                <TableHead>Plano</TableHead>
                 <TableHead>Valor Cobrança</TableHead>
                 <TableHead>Cobrança rápida</TableHead>
                 <TableHead>Opções</TableHead>
@@ -141,7 +124,6 @@ export function ClientsList() {
                   <TableCell>{client.name}</TableCell>
                   <TableCell>{client.phone}</TableCell>
                   <TableCell>{new Date(client.created_at).toLocaleDateString('pt-BR')}</TableCell>
-                  <TableCell>{client.plans?.name || "****"}</TableCell>
                   <TableCell>
                     {new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
