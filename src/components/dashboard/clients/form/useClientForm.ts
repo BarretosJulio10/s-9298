@@ -42,13 +42,16 @@ export function useClientForm({ onCancel }: UseClientFormProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      const formattedData = {
+        ...data,
+        company_id: user.id,
+        status: "active",
+        birth_date: data.birth_date?.toISOString().split('T')[0],
+      };
+
       const { error } = await supabase
         .from("clients")
-        .insert({
-          ...data,
-          company_id: user.id,
-          status: "active",
-        });
+        .insert(formattedData);
 
       if (error) throw error;
 

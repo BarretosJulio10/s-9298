@@ -1,13 +1,23 @@
 import { FormLabel } from "@/components/ui/form";
 import { Check, CreditCard, Barcode, QrCode } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UseFormReturn } from "react-hook-form";
 
 interface PaymentMethodsFieldProps {
-  selectedMethods: string[];
-  onToggle: (method: string) => void;
+  form: UseFormReturn<any>;
 }
 
-export function PaymentMethodsField({ selectedMethods, onToggle }: PaymentMethodsFieldProps) {
+export function PaymentMethodsField({ form }: PaymentMethodsFieldProps) {
+  const selectedMethods = form.watch("payment_methods") || [];
+
+  const onToggle = (method: string) => {
+    const current = form.getValues("payment_methods") || [];
+    const updated = current.includes(method)
+      ? current.filter((m) => m !== method)
+      : [...current, method];
+    form.setValue("payment_methods", updated);
+  };
+
   return (
     <div className="border-t pt-4 mt-6">
       <FormLabel className="mb-2 block">Método de Pagamento</FormLabel>

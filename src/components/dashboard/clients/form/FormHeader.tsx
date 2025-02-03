@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface FormHeaderProps {
   onClose: () => void;
@@ -9,7 +9,7 @@ interface FormHeaderProps {
 export function FormHeader({ onClose }: FormHeaderProps) {
   return (
     <DialogHeader className="p-6 border-b">
-      <DialogTitle className="text-lg font-medium">Criar um novo cliente</DialogTitle>
+      <DialogTitle>Criar um novo cliente</DialogTitle>
       <Button 
         variant="ghost" 
         size="icon" 
