@@ -31,6 +31,7 @@ const DashboardHome = () => {
         showTemplateForm={showTemplateForm}
         showChargeForm={showChargeForm}
         onBack={handleBack}
+        activeSection="home"
       />
     </div>
   );
