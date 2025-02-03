@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { EditChargeForm } from "./EditChargeForm";
 import { ChargeTableHeader } from "./ChargeTableHeader";
 import { ChargeTableRow } from "./ChargeTableRow";
 import { CancelChargeDialog } from "./CancelChargeDialog";
+import { EditChargeDialog } from "./charge-list/EditChargeDialog";
 
 export function ChargesList() {
   const { toast } = useToast();
@@ -37,24 +36,23 @@ export function ChargesList() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const { data: settings, error: settingsError } = await supabase
+      const { data: settings } = await supabase
         .from("company_settings")
         .select("*")
         .eq("company_id", user.id)
         .maybeSingle();
 
-      if (settingsError) throw settingsError;
       if (!settings?.asaas_api_key) {
         throw new Error("Chave API do Asaas não configurada");
       }
 
-      const { data: charge, error: chargeError } = await supabase
+      const { data: charge } = await supabase
         .from("charges")
         .select("asaas_id")
         .eq("id", chargeId)
-        .single();
+        .maybeSingle();
 
-      if (chargeError) throw chargeError;
+      if (!charge) throw new Error("Cobrança não encontrada");
 
       const asaasResponse = await fetch("/api/asaas/cancel-charge", {
         method: "POST",
@@ -132,19 +130,10 @@ export function ChargesList() {
         </Table>
       </div>
 
-      <Dialog open={editingCharge !== null} onOpenChange={() => setEditingCharge(null)}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Editar Cobrança</DialogTitle>
-          </DialogHeader>
-          {editingCharge && (
-            <EditChargeForm
-              charge={editingCharge}
-              onCancel={() => setEditingCharge(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <EditChargeDialog 
+        charge={editingCharge} 
+        onClose={() => setEditingCharge(null)} 
+      />
 
       <CancelChargeDialog
         open={selectedChargeId !== null}
