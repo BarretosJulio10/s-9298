@@ -1,14 +1,14 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const templateSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -53,7 +53,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
         company_id: user.id,
       };
 
-      if (template) {
+      if (template?.id) {
         const { error } = await supabase
           .from("message_templates")
           .update(templateData)
@@ -72,22 +72,28 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
       toast({
         title: template ? "Template atualizado" : "Template criado",
-        description: template ? "O template foi atualizado com sucesso" : "O template foi criado com sucesso",
+        description: template
+          ? "O template foi atualizado com sucesso"
+          : "O template foi criado com sucesso",
       });
       onCancel();
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Erro",
+        title: "Erro ao salvar template",
         description: error.message,
       });
     },
   });
 
+  const onSubmit = (values: TemplateFormData) => {
+    mutation.mutate(values);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
@@ -95,7 +101,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
             <FormItem>
               <FormLabel>Nome do Template</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="Ex: Lembrete de Pagamento" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -115,9 +121,9 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="reminder">Lembrete</SelectItem>
-                  <SelectItem value="overdue">Atraso</SelectItem>
-                  <SelectItem value="confirmation">Confirmação</SelectItem>
+                  <SelectItem value="payment_reminder">Lembrete de Pagamento</SelectItem>
+                  <SelectItem value="payment_confirmation">Confirmação de Pagamento</SelectItem>
+                  <SelectItem value="late_payment">Pagamento Atrasado</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -132,7 +138,11 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
             <FormItem>
               <FormLabel>Conteúdo</FormLabel>
               <FormControl>
-                <Textarea {...field} rows={5} />
+                <Textarea
+                  placeholder="Digite o conteúdo da mensagem..."
+                  className="min-h-[100px]"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -140,10 +150,10 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
         />
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onCancel}>
+          <Button variant="outline" onClick={onCancel} type="button">
             Cancelar
           </Button>
-          <Button type="submit">
+          <Button type="submit" disabled={mutation.isPending}>
             {template ? "Atualizar" : "Criar"} Template
           </Button>
         </div>
