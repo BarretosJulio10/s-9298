@@ -16,15 +16,18 @@ export function AmountField({ form }: AmountFieldProps) {
       .replace(/\D/g, '') // Remove tudo que não é número
       .replace(/^0+/, ''); // Remove zeros à esquerda
     
-    const numericValue = value ? Number(value) / 100 : 0; // Converte para decimal
+    // Garante que mesmo valores pequenos como 0,01 sejam tratados corretamente
+    const numericValue = value ? Number(value) / 100 : 0;
     form.setValue('amount', numericValue);
   };
 
   const formatAmount = (value: number | undefined) => {
-    if (!value) return '';
-    return (value).toLocaleString('pt-BR', {
+    if (!value && value !== 0) return '';
+    // Garante que valores pequenos como 0,01 sejam formatados corretamente
+    return value.toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
+      useGrouping: true, // Adiciona separador de milhar
     }).replace('R$', '').trim();
   };
 
