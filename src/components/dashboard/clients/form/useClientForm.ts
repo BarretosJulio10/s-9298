@@ -32,10 +32,6 @@ export const useClientForm = (onClose: () => void) => {
 
   const mutation = useMutation({
     mutationFn: async (values: Client) => {
-      if (!await validateWhatsApp(values.phone)) {
-        throw new Error("Número de WhatsApp inválido");
-      }
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
