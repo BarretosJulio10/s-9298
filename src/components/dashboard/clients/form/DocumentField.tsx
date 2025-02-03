@@ -47,10 +47,7 @@ export function DocumentField({ form }: DocumentFieldProps) {
                 <InputMask
                   mask={isCNPJ ? "99.999.999/9999-99" : "999.999.999-99"}
                   value={value}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    field.onChange(newValue);
-                  }}
+                  onChange={field.onChange}
                   maskChar={null}
                 >
                   {(inputProps: any) => (
