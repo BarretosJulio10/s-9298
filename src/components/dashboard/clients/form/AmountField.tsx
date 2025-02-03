@@ -13,21 +13,19 @@ interface AmountFieldProps {
 export function AmountField({ form }: AmountFieldProps) {
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value
-      .replace(/\D/g, '') // Remove tudo que não é número
-      .replace(/^0+/, ''); // Remove zeros à esquerda
+      .replace(/\D/g, '')
+      .replace(/^0+/, '');
     
-    // Garante que mesmo valores pequenos como 0,01 sejam tratados corretamente
     const numericValue = value ? Number(value) / 100 : 0;
     form.setValue('amount', numericValue);
   };
 
   const formatAmount = (value: number | undefined) => {
     if (!value && value !== 0) return '';
-    // Garante que valores pequenos como 0,01 sejam formatados corretamente
     return value.toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-      useGrouping: true, // Adiciona separador de milhar
+      useGrouping: true,
     }).replace('R$', '').trim();
   };
 
@@ -43,7 +41,7 @@ export function AmountField({ form }: AmountFieldProps) {
                 R$
               </span>
               <InputMask
-                mask="999.999,99"
+                mask={field.value ? "999.999,99" : ""}
                 maskChar={null}
                 value={formatAmount(field.value)}
                 onChange={handleAmountChange}
