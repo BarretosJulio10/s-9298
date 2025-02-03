@@ -77,6 +77,37 @@ export function DocumentField({ form }: DocumentFieldProps) {
     form.setValue('document', formattedCPF);
   };
 
+  // Função para gerar CNPJ válido
+  const generateValidCNPJ = () => {
+    // Gera os 12 primeiros dígitos aleatoriamente
+    const numbers = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10));
+    
+    // Calcula o primeiro dígito verificador
+    let soma = 0;
+    let multiplicador = 5;
+    for (let i = 0; i < 12; i++) {
+      soma += numbers[i] * multiplicador;
+      multiplicador = multiplicador === 2 ? 9 : multiplicador - 1;
+    }
+    const digit1 = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+    numbers.push(digit1);
+    
+    // Calcula o segundo dígito verificador
+    soma = 0;
+    multiplicador = 6;
+    for (let i = 0; i < 13; i++) {
+      soma += numbers[i] * multiplicador;
+      multiplicador = multiplicador === 2 ? 9 : multiplicador - 1;
+    }
+    const digit2 = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+    numbers.push(digit2);
+    
+    const cnpj = numbers.join('');
+    const formattedCNPJ = cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    form.setValue('document', formattedCNPJ);
+    setIsValidCNPJ(true);
+  };
+
   return (
     <FormField
       control={form.control}
@@ -134,13 +165,13 @@ export function DocumentField({ form }: DocumentFieldProps) {
                   </span>
                 )}
               </div>
-              {documentType === 'cpf' && (
+              {(documentType === 'cpf' || documentType === 'cnpj') && (
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
-                  onClick={generateValidCPF}
-                  title="Gerar CPF válido"
+                  onClick={documentType === 'cpf' ? generateValidCPF : generateValidCNPJ}
+                  title={`Gerar ${documentType.toUpperCase()} válido`}
                   className="flex-shrink-0"
                 >
                   <Wand2 className="h-4 w-4" />
