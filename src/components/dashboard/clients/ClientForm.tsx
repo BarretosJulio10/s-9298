@@ -1,54 +1,148 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
-import { FormHeader } from "./form/FormHeader";
-import { FormFooter } from "./form/FormFooter";
-import { DocumentField } from "./form/DocumentField";
-import { EmailField } from "./form/EmailField";
-import { PhoneField } from "./form/PhoneField";
-import { ChargeTypeField } from "./form/ChargeTypeField";
-import { PaymentMethodsField } from "./form/PaymentMethodsField";
-import { AmountField } from "./form/AmountField";
-import { BirthDateField } from "./form/BirthDateField";
-import { TemplateField } from "./form/TemplateField";
-import { useClientForm } from "./form/useClientForm";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ClientFormProps {
-  onClose: () => void;
-  open: boolean;
+  onBack: () => void;
 }
 
-export function ClientForm({ onClose, open }: ClientFormProps) {
-  const { form, onSubmit, isSubmitting } = useClientForm({ onCancel: onClose });
+interface ClientFormData {
+  name: string;
+  email: string;
+  document: string;
+  phone: string;
+  charge_amount: number;
+}
+
+export function ClientForm({ onBack }: ClientFormProps) {
+  const { toast } = useToast();
+  const { session } = useAuth();
+  const form = useForm<ClientFormData>();
+
+  const onSubmit = async (data: ClientFormData) => {
+    if (!session?.user?.id) return;
+
+    try {
+      const { error } = await supabase.from("clients").insert({
+        ...data,
+        company_id: session.user.id,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Cliente cadastrado",
+        description: "O cliente foi cadastrado com sucesso",
+      });
+      onBack();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao cadastrar",
+        description: error.message,
+      });
+    }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+    <Card>
+      <CardHeader>
+        <CardTitle>Novo Cliente</CardTitle>
+      </CardHeader>
+      <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormHeader onClose={onClose} />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            <div className="grid gap-6">
-              <div className="grid gap-4">
-                <div className="grid gap-4">
-                  <DocumentField form={form} />
-                  <EmailField form={form} />
-                  <PhoneField form={form} />
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <ChargeTypeField form={form} />
-                    <AmountField form={form} />
-                  </div>
-                  <BirthDateField form={form} />
-                  <TemplateField form={form} />
-                </div>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="email" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <PaymentMethodsField form={form} />
-              </div>
+            <FormField
+              control={form.control}
+              name="document"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CPF/CNPJ</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Telefone</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="charge_amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Valor da Cobrança</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="number" step="0.01" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-between">
+              <Button type="button" variant="outline" onClick={onBack}>
+                Voltar
+              </Button>
+              <Button type="submit">Salvar</Button>
             </div>
-
-            <FormFooter onClose={onClose} isSubmitting={isSubmitting} />
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   );
 }
