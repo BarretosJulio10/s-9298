@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { callWhatsAppAPI } from "@/lib/whatsapp";
 
 const notificationSchema = z.object({
   phone: z.string().min(1, "Telefone é obrigatório"),
@@ -31,26 +32,10 @@ export function SendNotificationDialog({ open, onOpenChange, template }: SendNot
 
   const sendNotification = useMutation({
     mutationFn: async (data: NotificationFormData) => {
-      const response = await fetch("/api/whatsapp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "sendMessage",
-          params: {
-            phone: data.phone,
-            message: template?.content,
-          },
-        }),
+      await callWhatsAppAPI("sendMessage", {
+        phone: data.phone,
+        message: template?.content,
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Erro ao enviar mensagem");
-      }
-
-      return response.json();
     },
     onSuccess: () => {
       toast({

@@ -7,10 +7,10 @@ export async function callWhatsAppAPI(action: string, params?: any) {
     .single();
 
   if (!config?.whatsapp_instance_id) {
-    throw new Error("WhatsApp instance ID not configured");
+    throw new Error("WhatsApp instance ID não configurado");
   }
 
-  const response = await fetch("/functions/v1/whatsapp", {
+  const response = await fetch("/api/whatsapp", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -23,7 +23,8 @@ export async function callWhatsAppAPI(action: string, params?: any) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to call WhatsApp API");
+    const error = await response.json();
+    throw new Error(error.message || "Erro ao enviar mensagem");
   }
 
   return response.json();
