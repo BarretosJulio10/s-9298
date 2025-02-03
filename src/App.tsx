@@ -10,7 +10,7 @@ import { useUserRole } from "./hooks/useUserRole";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+function App() {
   const { session, loading, setLoading } = useAuth();
   const { userRole, fetchUserRole } = useUserRole(session, setLoading);
 
@@ -18,7 +18,7 @@ const App = () => {
     if (session?.user) {
       fetchUserRole(session.user.id);
     }
-  }, [session]);
+  }, [session, fetchUserRole]);
 
   if (loading) {
     return null;
@@ -35,6 +35,6 @@ const App = () => {
       </TooltipProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
