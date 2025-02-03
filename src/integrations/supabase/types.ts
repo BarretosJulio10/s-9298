@@ -143,7 +143,7 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           due_date: string
-          id?: string
+          id: string
           payment_link?: string | null
           payment_method?: string | null
           status?: string | null
@@ -256,13 +256,6 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "clients_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "plans"
             referencedColumns: ["id"]
           },
         ]
@@ -419,7 +412,7 @@ export type Database = {
           created_at?: string
           days_after?: number
           days_before?: number
-          id?: string
+          id: string
           template_id?: string | null
           updated_at?: string
         }
@@ -539,42 +532,6 @@ export type Database = {
           },
         ]
       }
-      plans: {
-        Row: {
-          active: boolean
-          billing_period: string
-          created_at: string
-          description: string | null
-          features: Json | null
-          id: string
-          name: string
-          price: number
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          billing_period?: string
-          created_at?: string
-          description?: string | null
-          features?: Json | null
-          id?: string
-          name: string
-          price: number
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          billing_period?: string
-          created_at?: string
-          description?: string | null
-          features?: Json | null
-          id?: string
-          name?: string
-          price?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           cnpj: string | null
@@ -612,15 +569,7 @@ export type Database = {
           updated_at?: string
           whatsapp?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {

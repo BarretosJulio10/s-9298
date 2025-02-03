@@ -13,7 +13,6 @@ export function DashboardSidebarMenu({
   const menuItems = [
     { icon: Home, label: "Início", section: "home" },
     { icon: User, label: "Clientes", section: "clients" },
-    { icon: CreditCard, label: "Planos", section: "plans" },
     { icon: Wallet, label: "Carteira", section: "wallet" },
     { icon: CreditCard, label: "Cobranças", section: "charges" },
     { icon: MessageSquare, label: "Templates", section: "templates" },

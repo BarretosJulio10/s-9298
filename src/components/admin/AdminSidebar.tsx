@@ -25,11 +25,6 @@ const menuItems = [
     icon: Users,
   },
   {
-    title: "Planos",
-    url: "/admin/plans",
-    icon: Package,
-  },
-  {
     title: "Cobranças",
     url: "/admin/charges",
     icon: Receipt,
