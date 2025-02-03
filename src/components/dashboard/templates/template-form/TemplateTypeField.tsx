@@ -1,7 +1,7 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import { TemplateFormData } from "../TemplateForm";
+import { TemplateFormData } from "../hooks/useTemplateForm";
 
 interface TemplateTypeFieldProps {
   form: UseFormReturn<TemplateFormData>;
