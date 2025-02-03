@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
+import InputMask from "react-input-mask";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -132,6 +133,25 @@ export function ClientForm({ client, onCancel }: ClientFormProps) {
     },
   });
 
+  const searchCEP = async (cep: string) => {
+    const cleanCEP = cep.replace(/\D/g, '');
+    if (cleanCEP.length !== 8) return;
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      const data = await response.json();
+      
+      if (!data.erro) {
+        form.setValue('address_street', data.logradouro);
+        form.setValue('address_neighborhood', data.bairro);
+        form.setValue('address_city', data.localidade);
+        form.setValue('address_state', data.uf);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+    }
+  };
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     mutation.mutate(values);
   }
@@ -175,7 +195,13 @@ export function ClientForm({ client, onCancel }: ClientFormProps) {
               <FormItem>
                 <FormLabel>CPF/CNPJ</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <InputMask
+                    mask={field.value.length <= 11 ? "999.999.999-99" : "99.999.999/9999-99"}
+                    value={field.value}
+                    onChange={field.onChange}
+                  >
+                    {(inputProps: any) => <Input {...inputProps} />}
+                  </InputMask>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -189,7 +215,13 @@ export function ClientForm({ client, onCancel }: ClientFormProps) {
               <FormItem>
                 <FormLabel>Telefone</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <InputMask
+                    mask="(99) 99999-9999"
+                    value={field.value}
+                    onChange={field.onChange}
+                  >
+                    {(inputProps: any) => <Input {...inputProps} />}
+                  </InputMask>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -262,6 +294,29 @@ export function ClientForm({ client, onCancel }: ClientFormProps) {
         <div className="space-y-4">
           <h3 className="text-lg font-medium">Endereço</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="address_zip"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CEP</FormLabel>
+                  <FormControl>
+                    <InputMask
+                      mask="99999-999"
+                      value={field.value || ''}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        searchCEP(e.target.value);
+                      }}
+                    >
+                      {(inputProps: any) => <Input {...inputProps} />}
+                    </InputMask>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="address_street"
@@ -338,20 +393,6 @@ export function ClientForm({ client, onCancel }: ClientFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Estado</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="address_zip"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CEP</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
