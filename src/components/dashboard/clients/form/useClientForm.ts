@@ -26,7 +26,6 @@ export const useClientForm = (onClose: () => void) => {
       document: "",
       phone: "",
       status: "active",
-      birth_date: undefined,
       charge_amount: 0,
       payment_methods: ['pix'],
       charge_type: 'recurring',
@@ -41,19 +40,22 @@ export const useClientForm = (onClose: () => void) => {
           throw new Error("Usuário não autenticado");
         }
 
+        console.log("Dados a serem enviados:", { ...values, company_id: user.id });
+
         // Check if client with same email exists
         const { data: existingClients, error: checkError } = await supabase
           .from("clients")
           .select("id")
           .eq("email", values.email)
-          .eq("company_id", user.id);
+          .eq("company_id", user.id)
+          .maybeSingle();
 
         if (checkError) {
           console.error("Erro ao verificar email:", checkError);
           throw new Error("Erro ao verificar email do cliente");
         }
 
-        if (existingClients && existingClients.length > 0) {
+        if (existingClients) {
           throw new Error("Já existe um cliente cadastrado com este email");
         }
 

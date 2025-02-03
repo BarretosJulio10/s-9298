@@ -7,7 +7,7 @@ import type { Database } from "@/integrations/supabase/types";
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 interface AmountFieldProps {
-  form: UseFormReturn<Client & { amount?: number }>;
+  form: UseFormReturn<Client>;
 }
 
 export function AmountField({ form }: AmountFieldProps) {
@@ -17,7 +17,7 @@ export function AmountField({ form }: AmountFieldProps) {
       .replace(/^0+/, '');
     
     const numericValue = value ? Number(value) / 100 : 0;
-    form.setValue('amount', numericValue);
+    form.setValue('charge_amount', numericValue);
   };
 
   const formatAmount = (value: number | undefined) => {
@@ -32,7 +32,7 @@ export function AmountField({ form }: AmountFieldProps) {
   return (
     <FormField
       control={form.control}
-      name="amount"
+      name="charge_amount"
       render={({ field }) => (
         <FormItem className="w-36">
           <FormControl>
