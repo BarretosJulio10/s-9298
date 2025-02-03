@@ -19,6 +19,7 @@ const CompanyDashboard = () => {
   const [activeSection, setActiveSection] = useState<ActiveSection>("home");
   const [companyName, setCompanyName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
 
   useEffect(() => {
     const fetchCompanyName = async () => {
@@ -65,6 +66,11 @@ const CompanyDashboard = () => {
     }
   };
 
+  const handleNewTemplate = () => {
+    setShowTemplateForm(true);
+    setActiveSection("templates");
+  };
+
   const renderContent = () => {
     switch (activeSection) {
       case "home":
@@ -107,6 +113,7 @@ const CompanyDashboard = () => {
           <DashboardSidebarMenu 
             activeSection={activeSection} 
             onSectionChange={(section) => setActiveSection(section as ActiveSection)} 
+            onNewTemplate={handleNewTemplate}
           />
           <DashboardSidebarFooter 
             userRole={userRole} 
