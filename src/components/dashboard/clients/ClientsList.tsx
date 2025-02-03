@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { ClientForm } from "./ClientForm";
+import type { Database } from "@/integrations/supabase/types";
+
+type Client = Database["public"]["Tables"]["clients"]["Row"];
 
 export function ClientsList() {
   const [showForm, setShowForm] = useState(false);
@@ -20,7 +23,7 @@ export function ClientsList() {
         .eq("company_id", user.id);
 
       if (error) throw error;
-      return data;
+      return data as Client[];
     }
   });
 

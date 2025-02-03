@@ -14,6 +14,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { Database } from "@/integrations/supabase/types";
+
+type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 const formSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -51,7 +54,7 @@ export function ClientForm({ onCancel }: ClientFormProps) {
           {
             ...values,
             company_id: user.id,
-          },
+          } as Client
         ])
         .select()
         .single();
