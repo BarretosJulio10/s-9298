@@ -1,16 +1,32 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { ClientForm } from "./ClientForm";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Database } from "@/integrations/supabase/types";
 
 type Client = Database["public"]["Tables"]["clients"]["Row"];
 
 export function ClientsList() {
   const [showForm, setShowForm] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: clients, isLoading } = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
@@ -27,13 +43,48 @@ export function ClientsList() {
     }
   });
 
-  if (showForm) {
+  const deleteClient = useMutation({
+    mutationFn: async (clientId: string) => {
+      const { error } = await supabase
+        .from("clients")
+        .delete()
+        .eq("id", clientId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      toast({
+        title: "Cliente excluído",
+        description: "O cliente foi excluído com sucesso",
+      });
+      setClientToDelete(null);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir cliente",
+        description: error.message,
+      });
+    },
+  });
+
+  if (showForm || editingClient) {
     return (
       <div>
-        <ClientForm onCancel={() => setShowForm(false)} />
+        <ClientForm 
+          client={editingClient}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingClient(null);
+          }} 
+        />
         <Button 
           variant="outline" 
-          onClick={() => setShowForm(false)}
+          onClick={() => {
+            setShowForm(false);
+            setEditingClient(null);
+          }}
           className="mt-4"
         >
           Voltar para Lista
@@ -63,12 +114,21 @@ export function ClientsList() {
                   <h3 className="font-medium">{client.name}</h3>
                   <p className="text-sm text-gray-500">{client.email}</p>
                   <p className="text-sm text-gray-500">{client.document}</p>
+                  <p className="text-sm text-gray-500">{client.phone}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setEditingClient(client)}
+                  >
                     Editar
                   </Button>
-                  <Button variant="destructive" size="sm">
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => setClientToDelete(client)}
+                  >
                     Excluir
                   </Button>
                 </div>
@@ -77,6 +137,28 @@ export function ClientsList() {
           ))}
         </div>
       )}
+
+      <AlertDialog 
+        open={clientToDelete !== null}
+        onOpenChange={(open) => !open && setClientToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir cliente</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => clientToDelete && deleteClient.mutate(clientToDelete.id)}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

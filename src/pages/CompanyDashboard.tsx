@@ -9,19 +9,19 @@ import {
 import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
 import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 import { useAuth } from "@/hooks/useAuth";
-import { Home, CreditCard, MessageSquare, Settings, LogOut } from "lucide-react";
+import { Home, CreditCard, MessageSquare, Settings, LogOut, Users } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import DashboardHome from "./dashboard/DashboardHome";
+import { ClientsList } from "@/components/dashboard/clients/ClientsList";
 
-type ActiveSection = "home" | "charges" | "templates" | "settings";
+type ActiveSection = "home" | "charges" | "templates" | "settings" | "clients";
 
 const CompanyDashboard = () => {
   const { session } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<ActiveSection>("home");
 
@@ -50,6 +50,8 @@ const CompanyDashboard = () => {
         return <CompanyCharges companyId={session?.user?.id || ""} />;
       case "settings":
         return <CompanySettingsForm />;
+      case "clients":
+        return <ClientsList />;
       default:
         return (
           <div className="text-center">
@@ -96,6 +98,19 @@ const CompanyDashboard = () => {
                 >
                   <CreditCard className="h-5 w-5" />
                   <span>Cobranças</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setActiveSection("clients")}
+                  className={`w-full ${
+                    activeSection === "clients"
+                      ? "bg-primary/10 text-primary"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  <Users className="h-5 w-5" />
+                  <span>Clientes</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -152,6 +167,7 @@ const CompanyDashboard = () => {
             {activeSection === "charges" && "Cobranças"}
             {activeSection === "templates" && "Templates"}
             {activeSection === "settings" && "Configurações"}
+            {activeSection === "clients" && "Clientes"}
           </h1>
         </div>
         <main className="flex-1 p-8 overflow-auto">

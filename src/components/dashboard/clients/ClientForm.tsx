@@ -26,20 +26,21 @@ const formSchema = z.object({
 });
 
 interface ClientFormProps {
+  client?: Database["public"]["Tables"]["clients"]["Row"] | null;
   onCancel: () => void;
 }
 
-export function ClientForm({ onCancel }: ClientFormProps) {
+export function ClientForm({ client, onCancel }: ClientFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      document: "",
-      phone: "",
+      name: client?.name || "",
+      email: client?.email || "",
+      document: client?.document || "",
+      phone: client?.phone || "",
     },
   });
 
@@ -48,31 +49,46 @@ export function ClientForm({ onCancel }: ClientFormProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const { data, error } = await supabase
-        .from("clients")
-        .insert([
-          {
+      if (client) {
+        const { data, error } = await supabase
+          .from("clients")
+          .update({
             ...values,
             company_id: user.id,
-          } as Client
-        ])
-        .select()
-        .single();
+          } as Client)
+          .eq("id", client.id)
+          .select()
+          .single();
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        return data;
+      } else {
+        const { data, error } = await supabase
+          .from("clients")
+          .insert([
+            {
+              ...values,
+              company_id: user.id,
+            } as Client
+          ])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast({
-        title: "Cliente cadastrado com sucesso!",
+        title: client ? "Cliente atualizado" : "Cliente cadastrado com sucesso!",
       });
       onCancel();
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Erro ao cadastrar cliente",
+        title: client ? "Erro ao atualizar cliente" : "Erro ao cadastrar cliente",
         description: "Tente novamente mais tarde",
       });
     },
@@ -142,7 +158,9 @@ export function ClientForm({ onCancel }: ClientFormProps) {
         />
 
         <div className="flex gap-2">
-          <Button type="submit">Salvar</Button>
+          <Button type="submit">
+            {client ? "Atualizar" : "Salvar"}
+          </Button>
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
