@@ -1,13 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash } from "lucide-react";
+import { Plus, Search, Send } from "lucide-react";
 import { useState } from "react";
 import { ClientForm } from "./ClientForm";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +40,8 @@ export function ClientsList() {
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [perPage, setPerPage] = useState("10");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -77,18 +93,11 @@ export function ClientsList() {
     },
   });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return <Badge variant="success">Ativo</Badge>;
-      case "inactive":
-        return <Badge variant="secondary">Inativo</Badge>;
-      case "blocked":
-        return <Badge variant="destructive">Bloqueado</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
+  const filteredClients = clients?.filter(client =>
+    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.document.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (showForm || editingClient) {
     return (
@@ -115,61 +124,93 @@ export function ClientsList() {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold">Clientes</h2>
-        <Button onClick={() => setShowForm(true)}>
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Button onClick={() => setShowForm(true)} className="bg-emerald-600 hover:bg-emerald-700">
           <Plus className="h-4 w-4 mr-2" />
           Novo Cliente
         </Button>
+        <Button variant="outline" className="border-emerald-600 text-emerald-600">
+          <Plus className="h-4 w-4 mr-2" />
+          Novo link de cadastro
+        </Button>
+        <Button variant="outline" className="border-emerald-600 text-emerald-600">
+          Cobrança Avulsa
+        </Button>
+      </div>
+
+      <div className="flex justify-between items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">Exibir</span>
+          <Select value={perPage} onValueChange={setPerPage}>
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-gray-500">resultados por página</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">Pesquisar</span>
+          <Input
+            type="search"
+            placeholder="Buscar cliente..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-64"
+          />
+        </div>
       </div>
 
       {isLoading ? (
         <div>Carregando...</div>
       ) : (
-        <ScrollArea className="h-[calc(100vh-12rem)] pr-4">
-          <div className="grid gap-4">
-            {clients?.map((client) => (
-              <Card key={client.id} className="p-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium">{client.name}</h3>
-                      {getStatusBadge(client.status)}
-                    </div>
-                    <p className="text-sm text-gray-500">{client.email}</p>
-                    <p className="text-sm text-gray-500">{client.document}</p>
-                    <p className="text-sm text-gray-500">{client.phone}</p>
-                    {client.plans && (
-                      <p className="text-sm text-gray-500">Plano: {client.plans.name}</p>
-                    )}
-                    {client.address_city && client.address_state && (
-                      <p className="text-sm text-gray-500">
-                        {client.address_city}, {client.address_state}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setEditingClient(client)}
-                    >
-                      <Edit className="h-4 w-4" />
+        <div className="bg-white rounded-lg shadow-sm">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>WhatsApp</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Plano</TableHead>
+                <TableHead>Cobrança rápida</TableHead>
+                <TableHead>Opções</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredClients?.map((client) => (
+                <TableRow key={client.id}>
+                  <TableCell>{client.id.slice(0, 4)}</TableCell>
+                  <TableCell>{client.name}</TableCell>
+                  <TableCell>{client.phone}</TableCell>
+                  <TableCell>{new Date(client.created_at).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell>{client.plans?.name || "****"}</TableCell>
+                  <TableCell>
+                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">
+                      <Send className="h-4 w-4 mr-2" />
+                      Enviar cobrança
                     </Button>
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => setClientToDelete(client)}
-                    >
-                      <Trash className="h-4 w-4" />
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="secondary" size="sm">
+                      Opções
                     </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <div className="p-4 border-t">
+            <p className="text-sm text-gray-500">
+              Mostrando {filteredClients?.length || 0} de {clients?.length || 0} registros
+            </p>
           </div>
-        </ScrollArea>
+        </div>
       )}
 
       <AlertDialog 
