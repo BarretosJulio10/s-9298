@@ -27,11 +27,10 @@ export function useDateField(form: UseFormReturn<Client>, timeZone: string) {
       const month = parseInt(value.slice(2, 4)) - 1;
       const year = parseInt(value.slice(4));
       
-      const date = new Date(year, month, day);
-      const zonedDate = fromZonedTime(date, timeZone);
-
+      const date = new Date(year, month, day, 12, 0, 0); // Set to noon to avoid timezone issues
+      
       if (!isNaN(date.getTime())) {
-        form.setValue('birth_date', zonedDate.toISOString().split('T')[0]);
+        form.setValue('birth_date', date.toISOString().split('T')[0]);
       }
     }
   };
@@ -40,8 +39,7 @@ export function useDateField(form: UseFormReturn<Client>, timeZone: string) {
     const date = form.getValues('birth_date');
     if (date) {
       const utcDate = new Date(date);
-      const zonedDate = toZonedTime(utcDate, timeZone);
-      setInputDate(format(zonedDate, 'dd/MM/yyyy'));
+      setInputDate(format(utcDate, 'dd/MM/yyyy'));
     }
   }, [form.getValues('birth_date')]);
 
