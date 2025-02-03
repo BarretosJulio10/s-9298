@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -19,9 +19,24 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 export function ChargesList() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedChargeId, setSelectedChargeId] = useState<string | null>(null);
+
   const { data: charges, isLoading } = useQuery({
     queryKey: ["charges"],
     queryFn: async () => {
@@ -36,6 +51,75 @@ export function ChargesList() {
 
       if (error) throw error;
       return data;
+    },
+  });
+
+  const cancelCharge = useMutation({
+    mutationFn: async (chargeId: string) => {
+      // Primeiro, busca as configurações da empresa
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data: settings, error: settingsError } = await supabase
+        .from("company_settings")
+        .select("*")
+        .eq("company_id", user.id)
+        .maybeSingle();
+
+      if (settingsError) throw settingsError;
+      if (!settings?.asaas_api_key) {
+        throw new Error("Chave API do Asaas não configurada");
+      }
+
+      // Busca os dados da cobrança
+      const { data: charge, error: chargeError } = await supabase
+        .from("charges")
+        .select("asaas_id")
+        .eq("id", chargeId)
+        .single();
+
+      if (chargeError) throw chargeError;
+
+      // Cancela a cobrança no Asaas
+      const asaasResponse = await fetch("/api/asaas/cancel-charge", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          apiKey: settings.asaas_api_key,
+          environment: settings.asaas_environment,
+          chargeId: charge.asaas_id,
+        }),
+      });
+
+      if (!asaasResponse.ok) {
+        const error = await asaasResponse.json();
+        throw new Error(error.message || "Erro ao cancelar cobrança no Asaas");
+      }
+
+      // Atualiza o status da cobrança no banco de dados
+      const { error: updateError } = await supabase
+        .from("charges")
+        .update({ status: "cancelled" })
+        .eq("id", chargeId);
+
+      if (updateError) throw updateError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["charges"] });
+      toast({
+        title: "Cobrança cancelada",
+        description: "A cobrança foi cancelada com sucesso",
+      });
+      setSelectedChargeId(null);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao cancelar cobrança",
+        description: error.message,
+      });
     },
   });
 
@@ -63,6 +147,8 @@ export function ChargesList() {
         return "warning";
       case "overdue":
         return "destructive";
+      case "cancelled":
+        return "secondary";
       default:
         return "secondary";
     }
@@ -149,7 +235,7 @@ export function ChargesList() {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  {charge.payment_link && (
+                  {charge.payment_link && charge.status !== "cancelled" && (
                     <>
                       <Button
                         variant="outline"
@@ -169,22 +255,50 @@ export function ChargesList() {
                       </Button>
                     </>
                   )}
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    title="Editar"
-                  >
-                    <FileEdit className="h-4 w-4" />
-                  </Button>
-                  {charge.status !== "paid" && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="text-destructive hover:bg-destructive/10"
-                      title="Cancelar"
-                    >
-                      <Ban className="h-4 w-4" />
-                    </Button>
+                  {charge.status !== "cancelled" && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        title="Editar"
+                        disabled={charge.status === "paid"}
+                      >
+                        <FileEdit className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="text-destructive hover:bg-destructive/10"
+                            title="Cancelar"
+                            disabled={charge.status === "paid"}
+                            onClick={() => setSelectedChargeId(charge.id)}
+                          >
+                            <Ban className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Cancelar cobrança</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja cancelar esta cobrança? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel onClick={() => setSelectedChargeId(null)}>
+                              Não, manter cobrança
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => selectedChargeId && cancelCharge.mutate(selectedChargeId)}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              Sim, cancelar cobrança
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </>
                   )}
                 </div>
               </TableCell>
