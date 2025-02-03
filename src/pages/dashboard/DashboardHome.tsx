@@ -5,7 +5,7 @@ import { ChargesList } from "@/components/dashboard/charges/ChargesList";
 import { ChargeForm } from "@/components/dashboard/charges/ChargeForm";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Plus, ArrowUpRight, ArrowDownRight, Clock, Ban } from "lucide-react";
+import { Plus, ArrowUpRight, ArrowDownRight, Clock, Ban, AlertTriangle } from "lucide-react";
 import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
 import { TemplateForm } from "@/components/dashboard/templates/TemplateForm";
 
@@ -37,6 +37,12 @@ const DashboardHome = () => {
       const overdueAmount = charges?.reduce((acc, curr) => 
         curr.status === "overdue" ? acc + Number(curr.amount) : acc, 0) || 0;
 
+      // Calcular percentuais
+      const totalCount = paid + pending + overdue;
+      const paidPercentage = totalCount > 0 ? Math.round((paid / totalCount) * 100) : 0;
+      const pendingPercentage = totalCount > 0 ? Math.round((pending / totalCount) * 100) : 0;
+      const overduePercentage = totalCount > 0 ? Math.round((overdue / totalCount) * 100) : 0;
+
       return {
         total,
         pending,
@@ -44,7 +50,10 @@ const DashboardHome = () => {
         overdue,
         paidAmount,
         pendingAmount,
-        overdueAmount
+        overdueAmount,
+        paidPercentage,
+        pendingPercentage,
+        overduePercentage
       };
     }
   });
@@ -81,7 +90,9 @@ const DashboardHome = () => {
               <ArrowUpRight className="h-6 w-6 text-green-600" />
             </div>
           </div>
-          <p className="mt-2 text-sm text-gray-600">{stats?.paid || 0} cobranças pagas</p>
+          <p className="mt-2 text-sm text-gray-600">
+            {stats?.paid || 0} cobranças pagas ({stats?.paidPercentage || 0}%)
+          </p>
         </Card>
 
         <Card className="p-6">
@@ -99,7 +110,9 @@ const DashboardHome = () => {
               <Clock className="h-6 w-6 text-yellow-600" />
             </div>
           </div>
-          <p className="mt-2 text-sm text-gray-600">{stats?.pending || 0} cobranças pendentes</p>
+          <p className="mt-2 text-sm text-gray-600">
+            {stats?.pending || 0} cobranças pendentes ({stats?.pendingPercentage || 0}%)
+          </p>
         </Card>
 
         <Card className="p-6">
@@ -114,10 +127,12 @@ const DashboardHome = () => {
               </p>
             </div>
             <div className="p-2 bg-red-100 rounded-full">
-              <ArrowDownRight className="h-6 w-6 text-red-600" />
+              <AlertTriangle className="h-6 w-6 text-red-600" />
             </div>
           </div>
-          <p className="mt-2 text-sm text-gray-600">{stats?.overdue || 0} cobranças vencidas</p>
+          <p className="mt-2 text-sm text-gray-600">
+            {stats?.overdue || 0} cobranças vencidas ({stats?.overduePercentage || 0}%)
+          </p>
         </Card>
 
         <Card className="p-6">
@@ -135,7 +150,9 @@ const DashboardHome = () => {
               <Ban className="h-6 w-6 text-gray-600" />
             </div>
           </div>
-          <p className="mt-2 text-sm text-gray-600">Total de {(stats?.paid || 0) + (stats?.pending || 0) + (stats?.overdue || 0)} cobranças</p>
+          <p className="mt-2 text-sm text-gray-600">
+            Total de {(stats?.paid || 0) + (stats?.pending || 0) + (stats?.overdue || 0)} cobranças
+          </p>
         </Card>
       </div>
 
