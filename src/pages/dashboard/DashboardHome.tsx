@@ -19,12 +19,17 @@ const DashboardHome = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      console.log("ID da empresa logada:", user.id);
+
       const { data: charges, error } = await supabase
         .from("charges")
         .select("status, amount, payment_date, due_date")
         .eq("company_id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao buscar cobranças:", error);
+        throw error;
+      }
 
       console.log("Cobranças encontradas:", charges);
 
