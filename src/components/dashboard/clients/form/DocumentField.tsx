@@ -151,10 +151,10 @@ export function DocumentField({ form }: DocumentFieldProps) {
       name="document"
       render={({ field }) => (
         <FormItem>
-          <div className="space-y-4">
+          <div className="space-y-2">
             <RadioGroup 
               defaultValue="cpf" 
-              className="flex gap-6 mb-2"
+              className="flex items-center gap-4 mb-2"
               onValueChange={(value: 'cpf' | 'cnpj') => {
                 setDocumentType(value);
                 form.setValue('document', '');
@@ -172,7 +172,7 @@ export function DocumentField({ form }: DocumentFieldProps) {
               </div>
             </RadioGroup>
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <div className="flex-1 relative">
                 <InputMask
                   mask={documentType === 'cpf' ? "999.999.999-99" : "99.999.999/9999-99"}
@@ -189,7 +189,7 @@ export function DocumentField({ form }: DocumentFieldProps) {
                       <Input 
                         placeholder={documentType === 'cpf' ? "CPF" : "CNPJ"}
                         {...inputProps} 
-                        className="bg-white"
+                        className="bg-white pr-16"
                       />
                     </FormControl>
                   )}
