@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ClientForm } from "./ClientForm";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -126,47 +127,49 @@ export function ClientsList() {
       {isLoading ? (
         <div>Carregando...</div>
       ) : (
-        <div className="grid gap-4">
-          {clients?.map((client) => (
-            <Card key={client.id} className="p-4">
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium">{client.name}</h3>
-                    {getStatusBadge(client.status)}
+        <ScrollArea className="h-[calc(100vh-12rem)] pr-4">
+          <div className="grid gap-4">
+            {clients?.map((client) => (
+              <Card key={client.id} className="p-4">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium">{client.name}</h3>
+                      {getStatusBadge(client.status)}
+                    </div>
+                    <p className="text-sm text-gray-500">{client.email}</p>
+                    <p className="text-sm text-gray-500">{client.document}</p>
+                    <p className="text-sm text-gray-500">{client.phone}</p>
+                    {client.plans && (
+                      <p className="text-sm text-gray-500">Plano: {client.plans.name}</p>
+                    )}
+                    {client.address_city && client.address_state && (
+                      <p className="text-sm text-gray-500">
+                        {client.address_city}, {client.address_state}
+                      </p>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-500">{client.email}</p>
-                  <p className="text-sm text-gray-500">{client.document}</p>
-                  <p className="text-sm text-gray-500">{client.phone}</p>
-                  {client.plans && (
-                    <p className="text-sm text-gray-500">Plano: {client.plans.name}</p>
-                  )}
-                  {client.address_city && client.address_state && (
-                    <p className="text-sm text-gray-500">
-                      {client.address_city}, {client.address_state}
-                    </p>
-                  )}
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setEditingClient(client)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => setClientToDelete(client)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setEditingClient(client)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={() => setClientToDelete(client)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
       )}
 
       <AlertDialog 
