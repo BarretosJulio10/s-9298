@@ -4,7 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
@@ -46,7 +46,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
       
       // Cria a data no fuso horário de São Paulo
       const date = new Date(year, month, day);
-      const zonedDate = zonedTimeToUtc(date, timeZone);
+      const zonedDate = fromZonedTime(date, timeZone);
 
       // Verifica se é uma data válida
       if (!isNaN(date.getTime())) {
@@ -60,7 +60,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
     const date = form.getValues('birth_date');
     if (date) {
       const utcDate = new Date(date);
-      const zonedDate = utcToZonedTime(utcDate, timeZone);
+      const zonedDate = toZonedTime(utcDate, timeZone);
       setInputDate(format(zonedDate, 'dd/MM/yyyy'));
     }
   }, [form.getValues('birth_date')]);
@@ -95,10 +95,10 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value ? utcToZonedTime(new Date(field.value), timeZone) : undefined}
+                  selected={field.value ? toZonedTime(new Date(field.value), timeZone) : undefined}
                   onSelect={(date) => {
                     if (date) {
-                      const zonedDate = zonedTimeToUtc(date, timeZone);
+                      const zonedDate = fromZonedTime(date, timeZone);
                       field.onChange(zonedDate.toISOString().split('T')[0]);
                       setInputDate(format(date, 'dd/MM/yyyy'));
                     }
