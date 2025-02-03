@@ -8,6 +8,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { DateInput } from "./date/DateInput";
 import { DateCalendar } from "./date/DateCalendar";
 import { useDateField } from "./date/useDateField";
+import { useState } from "react";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -17,6 +18,7 @@ interface BirthDateFieldProps {
 
 export function BirthDateField({ form }: BirthDateFieldProps) {
   const { inputDate, handleDateInput } = useDateField(form);
+  const [open, setOpen] = useState(false);
 
   return (
     <FormField
@@ -30,7 +32,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
               inputDate={inputDate} 
               handleDateInput={handleDateInput} 
             />
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -48,6 +50,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                   onSelect={(date) => {
                     if (date) {
                       field.onChange(date.toISOString().split('T')[0]);
+                      setOpen(false); // Close the popover after selection
                     }
                   }}
                 />
