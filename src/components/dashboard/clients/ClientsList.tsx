@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Send, Edit, Trash } from "lucide-react";
+import { Plus, Send, Edit, Trash, Check, Clock, X } from "lucide-react";
 import { useState } from "react";
 import { ClientForm } from "./ClientForm";
 import { useToast } from "@/hooks/use-toast";
@@ -31,31 +31,81 @@ export function ClientsList() {
   const [perPage, setPerPage] = useState("10");
   const { toast } = useToast();
 
-  const { data: clients, isLoading } = useQuery({
-    queryKey: ["clients"],
+  const { data: clientsWithCharges, isLoading } = useQuery({
+    queryKey: ["clients-with-charges"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      console.log("ID da empresa logada:", user.id);
-
-      const { data, error } = await supabase
+      const { data: clients, error: clientsError } = await supabase
         .from("clients")
-        .select("*")
+        .select(`
+          *,
+          client_charges (
+            status,
+            due_date
+          )
+        `)
         .eq("company_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Erro ao buscar clientes:", error);
-        throw error;
+      if (clientsError) {
+        console.error("Erro ao buscar clientes:", clientsError);
+        throw clientsError;
       }
 
-      console.log("Clientes encontrados:", data);
-      return data;
+      return clients.map(client => ({
+        ...client,
+        paymentStatus: getPaymentStatus(client.client_charges)
+      }));
     }
   });
 
-  const filteredClients = clients?.filter(client =>
+  const getPaymentStatus = (charges: any[]) => {
+    if (!charges || charges.length === 0) return "pending";
+    
+    const latestCharge = charges[0];
+    if (!latestCharge) return "pending";
+
+    if (latestCharge.status === "paid") return "paid";
+    
+    const dueDate = new Date(latestCharge.due_date);
+    const today = new Date();
+    
+    if (dueDate < today) return "overdue";
+    return "sent";
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "paid":
+        return <Check className="h-4 w-4 text-green-600" />;
+      case "overdue":
+        return <X className="h-4 w-4 text-red-600" />;
+      case "sent":
+      case "pending":
+        return <Clock className="h-4 w-4 text-yellow-600" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "Pago";
+      case "overdue":
+        return "Atrasado";
+      case "sent":
+        return "Enviado";
+      case "pending":
+        return "Pendente";
+      default:
+        return status;
+    }
+  };
+
+  const filteredClients = clientsWithCharges?.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     client.document.toLowerCase().includes(searchTerm.toLowerCase())
@@ -112,6 +162,7 @@ export function ClientsList() {
                 <TableHead className="text-center">WhatsApp</TableHead>
                 <TableHead className="text-center">Data</TableHead>
                 <TableHead className="text-center">Valor Cobrança</TableHead>
+                <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -129,6 +180,12 @@ export function ClientsList() {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     }).format(client.charge_amount)}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      {getStatusIcon(client.paymentStatus)}
+                      <span className="text-sm">{getStatusText(client.paymentStatus)}</span>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center gap-1">
@@ -164,7 +221,7 @@ export function ClientsList() {
           </Table>
           <div className="p-4 border-t">
             <p className="text-sm text-gray-500">
-              Mostrando {filteredClients?.length || 0} de {clients?.length || 0} registros
+              Mostrando {filteredClients?.length || 0} de {clientsWithCharges?.length || 0} registros
             </p>
           </div>
         </div>
