@@ -19,7 +19,7 @@ export const useClientForm = (onClose: () => void) => {
     return true;
   };
 
-  const form = useForm<Client & { amount?: number }>({
+  const form = useForm<Client>({
     defaultValues: {
       name: "",
       email: "",
@@ -28,20 +28,33 @@ export const useClientForm = (onClose: () => void) => {
       status: "active",
       birth_date: undefined,
       charge_amount: 0,
+      payment_methods: ['pix'],
+      charge_type: 'recurring',
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: Client & { amount?: number }) => {
+    mutationFn: async (values: Client) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
+
+      // Check if client with same email already exists
+      const { data: existingClient } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("email", values.email)
+        .eq("company_id", user.id)
+        .single();
+
+      if (existingClient) {
+        throw new Error("Já existe um cliente cadastrado com este email");
+      }
 
       const { data, error } = await supabase
         .from("clients")
         .insert([{
           ...values,
           company_id: user.id,
-          charge_amount: values.amount || 0,
         }])
         .select()
         .single();
