@@ -18,15 +18,14 @@ export function AmountField({ form }: AmountFieldProps) {
         <FormItem>
           <FormControl>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-2xl text-muted-foreground">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg text-muted-foreground">
                 R$
               </span>
               <Input 
                 type="number"
-                placeholder="Valor da cobrança (ex: R$ 99,90 para plano mensal)"
                 step="0.01"
                 min="0"
-                className="pl-12 text-2xl h-14"
+                className="pl-10 text-lg h-10"
                 {...field}
               />
             </div>
