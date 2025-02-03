@@ -24,7 +24,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 import InputMask from "react-input-mask";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { X, CreditCard, Barcode, QrCode, Check, Flag } from "lucide-react";
+import { X, CreditCard, Barcode, QrCode, Check } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -46,18 +46,11 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>(["pix"]);
 
   const validateWhatsApp = (phone: string) => {
-    // Remove all non-numeric characters
     const cleanPhone = phone.replace(/\D/g, '');
-    
-    // Check if it's a valid Brazilian WhatsApp number
-    // Must be 11 digits (including DDD), and start with 9
     if (cleanPhone.length !== 11) return false;
     if (cleanPhone[2] !== '9') return false;
-    
-    // Check if DDD is valid (11-99)
     const ddd = parseInt(cleanPhone.substring(0, 2));
     if (ddd < 11 || ddd > 99) return false;
-    
     return true;
   };
 
@@ -87,7 +80,6 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (values: Client) => {
-      // Validate WhatsApp before submitting
       if (!validateWhatsApp(values.phone)) {
         throw new Error("Número de WhatsApp inválido");
       }
@@ -131,7 +123,6 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   const handlePaymentMethodToggle = (method: string) => {
     setSelectedPaymentMethods(prev => {
       if (prev.includes(method)) {
-        // Don't remove if it's the last method
         if (prev.length === 1) return prev;
         return prev.filter(m => m !== method);
       }
@@ -283,15 +274,17 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                   <FormControl>
                     <div className="flex">
                       <div className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
-                        <Flag className="h-4 w-4 mr-1" />
-                        <span>+55</span>
+                        <div className="w-6 h-4 relative rounded overflow-hidden">
+                          <div className="absolute inset-0 bg-[#009c3b]" />
+                          <div className="absolute inset-[15%] bg-[#ffdf00]" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
+                          <div className="absolute inset-[30%] bg-[#002776] rounded-full" />
+                        </div>
                       </div>
                       <InputMask
                         mask="(99) 99999-9999"
                         value={field.value}
                         onChange={(e) => {
                           field.onChange(e);
-                          // Show validation feedback as user types
                           if (e.target.value.replace(/\D/g, '').length === 11) {
                             if (!validateWhatsApp(e.target.value)) {
                               form.setError('phone', {
