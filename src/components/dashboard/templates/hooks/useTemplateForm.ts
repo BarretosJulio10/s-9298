@@ -12,7 +12,7 @@ const templateSchema = z.object({
   company_id: z.string().optional(),
 });
 
-type TemplateFormData = z.infer<typeof templateSchema>;
+export type TemplateFormData = z.infer<typeof templateSchema>;
 
 export function useTemplateForm() {
   const { toast } = useToast();
@@ -31,6 +31,9 @@ export function useTemplateForm() {
         .insert({
           ...data,
           company_id: user.id,
+          content: data.content || "",
+          name: data.name || "",
+          type: data.type || "",
         });
 
       if (error) throw error;
