@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Send, Edit, Trash } from "lucide-react";
+import { Plus, Send, Edit, Trash } from "lucide-react";
 import { useState } from "react";
 import { ClientForm } from "./ClientForm";
 import { useToast } from "@/hooks/use-toast";
@@ -107,22 +107,22 @@ export function ClientsList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Nome</TableHead>
-                <TableHead>WhatsApp</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Valor Cobrança</TableHead>
+                <TableHead className="text-center w-[100px]">ID</TableHead>
+                <TableHead className="text-center">Nome</TableHead>
+                <TableHead className="text-center">WhatsApp</TableHead>
+                <TableHead className="text-center">Data</TableHead>
+                <TableHead className="text-center">Valor Cobrança</TableHead>
                 <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredClients?.map((client) => (
                 <TableRow key={client.id}>
-                  <TableCell>{client.id.slice(0, 4)}</TableCell>
-                  <TableCell>{client.name}</TableCell>
-                  <TableCell>{client.phone}</TableCell>
-                  <TableCell>{new Date(client.created_at).toLocaleDateString('pt-BR')}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">{client.id.slice(0, 4)}</TableCell>
+                  <TableCell className="text-center">{client.name}</TableCell>
+                  <TableCell className="text-center">{client.phone}</TableCell>
+                  <TableCell className="text-center">{new Date(client.created_at).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell className="text-center">
                     {new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
                       currency: 'BRL',
