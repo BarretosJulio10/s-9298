@@ -24,7 +24,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 import InputMask from "react-input-mask";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { X } from "lucide-react";
+import { X, CreditCard, Barcode, QrCode } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -43,6 +43,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [chargeType, setChargeType] = useState("recurring");
+  const [paymentMethod, setPaymentMethod] = useState("pix");
 
   const { data: plans = [] } = useQuery({
     queryKey: ["plans"],
@@ -307,6 +308,46 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                 )}
               />
             )}
+
+            <div className="border-t pt-4 mt-6">
+              <FormLabel className="mb-2 block">Método de Pagamento</FormLabel>
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={setPaymentMethod}
+                className="grid grid-cols-3 gap-4"
+              >
+                <div className={cn(
+                  "flex flex-col items-center space-y-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
+                  paymentMethod === "pix" && "border-primary bg-primary/5"
+                )}>
+                  <RadioGroupItem value="pix" id="pix" className="sr-only" />
+                  <QrCode className="h-6 w-6" />
+                  <label htmlFor="pix" className="cursor-pointer text-sm font-medium">
+                    PIX
+                  </label>
+                </div>
+                <div className={cn(
+                  "flex flex-col items-center space-y-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
+                  paymentMethod === "boleto" && "border-primary bg-primary/5"
+                )}>
+                  <RadioGroupItem value="boleto" id="boleto" className="sr-only" />
+                  <Barcode className="h-6 w-6" />
+                  <label htmlFor="boleto" className="cursor-pointer text-sm font-medium">
+                    Boleto
+                  </label>
+                </div>
+                <div className={cn(
+                  "flex flex-col items-center space-y-2 border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors",
+                  paymentMethod === "card" && "border-primary bg-primary/5"
+                )}>
+                  <RadioGroupItem value="card" id="card" className="sr-only" />
+                  <CreditCard className="h-6 w-6" />
+                  <label htmlFor="card" className="cursor-pointer text-sm font-medium">
+                    Cartão
+                  </label>
+                </div>
+              </RadioGroup>
+            </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button 
