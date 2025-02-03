@@ -22,6 +22,7 @@ const DashboardHome = () => {
           </p>
         </div>
         <DashboardActions 
+          onNewTemplate={() => setShowTemplateForm(true)}
           onNewCharge={() => setShowChargeForm(true)}
         />
       </div>
