@@ -129,7 +129,7 @@ export function ClientsList() {
                       currency: 'BRL',
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
-                    }).format(Number(client.charge_amount))}
+                    }).format(client.charge_amount)}
                   </TableCell>
                   <TableCell>
                     <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700">

@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import type { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
+import InputMask from "react-input-mask";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -11,10 +12,7 @@ interface AmountFieldProps {
 
 export function AmountField({ form }: AmountFieldProps) {
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove todos os caracteres não numéricos
     const rawValue = event.target.value.replace(/\D/g, '');
-    
-    // Converte o valor para reais (divide por 100 para considerar os centavos)
     const numericValue = rawValue ? parseFloat(rawValue) / 100 : 0;
     
     console.log('Valor original:', event.target.value);
@@ -39,14 +37,25 @@ export function AmountField({ form }: AmountFieldProps) {
       control={form.control}
       name="charge_amount"
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="w-48">
           <FormLabel>Valor da Cobrança</FormLabel>
           <FormControl>
-            <Input
-              placeholder="R$ 0,00"
-              onChange={handleAmountChange}
-              value={formatAmount(field.value)}
-            />
+            <div className="relative">
+              <InputMask
+                mask="R$ 999.999,99"
+                maskChar={null}
+                value={formatAmount(field.value)}
+                onChange={handleAmountChange}
+              >
+                {(inputProps: any) => (
+                  <Input 
+                    {...inputProps}
+                    className="text-lg"
+                    placeholder="R$ 0,00"
+                  />
+                )}
+              </InputMask>
+            </div>
           </FormControl>
         </FormItem>
       )}
