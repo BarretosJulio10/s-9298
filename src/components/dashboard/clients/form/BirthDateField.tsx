@@ -2,8 +2,9 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
@@ -16,6 +17,8 @@ type Client = Database["public"]["Tables"]["clients"]["Insert"];
 interface BirthDateFieldProps {
   form: UseFormReturn<Client>;
 }
+
+const timeZone = 'America/Sao_Paulo';
 
 export function BirthDateField({ form }: BirthDateFieldProps) {
   const [inputDate, setInputDate] = useState("");
@@ -40,17 +43,14 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
       const day = parseInt(value.slice(0, 2));
       const month = parseInt(value.slice(2, 4)) - 1;
       const year = parseInt(value.slice(4));
+      
+      // Cria a data no fuso horário de São Paulo
       const date = new Date(year, month, day);
+      const zonedDate = zonedTimeToUtc(date, timeZone);
 
-      // Verifica se é uma data válida e ajusta para o fuso horário local
+      // Verifica se é uma data válida
       if (!isNaN(date.getTime())) {
-        const isoDate = new Date(
-          date.getFullYear(),
-          date.getMonth(),
-          date.getDate(),
-          12 // Define meio-dia para evitar problemas de timezone
-        ).toISOString().split('T')[0];
-        form.setValue('birth_date', isoDate);
+        form.setValue('birth_date', zonedDate.toISOString().split('T')[0]);
       }
     }
   };
@@ -59,9 +59,9 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
   useEffect(() => {
     const date = form.getValues('birth_date');
     if (date) {
-      const parsedDate = new Date(date);
-      parsedDate.setHours(12); // Define meio-dia para evitar problemas de timezone
-      setInputDate(format(parsedDate, 'dd/MM/yyyy'));
+      const utcDate = new Date(date);
+      const zonedDate = utcToZonedTime(utcDate, timeZone);
+      setInputDate(format(zonedDate, 'dd/MM/yyyy'));
     }
   }, [form.getValues('birth_date')]);
 
@@ -95,14 +95,12 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value ? new Date(field.value) : undefined}
+                  selected={field.value ? utcToZonedTime(new Date(field.value), timeZone) : undefined}
                   onSelect={(date) => {
                     if (date) {
-                      // Ajusta a data para meio-dia para evitar problemas de timezone
-                      const adjustedDate = new Date(date);
-                      adjustedDate.setHours(12);
-                      field.onChange(adjustedDate.toISOString().split('T')[0]);
-                      setInputDate(format(adjustedDate, 'dd/MM/yyyy'));
+                      const zonedDate = zonedTimeToUtc(date, timeZone);
+                      field.onChange(zonedDate.toISOString().split('T')[0]);
+                      setInputDate(format(date, 'dd/MM/yyyy'));
                     }
                   }}
                   disabled={(date) =>
