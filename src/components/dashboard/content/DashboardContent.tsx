@@ -46,14 +46,19 @@ export function DashboardContent({
   }
 
   return (
-    <div className="mt-6 space-y-6">
+    <div className="mt-6 space-y-8">
       <div>
-        <h2 className="text-lg font-semibold mb-4">Templates de Mensagem</h2>
-        <TemplatesList />
-      </div>
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Cobranças</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Cobranças</h2>
+        </div>
         <ChargesList />
+      </div>
+
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Templates de Mensagem</h2>
+        </div>
+        <TemplatesList />
       </div>
     </div>
   );
