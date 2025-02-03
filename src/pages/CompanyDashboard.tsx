@@ -8,8 +8,6 @@ import DashboardHome from "./dashboard/DashboardHome";
 import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
 import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 import { ClientsList } from "@/components/dashboard/clients/ClientsList";
-import Draggable from "react-draggable";
-import { Button } from "@/components/ui/button";
 
 type ActiveSection = "home" | "charges" | "templates" | "settings" | "clients";
 
@@ -80,37 +78,34 @@ const CompanyDashboard = () => {
 
       <main className="p-8">
         <div className="max-w-7xl mx-auto relative">
-          {menuItems.map((item, index) => (
-            <Draggable key={item.section} defaultPosition={{ x: 0, y: index * 60 }}>
-              <div className="absolute left-0">
-                <Button
-                  variant={activeSection === item.section ? "default" : "secondary"}
-                  className="w-48 flex items-center gap-2 cursor-move"
-                  onClick={() => setActiveSection(item.section as ActiveSection)}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </Button>
-              </div>
-            </Draggable>
-          ))}
+          <div className="fixed left-8 top-24 w-48 space-y-2">
+            {menuItems.map((item) => (
+              <button
+                key={item.section}
+                className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  activeSection === item.section
+                    ? "bg-primary text-primary-foreground"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                onClick={() => setActiveSection(item.section as ActiveSection)}
+              >
+                <item.icon className="h-5 w-5" />
+                <span>{item.label}</span>
+              </button>
+            ))}
+            
+            <button
+              className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors mt-auto"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Sair</span>
+            </button>
+          </div>
 
           <div className="ml-56">
             {renderContent()}
           </div>
-
-          <Draggable defaultPosition={{ x: 0, y: menuItems.length * 60 }}>
-            <div className="absolute left-0">
-              <Button
-                variant="destructive"
-                className="w-48 flex items-center gap-2 cursor-move"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5" />
-                <span>Sair</span>
-              </Button>
-            </div>
-          </Draggable>
         </div>
       </main>
     </div>
