@@ -17,7 +17,8 @@ export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
   const [isChecking, setIsChecking] = useState(false);
 
   const handlePhoneChange = async (value: string) => {
-    if (value.replace(/\D/g, '').length === 11) {
+    const cleanValue = value.replace(/\D/g, '');
+    if (cleanValue.length === 11) {
       setIsChecking(true);
       try {
         const isValid = await validateWhatsApp(value);

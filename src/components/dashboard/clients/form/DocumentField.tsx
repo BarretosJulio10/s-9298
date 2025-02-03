@@ -17,18 +17,41 @@ interface DocumentFieldProps {
 
 export function DocumentField({ form }: DocumentFieldProps) {
   const [documentType, setDocumentType] = useState<'cpf' | 'cnpj'>('cpf');
-  const [isValidCNPJ, setIsValidCNPJ] = useState(false);
+  const [isValidDocument, setIsValidDocument] = useState(false);
+
+  // Função para validar CPF
+  const validateCPF = (cpf: string) => {
+    cpf = cpf.replace(/[^\d]/g, '');
+    
+    if (cpf.length !== 11) return false;
+    if (/^(\d)\1+$/.test(cpf)) return false;
+    
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(cpf.charAt(i)) * (10 - i);
+    }
+    let digit = 11 - (sum % 11);
+    if (digit >= 10) digit = 0;
+    if (digit !== parseInt(cpf.charAt(9))) return false;
+    
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(cpf.charAt(i)) * (11 - i);
+    }
+    digit = 11 - (sum % 11);
+    if (digit >= 10) digit = 0;
+    if (digit !== parseInt(cpf.charAt(10))) return false;
+    
+    return true;
+  };
 
   // Função para validar CNPJ
   const validateCNPJ = (cnpj: string) => {
     cnpj = cnpj.replace(/[^\d]/g, '');
     
     if (cnpj.length !== 14) return false;
-    
-    // Elimina CNPJs inválidos conhecidos
     if (/^(\d)\1+$/.test(cnpj)) return false;
     
-    // Valida DVs
     let tamanho = cnpj.length - 2;
     let numeros = cnpj.substring(0, tamanho);
     const digitos = cnpj.substring(tamanho);
@@ -75,14 +98,13 @@ export function DocumentField({ form }: DocumentFieldProps) {
     const cpf = [...numbers, digit1, digit2].join('');
     const formattedCPF = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     form.setValue('document', formattedCPF);
+    setIsValidDocument(true);
   };
 
   // Função para gerar CNPJ válido
   const generateValidCNPJ = () => {
-    // Gera os 12 primeiros dígitos aleatoriamente
     const numbers = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10));
     
-    // Calcula o primeiro dígito verificador
     let soma = 0;
     let multiplicador = 5;
     for (let i = 0; i < 12; i++) {
@@ -92,7 +114,6 @@ export function DocumentField({ form }: DocumentFieldProps) {
     const digit1 = soma % 11 < 2 ? 0 : 11 - (soma % 11);
     numbers.push(digit1);
     
-    // Calcula o segundo dígito verificador
     soma = 0;
     multiplicador = 6;
     for (let i = 0; i < 13; i++) {
@@ -105,7 +126,18 @@ export function DocumentField({ form }: DocumentFieldProps) {
     const cnpj = numbers.join('');
     const formattedCNPJ = cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     form.setValue('document', formattedCNPJ);
-    setIsValidCNPJ(true);
+    setIsValidDocument(true);
+  };
+
+  const handleDocumentChange = (value: string) => {
+    const cleanValue = value.replace(/[^\d]/g, '');
+    if (documentType === 'cpf' && cleanValue.length === 11) {
+      setIsValidDocument(validateCPF(cleanValue));
+    } else if (documentType === 'cnpj' && cleanValue.length === 14) {
+      setIsValidDocument(validateCNPJ(cleanValue));
+    } else {
+      setIsValidDocument(false);
+    }
   };
 
   return (
@@ -121,7 +153,7 @@ export function DocumentField({ form }: DocumentFieldProps) {
               onValueChange={(value: 'cpf' | 'cnpj') => {
                 setDocumentType(value);
                 form.setValue('document', '');
-                setIsValidCNPJ(false);
+                setIsValidDocument(false);
               }}
             >
               <div className="flex items-center space-x-2">
@@ -143,9 +175,7 @@ export function DocumentField({ form }: DocumentFieldProps) {
                   onChange={(e) => {
                     const value = e.target.value;
                     field.onChange(value);
-                    if (documentType === 'cnpj') {
-                      setIsValidCNPJ(validateCNPJ(value));
-                    }
+                    handleDocumentChange(value);
                   }}
                   maskChar={null}
                 >
@@ -159,9 +189,9 @@ export function DocumentField({ form }: DocumentFieldProps) {
                     </FormControl>
                   )}
                 </InputMask>
-                {documentType === 'cnpj' && field.value && (
-                  <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm ${isValidCNPJ ? 'text-green-500' : 'text-red-500'}`}>
-                    {isValidCNPJ ? 'Válido' : 'Inválido'}
+                {field.value && field.value.replace(/[^\d]/g, '').length === (documentType === 'cpf' ? 11 : 14) && (
+                  <span className={`absolute right-3 top-1/2 -translate-y-1/2 text-sm ${isValidDocument ? 'text-green-500' : 'text-red-500'}`}>
+                    {isValidDocument ? 'Válido' : 'Inválido'}
                   </span>
                 )}
               </div>
