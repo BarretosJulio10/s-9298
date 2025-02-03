@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 import InputMask from "react-input-mask";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
@@ -106,10 +106,10 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   }
 
   return (
-    <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="right" className="sm:max-w-[500px]">
-        <SheetHeader className="border-b pb-4">
-          <SheetTitle className="text-lg font-medium">Criar um novo cliente</SheetTitle>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px] p-0 bg-white rounded-lg shadow-lg">
+        <DialogHeader className="p-6 border-b">
+          <DialogTitle className="text-lg font-medium">Criar um novo cliente</DialogTitle>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -118,10 +118,10 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
           >
             <X className="h-4 w-4" />
           </Button>
-        </SheetHeader>
+        </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-6">
             <FormField
               control={form.control}
               name="name"
@@ -237,7 +237,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                   <div className="mt-1">
                     <Button 
                       variant="link" 
-                      className="h-auto p-0 text-emerald-600"
+                      className="h-auto p-0 text-primary"
                       type="button"
                     >
                       Criar novo plano agora
@@ -258,14 +258,14 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               </Button>
               <Button 
                 type="submit"
-                className="bg-emerald-600 hover:bg-emerald-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 Adicionar
               </Button>
             </div>
           </form>
         </Form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
