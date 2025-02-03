@@ -66,7 +66,7 @@ const CompanyDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="h-16 bg-white border-b border-gray-200 flex items-center px-8 sticky top-0 z-50">
+      <div className="h-12 bg-white border-b border-gray-200 flex items-center px-8 sticky top-0 z-50">
         <h1 className="text-2xl font-semibold text-gray-800">
           {activeSection === "home" && "Dashboard"}
           {activeSection === "charges" && "Cobranças"}
@@ -76,9 +76,9 @@ const CompanyDashboard = () => {
         </h1>
       </div>
 
-      <main className="p-8">
+      <main className="p-4">
         <div className="max-w-7xl mx-auto relative">
-          <div className="fixed left-6 top-24 w-40 space-y-2">
+          <div className="fixed left-6 top-16 w-40 space-y-2">
             {menuItems.map((item) => (
               <button
                 key={item.section}
