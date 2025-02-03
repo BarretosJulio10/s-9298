@@ -16,18 +16,29 @@ const CompanyDashboard = () => {
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState<ActiveSection>("home");
   const [companyName, setCompanyName] = useState<string>("");
+  const [userRole, setUserRole] = useState<string>("");
 
   useEffect(() => {
     const fetchCompanyName = async () => {
       if (session?.user?.id) {
-        const { data, error } = await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('company_name')
           .eq('id', session.user.id)
           .single();
 
-        if (!error && data) {
-          setCompanyName(data.company_name || '');
+        if (!profileError && profileData) {
+          setCompanyName(profileData.company_name || '');
+        }
+
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (!roleError && roleData) {
+          setUserRole(roleData.role);
         }
       }
     };
@@ -82,9 +93,14 @@ const CompanyDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="h-12 bg-white border-r border-gray-200 flex items-center justify-between px-4 sticky top-0 z-50">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          PagouPix
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-gray-800">
+            PagouPix
+          </h1>
+          <span className="text-sm text-gray-500">
+            {userRole === 'admin' ? '(Painel Admin)' : '(Painel Empresa)'}
+          </span>
+        </div>
         <span className="text-gray-600">
           {companyName}
         </span>
