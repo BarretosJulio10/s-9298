@@ -6,7 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 interface AmountFieldProps {
-  form: UseFormReturn<Client>;
+  form: UseFormReturn<Client & { amount?: number }>;
 }
 
 export function AmountField({ form }: AmountFieldProps) {
@@ -17,13 +17,19 @@ export function AmountField({ form }: AmountFieldProps) {
       render={({ field }) => (
         <FormItem>
           <FormControl>
-            <Input 
-              type="number"
-              placeholder="Valor da cobrança"
-              step="0.01"
-              min="0"
-              {...field}
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-2xl text-muted-foreground">
+                R$
+              </span>
+              <Input 
+                type="number"
+                placeholder="Valor da cobrança (ex: R$ 99,90 para plano mensal)"
+                step="0.01"
+                min="0"
+                className="pl-12 text-2xl h-14"
+                {...field}
+              />
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>

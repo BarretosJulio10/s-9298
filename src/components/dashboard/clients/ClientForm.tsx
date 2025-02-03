@@ -21,7 +21,7 @@ interface ClientFormProps {
 export function ClientForm({ open, onClose }: ClientFormProps) {
   const [chargeType, setChargeType] = useState("recurring");
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>(["pix"]);
-  const { form, mutation } = useClientForm(onClose);
+  const { form, mutation, validateWhatsApp } = useClientForm(onClose);
 
   const handlePaymentMethodToggle = (method: string) => {
     setSelectedPaymentMethods(prev => {
@@ -58,7 +58,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               <DocumentField form={form} />
             </div>
 
-            <PhoneField form={form} />
+            <PhoneField form={form} validateWhatsApp={validateWhatsApp} />
 
             {chargeType === "recurring" && (
               <AmountField form={form} />
