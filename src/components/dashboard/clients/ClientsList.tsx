@@ -107,7 +107,7 @@ export function ClientsList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">ID</TableHead>
+                <TableHead>ID</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead className="text-center">WhatsApp</TableHead>
                 <TableHead className="text-center">Data</TableHead>
@@ -118,7 +118,7 @@ export function ClientsList() {
             <TableBody>
               {filteredClients?.map((client) => (
                 <TableRow key={client.id}>
-                  <TableCell className="text-center">{client.id.slice(0, 4)}</TableCell>
+                  <TableCell>{client.id.slice(0, 4)}</TableCell>
                   <TableCell>{client.name}</TableCell>
                   <TableCell className="text-center">{client.phone}</TableCell>
                   <TableCell className="text-center">{new Date(client.created_at).toLocaleDateString('pt-BR')}</TableCell>
