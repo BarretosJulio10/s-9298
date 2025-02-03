@@ -1,5 +1,5 @@
 import { Home, Users, Package, Settings2, LogOut, MessageSquare, Receipt } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -48,6 +48,7 @@ const menuItems = [
 
 export function AdminSidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -67,32 +68,49 @@ export function AdminSidebar() {
   };
 
   return (
-    <Sidebar>
+    <Sidebar className="border-r border-gray-200 bg-white">
       <SidebarContent className="flex flex-col h-full">
-        <SidebarGroup>
-          <SidebarGroupLabel>Administração</SidebarGroupLabel>
+        <div className="px-6 py-6 border-b border-gray-200">
+          <h2 className="text-2xl font-bold text-primary">PagouPix</h2>
+          <p className="text-sm text-muted-foreground mt-1">Painel Administrativo</p>
+        </div>
+
+        <SidebarGroup className="flex-1 px-4 py-4">
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      className={`w-full ${
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      <Link to={item.url}>
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto">
+        <SidebarGroup className="border-t border-gray-200 p-4">
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleLogout}>
-                  <LogOut className="h-4 w-4" />
+                <SidebarMenuButton
+                  onClick={handleLogout}
+                  className="w-full text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-5 w-5" />
                   <span>Sair</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
