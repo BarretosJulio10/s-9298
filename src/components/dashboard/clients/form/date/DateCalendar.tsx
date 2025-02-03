@@ -3,7 +3,6 @@ import { ptBR } from "date-fns/locale";
 
 interface DateCalendarProps {
   value?: string;
-  timeZone: string;
   onSelect: (date: Date | undefined) => void;
 }
 
@@ -17,6 +16,7 @@ export function DateCalendar({ value, onSelect }: DateCalendarProps) {
       onSelect={(date) => onSelect(date)}
       locale={ptBR}
       initialFocus
+      className="bg-white"
     />
   );
 }

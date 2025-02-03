@@ -6,7 +6,9 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
-export function useDateField(form: UseFormReturn<Client>, timeZone: string) {
+const timeZone = 'America/Sao_Paulo';
+
+export function useDateField(form: UseFormReturn<Client>) {
   const [inputDate, setInputDate] = useState("");
 
   const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +29,7 @@ export function useDateField(form: UseFormReturn<Client>, timeZone: string) {
       const month = parseInt(value.slice(2, 4)) - 1;
       const year = parseInt(value.slice(4));
       
-      const date = new Date(year, month, day, 12, 0, 0); // Set to noon to avoid timezone issues
+      const date = new Date(year, month, day, 12, 0, 0);
       
       if (!isNaN(date.getTime())) {
         form.setValue('birth_date', date.toISOString().split('T')[0]);

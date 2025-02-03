@@ -15,10 +15,8 @@ interface BirthDateFieldProps {
   form: UseFormReturn<Client>;
 }
 
-const timeZone = 'America/Sao_Paulo';
-
 export function BirthDateField({ form }: BirthDateFieldProps) {
-  const { inputDate, handleDateInput } = useDateField(form, timeZone);
+  const { inputDate, handleDateInput } = useDateField(form);
 
   return (
     <FormField
@@ -47,7 +45,6 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <DateCalendar
                   value={field.value}
-                  timeZone={timeZone}
                   onSelect={(date) => {
                     if (date) {
                       field.onChange(date.toISOString().split('T')[0]);
