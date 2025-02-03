@@ -31,38 +31,51 @@ export function DocumentField({ form }: DocumentFieldProps) {
     form.setValue('document', formattedCPF);
   };
 
+  const handleDocumentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value.replace(/\D/g, '');
+    form.setValue('document', value);
+  };
+
   return (
     <FormField
       control={form.control}
       name="document"
-      render={({ field }) => (
-        <FormItem className="relative">
-          <FormControl>
-            <div className="flex gap-2">
-              <InputMask
-                mask={field.value.length <= 14 ? "999.999.999-99" : "99.999.999/9999-99"}
-                value={field.value}
-                onChange={field.onChange}
-              >
-                {(inputProps: any) => (
-                  <Input placeholder="CPF ou CNPJ" {...inputProps} />
-                )}
-              </InputMask>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={generateValidCPF}
-                title="Gerar CPF válido"
-                className="flex-shrink-0"
-              >
-                <Wand2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
+      render={({ field }) => {
+        const cleanValue = field.value.replace(/\D/g, '');
+        const isCNPJ = cleanValue.length > 11;
+        
+        return (
+          <FormItem className="relative">
+            <FormControl>
+              <div className="flex gap-2">
+                <InputMask
+                  mask={isCNPJ ? "99.999.999/9999-99" : "999.999.999-99"}
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleDocumentChange(e);
+                  }}
+                >
+                  {(inputProps: any) => (
+                    <Input placeholder="CPF ou CNPJ" {...inputProps} />
+                  )}
+                </InputMask>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={generateValidCPF}
+                  title="Gerar CPF válido"
+                  className="flex-shrink-0"
+                >
+                  <Wand2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }
