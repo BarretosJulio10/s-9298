@@ -9,6 +9,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { TemplateForm } from "./TemplateForm";
 import { useToast } from "@/hooks/use-toast";
 
+const templateTypeTranslations: Record<string, string> = {
+  "payment_reminder": "Lembrete de Pagamento",
+  "payment_confirmation": "Confirmação de Pagamento",
+  "payment_overdue": "Pagamento Atrasado",
+  "welcome": "Boas-vindas",
+  "general": "Geral"
+};
+
 export function TemplatesList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -82,7 +90,7 @@ export function TemplatesList() {
             {templates?.map((template) => (
               <TableRow key={template.id}>
                 <TableCell>{template.name}</TableCell>
-                <TableCell>{template.type}</TableCell>
+                <TableCell>{templateTypeTranslations[template.type] || template.type}</TableCell>
                 <TableCell className="max-w-md truncate">{template.content}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">

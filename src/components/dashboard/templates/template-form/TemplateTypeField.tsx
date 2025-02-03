@@ -3,6 +3,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UseFormReturn } from "react-hook-form";
 import { TemplateFormData } from "../hooks/useTemplateForm";
 
+const templateTypes = [
+  { value: "payment_reminder", label: "Lembrete de Pagamento" },
+  { value: "payment_confirmation", label: "Confirmação de Pagamento" },
+  { value: "payment_overdue", label: "Pagamento Atrasado" },
+  { value: "welcome", label: "Boas-vindas" },
+  { value: "general", label: "Geral" }
+];
+
 interface TemplateTypeFieldProps {
   form: UseFormReturn<TemplateFormData>;
 }
@@ -15,18 +23,20 @@ export function TemplateTypeField({ form }: TemplateTypeFieldProps) {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Tipo</FormLabel>
-          <FormControl>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
+                <SelectValue placeholder="Selecione o tipo do template" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="payment_reminder">Lembrete de Pagamento</SelectItem>
-                <SelectItem value="payment_confirmation">Confirmação de Pagamento</SelectItem>
-                <SelectItem value="late_payment">Pagamento Atrasado</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormControl>
+            </FormControl>
+            <SelectContent>
+              {templateTypes.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <FormMessage />
         </FormItem>
       )}
