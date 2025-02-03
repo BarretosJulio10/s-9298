@@ -52,6 +52,7 @@ export function ClientsList() {
           payment_methods,
           charge_type,
           company_id,
+          created_at,
           plans (
             name
           )
