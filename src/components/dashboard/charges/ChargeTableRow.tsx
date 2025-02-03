@@ -53,6 +53,7 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
   return (
     <TableRow>
       <TableCell>{charge.customer_name}</TableCell>
+      <TableCell>{charge.customer_document}</TableCell>
       <TableCell className="font-medium">
         {new Intl.NumberFormat("pt-BR", {
           style: "currency",

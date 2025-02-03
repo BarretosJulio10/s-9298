@@ -5,6 +5,7 @@ export function ChargeTableHeader() {
     <TableHeader>
       <TableRow>
         <TableHead>Cliente</TableHead>
+        <TableHead>Documento</TableHead>
         <TableHead>Valor</TableHead>
         <TableHead>Vencimento</TableHead>
         <TableHead>Status</TableHead>

@@ -18,7 +18,10 @@ export function ChargesList() {
         .eq("company_id", user.id)
         .order("due_date", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao buscar cobranças:", error);
+        throw error;
+      }
       return data;
     },
   });
@@ -33,12 +36,20 @@ export function ChargesList() {
     );
   }
 
+  if (!charges || charges.length === 0) {
+    return (
+      <div className="text-center py-8 bg-white rounded-md border">
+        <p className="text-muted-foreground">Nenhuma cobrança encontrada</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-md border bg-white">
       <Table>
         <ChargeTableHeader />
         <TableBody>
-          {charges?.map((charge) => (
+          {charges.map((charge) => (
             <ChargeTableRow key={charge.id} charge={charge} />
           ))}
         </TableBody>
