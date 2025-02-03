@@ -9,17 +9,12 @@ type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 interface PhoneFieldProps {
   form: UseFormReturn<Client>;
+  validateWhatsApp: (phone: string) => Promise<boolean>;
 }
 
-export function PhoneField({ form }: PhoneFieldProps) {
+export function PhoneField({ form, validateWhatsApp }: PhoneFieldProps) {
   const [isValidPhone, setIsValidPhone] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
-
-  const validateWhatsApp = async (phone: string): Promise<boolean> => {
-    // Implementação básica de validação
-    const cleanPhone = phone.replace(/\D/g, '');
-    return cleanPhone.length === 11;
-  };
 
   const handlePhoneChange = async (value: string) => {
     const cleanValue = value.replace(/\D/g, '');

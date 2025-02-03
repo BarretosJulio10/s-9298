@@ -1,68 +1,68 @@
-import DashboardHome from "@/pages/dashboard/DashboardHome";
-import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
-import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
-import { PaymentGatewayForm } from "@/components/dashboard/settings/payment/PaymentGatewayForm";
+import { ChargeForm } from "@/components/dashboard/charges/ChargeForm";
+import { ChargesList } from "@/components/dashboard/charges/ChargesList";
 import { TemplateForm } from "@/components/dashboard/templates/TemplateForm";
 import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
-import { ClientsList } from "@/components/dashboard/clients/ClientsList";
-import { ClientForm } from "@/components/dashboard/clients/ClientForm";
+import { DashboardStats } from "@/components/dashboard/stats/DashboardStats";
+import { Button } from "@/components/ui/button";
 
 interface DashboardContentProps {
   showTemplateForm: boolean;
   showChargeForm: boolean;
   onBack: () => void;
-  activeSection: string;
 }
 
-export function DashboardContent({
-  showTemplateForm,
-  showChargeForm,
-  onBack,
-  activeSection,
+export function DashboardContent({ 
+  showTemplateForm, 
+  showChargeForm, 
+  onBack 
 }: DashboardContentProps) {
-  if (activeSection === "home") {
+  if (showTemplateForm) {
     return (
-      <DashboardHome
-        showTemplateForm={showTemplateForm}
-        showChargeForm={showChargeForm}
-        onBack={onBack}
-        activeSection="home"
-      />
-    );
-  }
-
-  if (activeSection === "clients") {
-    return (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Clientes</h2>
-        <ClientsList />
+      <div className="mt-6">
+        <TemplateForm onCancel={onBack} />
+        <Button 
+          variant="outline" 
+          onClick={onBack}
+          className="mt-4"
+        >
+          Voltar para Lista
+        </Button>
       </div>
     );
   }
 
-  if (activeSection === "settings") {
+  if (showChargeForm) {
     return (
-      <div className="space-y-8">
-        <h2 className="text-2xl font-bold">Configurações</h2>
-        
-        <div className="grid gap-8">
-          <CompanySettingsForm />
-          <PaymentGatewayForm />
+      <div className="mt-6">
+        <ChargeForm />
+        <Button 
+          variant="outline" 
+          onClick={onBack}
+          className="mt-4"
+        >
+          Voltar para Lista
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6 space-y-8">
+      <DashboardStats />
+
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Cobranças</h2>
         </div>
+        <ChargesList />
       </div>
-    );
-  }
 
-  if (activeSection === "templates") {
-    if (showTemplateForm) {
-      return <TemplateForm onBack={onBack} />;
-    }
-    return <TemplatesList />;
-  }
-
-  if (activeSection === "charges") {
-    return <CompanyCharges />;
-  }
-
-  return null;
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Templates de Mensagem</h2>
+        </div>
+        <TemplatesList />
+      </div>
+    </div>
+  );
 }

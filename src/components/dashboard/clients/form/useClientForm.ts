@@ -1,82 +1,118 @@
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 
-type Client = Database["public"]["Tables"]["clients"]["Insert"];
+type Client = Database["public"]["Tables"]["clients"]["Insert"] & {
+  template_id?: string | null;
+};
 
-const clientSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  email: z.string().email("E-mail inválido"),
-  document: z.string().min(1, "Documento é obrigatório"),
-  phone: z.string().min(1, "Telefone é obrigatório"),
-  birth_date: z.string().optional(),
-  charge_type: z.string().default("recurring"),
-  charge_amount: z.number().min(0.01, "Valor deve ser maior que zero"),
-  payment_methods: z.array(z.string()).min(1, "Selecione pelo menos um método de pagamento"),
-  company_id: z.string().optional(),
-  status: z.string().optional(),
-  template_id: z.string().optional()
-});
-
-interface UseClientFormProps {
-  onCancel: () => void;
-}
-
-export function useClientForm({ onCancel }: UseClientFormProps) {
+export const useClientForm = (onClose: () => void) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const validateWhatsApp = async (phone: string): Promise<boolean> => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 11) return false;
+    if (cleanPhone[2] !== '9') return false;
+    const ddd = parseInt(cleanPhone.substring(0, 2));
+    if (ddd < 11 || ddd > 99) return false;
+    return true;
+  };
 
   const form = useForm<Client>({
-    resolver: zodResolver(clientSchema),
     defaultValues: {
       name: "",
       email: "",
       document: "",
       phone: "",
-      charge_type: "recurring",
+      status: "active",
       charge_amount: 0,
-      payment_methods: ["pix"],
-      status: "active"
+      payment_methods: ['pix'],
+      charge_type: 'recurring',
+      template_id: null,
     },
   });
 
-  const onSubmit = async (data: Client) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
+  const mutation = useMutation({
+    mutationFn: async (values: Client) => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error("Usuário não autenticado");
+        }
 
-      const formattedData = {
-        ...data,
-        company_id: user.id,
-        status: "active",
-      };
+        const charge_amount = typeof values.charge_amount === 'string' 
+          ? parseFloat(values.charge_amount) 
+          : values.charge_amount;
 
-      const { error } = await supabase
-        .from("clients")
-        .insert(formattedData);
+        console.log("Dados a serem enviados:", { 
+          ...values, 
+          company_id: user.id,
+          charge_amount 
+        });
 
-      if (error) throw error;
+        const { data: existingClients, error: checkError } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("email", values.email)
+          .eq("company_id", user.id)
+          .maybeSingle();
 
+        if (checkError) {
+          console.error("Erro ao verificar email:", checkError);
+          throw new Error("Erro ao verificar email do cliente");
+        }
+
+        if (existingClients) {
+          throw new Error("Já existe um cliente cadastrado com este email");
+        }
+
+        const { data, error } = await supabase
+          .from("clients")
+          .insert([{
+            ...values,
+            company_id: user.id,
+            charge_amount: charge_amount || 0,
+          }])
+          .select()
+          .maybeSingle();
+
+        if (error) {
+          console.error("Erro ao inserir cliente:", error);
+          throw new Error("Erro ao cadastrar cliente. Por favor, tente novamente.");
+        }
+
+        if (!data) {
+          throw new Error("Erro ao cadastrar cliente: nenhum dado retornado");
+        }
+
+        return data;
+      } catch (error: any) {
+        console.error("Erro ao cadastrar cliente:", error);
+        throw new Error(error.message || "Erro ao cadastrar cliente. Tente novamente mais tarde.");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast({
-        title: "Cliente cadastrado",
-        description: "O cliente foi cadastrado com sucesso",
+        title: "Cliente cadastrado com sucesso!",
       });
-
-      onCancel();
-    } catch (error: any) {
+      onClose();
+      form.reset();
+    },
+    onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Erro ao cadastrar cliente",
-        description: error.message,
+        title: error.message,
       });
-    }
-  };
+    },
+  });
 
   return {
     form,
-    onSubmit,
-    isSubmitting: form.formState.isSubmitting,
+    mutation,
+    validateWhatsApp,
   };
-}
+};

@@ -1,148 +1,84 @@
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { useState } from "react";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { FormHeader } from "./form/FormHeader";
+import { FormFooter } from "./form/FormFooter";
+import { ChargeTypeField } from "./form/ChargeTypeField";
+import { DocumentField } from "./form/DocumentField";
+import { EmailField } from "./form/EmailField";
+import { PhoneField } from "./form/PhoneField";
+import { PaymentMethodsField } from "./form/PaymentMethodsField";
+import { AmountField } from "./form/AmountField";
+import { BirthDateField } from "./form/BirthDateField";
+import { TemplateField } from "./form/TemplateField";
+import { useClientForm } from "./form/useClientForm";
 
 interface ClientFormProps {
-  onBack: () => void;
+  open: boolean;
+  onClose: () => void;
 }
 
-interface ClientFormData {
-  name: string;
-  email: string;
-  document: string;
-  phone: string;
-  charge_amount: number;
-}
+export function ClientForm({ open, onClose }: ClientFormProps) {
+  const [chargeType, setChargeType] = useState("recurring");
+  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>(["pix"]);
+  const { form, mutation, validateWhatsApp } = useClientForm(onClose);
 
-export function ClientForm({ onBack }: ClientFormProps) {
-  const { toast } = useToast();
-  const { session } = useAuth();
-  const form = useForm<ClientFormData>();
-
-  const onSubmit = async (data: ClientFormData) => {
-    if (!session?.user?.id) return;
-
-    try {
-      const { error } = await supabase.from("clients").insert({
-        ...data,
-        company_id: session.user.id,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Cliente cadastrado",
-        description: "O cliente foi cadastrado com sucesso",
-      });
-      onBack();
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao cadastrar",
-        description: error.message,
-      });
-    }
+  const handlePaymentMethodToggle = (method: string) => {
+    setSelectedPaymentMethods(prev => {
+      if (prev.includes(method)) {
+        if (prev.length === 1) return prev;
+        return prev.filter(m => m !== method);
+      }
+      return [...prev, method];
+    });
   };
 
+  function onSubmit(values: any) {
+    const formData = {
+      ...values,
+      payment_methods: selectedPaymentMethods,
+      charge_type: chargeType,
+    };
+    mutation.mutate(formData);
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Novo Cliente</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px] p-0 bg-white rounded-lg shadow-lg">
+        <FormHeader onClose={onClose} />
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-6">
+            <ChargeTypeField 
+              value={chargeType}
+              onChange={setChargeType}
             />
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="email" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <Input placeholder="Nome do cliente" {...form.register("name")} />
 
-            <FormField
-              control={form.control}
-              name="document"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CPF/CNPJ</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Telefone</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="charge_amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Valor da Cobrança</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="number" step="0.01" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-between">
-              <Button type="button" variant="outline" onClick={onBack}>
-                Voltar
-              </Button>
-              <Button type="submit">Salvar</Button>
+            <div className="grid grid-cols-1 gap-4">
+              <EmailField form={form} />
+              <PhoneField form={form} validateWhatsApp={validateWhatsApp} />
+              <div className="grid grid-cols-2 gap-4">
+                <DocumentField form={form} />
+                <div className="flex justify-end">
+                  <AmountField form={form} />
+                </div>
+              </div>
+              <BirthDateField form={form} />
+              <TemplateField form={form} />
             </div>
+
+            <PaymentMethodsField
+              selectedMethods={selectedPaymentMethods}
+              onToggle={handlePaymentMethodToggle}
+            />
+
+            <FormFooter onClose={onClose} />
           </form>
         </Form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }

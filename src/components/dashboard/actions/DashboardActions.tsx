@@ -2,11 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
 interface DashboardActionsProps {
-  onNewCharge: () => void;
   onNewTemplate: () => void;
+  onNewCharge: () => void;
 }
 
-export function DashboardActions({ onNewCharge, onNewTemplate }: DashboardActionsProps) {
+export function DashboardActions({ onNewTemplate, onNewCharge }: DashboardActionsProps) {
   return (
     <div className="flex gap-2">
       <Button onClick={onNewTemplate} className="flex items-center gap-2">

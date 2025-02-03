@@ -4,7 +4,7 @@ import { TemplateForm } from "../TemplateForm";
 interface EditTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  template: any;
+  template: any | null;
 }
 
 export function EditTemplateDialog({ open, onOpenChange, template }: EditTemplateDialogProps) {
@@ -14,7 +14,12 @@ export function EditTemplateDialog({ open, onOpenChange, template }: EditTemplat
         <DialogHeader>
           <DialogTitle>Editar Template</DialogTitle>
         </DialogHeader>
-        <TemplateForm />
+        {template && (
+          <TemplateForm
+            template={template}
+            onCancel={() => onOpenChange(false)}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

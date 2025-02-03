@@ -8,7 +8,7 @@ import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
 import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 import { DashboardSidebarMenu } from "@/components/dashboard/sidebar/DashboardSidebarMenu";
 import { DashboardSidebarFooter } from "@/components/dashboard/sidebar/DashboardSidebarFooter";
-import { DashboardContent } from "@/components/dashboard/content/DashboardContent";
+import { ClientsList } from "@/components/dashboard/clients/ClientsList";
 
 type ActiveSection = "home" | "clients" | "plans" | "wallet" | "charges" | "templates" | "settings";
 
@@ -19,8 +19,6 @@ const CompanyDashboard = () => {
   const [activeSection, setActiveSection] = useState<ActiveSection>("home");
   const [companyName, setCompanyName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
-  const [showTemplateForm, setShowTemplateForm] = useState(false);
-  const [showChargeForm, setShowChargeForm] = useState(false);
 
   useEffect(() => {
     const fetchCompanyName = async () => {
@@ -67,14 +65,30 @@ const CompanyDashboard = () => {
     }
   };
 
-  const handleNewTemplate = () => {
-    setShowTemplateForm(true);
-    setActiveSection("templates");
-  };
-
-  const handleBack = () => {
-    setShowTemplateForm(false);
-    setShowChargeForm(false);
+  const renderContent = () => {
+    switch (activeSection) {
+      case "home":
+        return <DashboardHome />;
+      case "clients":
+        return <ClientsList />;
+      case "plans":
+        return <div>Em desenvolvimento</div>;
+      case "wallet":
+        return <div>Em desenvolvimento</div>;
+      case "charges":
+        return <CompanyCharges companyId={session?.user?.id || ""} />;
+      case "settings":
+        return <CompanySettingsForm />;
+      default:
+        return (
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Bem-vindo ao seu painel</h2>
+            <p className="text-muted-foreground">
+              Selecione uma opção no menu para começar.
+            </p>
+          </div>
+        );
+    }
   };
 
   return (
@@ -93,7 +107,6 @@ const CompanyDashboard = () => {
           <DashboardSidebarMenu 
             activeSection={activeSection} 
             onSectionChange={(section) => setActiveSection(section as ActiveSection)} 
-            onNewTemplate={handleNewTemplate}
           />
           <DashboardSidebarFooter 
             userRole={userRole} 
@@ -103,12 +116,7 @@ const CompanyDashboard = () => {
 
         <div className="flex-1 ml-48">
           <div className="max-w-full mx-4 py-4">
-            <DashboardContent 
-              showTemplateForm={showTemplateForm}
-              showChargeForm={showChargeForm}
-              onBack={handleBack}
-              activeSection={activeSection}
-            />
+            {renderContent()}
           </div>
         </div>
       </div>

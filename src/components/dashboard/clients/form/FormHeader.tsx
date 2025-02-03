@@ -9,7 +9,7 @@ interface FormHeaderProps {
 export function FormHeader({ onClose }: FormHeaderProps) {
   return (
     <DialogHeader className="p-6 border-b">
-      <DialogTitle>Criar um novo cliente</DialogTitle>
+      <DialogTitle className="text-lg font-medium">Criar um novo cliente</DialogTitle>
       <Button 
         variant="ghost" 
         size="icon" 
