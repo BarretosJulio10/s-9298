@@ -1,4 +1,4 @@
-import { Home, CreditCard, User, Wallet } from "lucide-react";
+import { Home, CreditCard, User, Wallet, MessageSquare, Settings } from "lucide-react";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 
 interface DashboardSidebarMenuProps {
