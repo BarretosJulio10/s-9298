@@ -65,7 +65,7 @@ const CompanyDashboard = () => {
     { icon: Settings, label: "Configurações", section: "settings" },
   ];
 
-  const grid = 40; // Reduced grid size for even tighter spacing
+  const grid = 32; // Even smaller grid size for tighter spacing
 
   const snapToGrid = (x: number, y: number) => {
     return {
@@ -89,7 +89,7 @@ const CompanyDashboard = () => {
       <main className="p-8">
         <div className="max-w-7xl mx-auto relative">
           <div className="fixed left-8 top-24 flex flex-col justify-between h-[calc(100vh-8rem)] w-48">
-            <div className="space-y-1">
+            <div className="space-y-0.5"> {/* Reduced space between items */}
               {menuItems.map((item, index) => (
                 <Draggable
                   key={item.section}
@@ -103,7 +103,7 @@ const CompanyDashboard = () => {
                   }}
                 >
                   <div 
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-move transition-all duration-200 ${
+                    className={`flex items-center gap-3 px-3 py-1.5 rounded-lg cursor-move transition-all duration-200 ${
                       activeSection === item.section 
                         ? "bg-primary text-white shadow-lg" 
                         : "bg-white text-gray-700 hover:bg-gray-50 hover:text-primary shadow"
@@ -128,7 +128,7 @@ const CompanyDashboard = () => {
               }}
             >
               <div 
-                className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-move bg-red-500 text-white hover:bg-red-600 transition-colors duration-200 shadow-lg"
+                className="flex items-center gap-3 px-3 py-1.5 rounded-lg cursor-move bg-red-500 text-white hover:bg-red-600 transition-colors duration-200 shadow-lg"
                 onClick={handleLogout}
               >
                 <LogOut className="h-4 w-4" />
