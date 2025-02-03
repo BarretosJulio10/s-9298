@@ -64,10 +64,7 @@ const CompanyDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="h-12 bg-white border-b border-gray-200 flex items-center px-4 sticky top-0 z-50">
         <h1 className="text-2xl font-semibold text-gray-800">
-          {activeSection === "home" && "Dashboard"}
-          {activeSection === "charges" && "Cobranças"}
-          {activeSection === "templates" && "Templates"}
-          {activeSection === "settings" && "Configurações"}
+          Dashboard
         </h1>
       </div>
 
