@@ -181,6 +181,7 @@ export type Database = {
           address_street: string | null
           address_zip: string | null
           birth_date: string | null
+          charge_amount: number
           charge_day: number | null
           charge_start_date: string | null
           charge_type: string | null
@@ -206,6 +207,7 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           birth_date?: string | null
+          charge_amount?: number
           charge_day?: number | null
           charge_start_date?: string | null
           charge_type?: string | null
@@ -231,6 +233,7 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           birth_date?: string | null
+          charge_amount?: number
           charge_day?: number | null
           charge_start_date?: string | null
           charge_type?: string | null
