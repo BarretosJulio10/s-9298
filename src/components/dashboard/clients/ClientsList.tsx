@@ -111,7 +111,7 @@ export function ClientsList() {
                 <TableHead>Nome</TableHead>
                 <TableHead>WhatsApp</TableHead>
                 <TableHead>Data</TableHead>
-                <TableHead>Valor Cobrança</TableHead>
+                <TableHead className="text-center">Valor Cobrança</TableHead>
                 <TableHead className="text-center w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
