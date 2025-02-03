@@ -52,6 +52,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                 }
                 initialFocus
                 locale={ptBR}
+                className="bg-white border rounded-md"
               />
             </PopoverContent>
           </Popover>
