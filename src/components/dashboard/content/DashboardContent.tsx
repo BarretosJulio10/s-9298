@@ -19,7 +19,7 @@ export function DashboardContent({
   if (showTemplateForm) {
     return (
       <div className="mt-6">
-        <TemplateForm onCancel={onBack} />
+        <TemplateForm />
         <Button 
           variant="outline" 
           onClick={onBack}
