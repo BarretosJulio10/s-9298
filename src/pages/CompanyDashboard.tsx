@@ -8,7 +8,7 @@ import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
 import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 import { DashboardSidebarMenu } from "@/components/dashboard/sidebar/DashboardSidebarMenu";
 import { DashboardSidebarFooter } from "@/components/dashboard/sidebar/DashboardSidebarFooter";
-import { ClientsList } from "@/components/dashboard/clients/ClientsList";
+import { DashboardContent } from "@/components/dashboard/content/DashboardContent";
 
 type ActiveSection = "home" | "clients" | "plans" | "wallet" | "charges" | "templates" | "settings";
 
@@ -20,6 +20,7 @@ const CompanyDashboard = () => {
   const [companyName, setCompanyName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
   const [showTemplateForm, setShowTemplateForm] = useState(false);
+  const [showChargeForm, setShowChargeForm] = useState(false);
 
   useEffect(() => {
     const fetchCompanyName = async () => {
@@ -71,30 +72,9 @@ const CompanyDashboard = () => {
     setActiveSection("templates");
   };
 
-  const renderContent = () => {
-    switch (activeSection) {
-      case "home":
-        return <DashboardHome />;
-      case "clients":
-        return <ClientsList />;
-      case "plans":
-        return <div>Em desenvolvimento</div>;
-      case "wallet":
-        return <div>Em desenvolvimento</div>;
-      case "charges":
-        return <CompanyCharges companyId={session?.user?.id || ""} />;
-      case "settings":
-        return <CompanySettingsForm />;
-      default:
-        return (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Bem-vindo ao seu painel</h2>
-            <p className="text-muted-foreground">
-              Selecione uma opção no menu para começar.
-            </p>
-          </div>
-        );
-    }
+  const handleBack = () => {
+    setShowTemplateForm(false);
+    setShowChargeForm(false);
   };
 
   return (
@@ -123,7 +103,12 @@ const CompanyDashboard = () => {
 
         <div className="flex-1 ml-48">
           <div className="max-w-full mx-4 py-4">
-            {renderContent()}
+            <DashboardContent 
+              showTemplateForm={showTemplateForm}
+              showChargeForm={showChargeForm}
+              onBack={handleBack}
+              activeSection={activeSection}
+            />
           </div>
         </div>
       </div>

@@ -9,12 +9,14 @@ interface DashboardContentProps {
   showTemplateForm: boolean;
   showChargeForm: boolean;
   onBack: () => void;
+  activeSection: string;
 }
 
 export function DashboardContent({ 
   showTemplateForm, 
   showChargeForm, 
-  onBack 
+  onBack,
+  activeSection
 }: DashboardContentProps) {
   if (showTemplateForm) {
     return (
@@ -46,6 +48,19 @@ export function DashboardContent({
     );
   }
 
+  if (activeSection === "templates") {
+    return (
+      <div className="mt-6 space-y-8">
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Templates de Mensagem</h2>
+          </div>
+          <TemplatesList />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6 space-y-8">
       <DashboardStats />
@@ -55,13 +70,6 @@ export function DashboardContent({
           <h2 className="text-lg font-semibold text-gray-900">Cobranças</h2>
         </div>
         <ChargesList />
-      </div>
-
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Templates de Mensagem</h2>
-        </div>
-        <TemplatesList />
       </div>
     </div>
   );
