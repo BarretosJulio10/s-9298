@@ -1,16 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { TemplateForm } from "./TemplateForm";
 import { useToast } from "@/hooks/use-toast";
 
 export function TemplatesList() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
+  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
 
   const { data: templates, isLoading } = useQuery({
     queryKey: ["templates"],
@@ -26,6 +29,32 @@ export function TemplatesList() {
 
       if (error) throw error;
       return data;
+    },
+  });
+
+  const deleteTemplate = useMutation({
+    mutationFn: async (templateId: string) => {
+      const { error } = await supabase
+        .from("message_templates")
+        .delete()
+        .eq("id", templateId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      toast({
+        title: "Template excluído",
+        description: "O template foi excluído com sucesso",
+      });
+      setTemplateToDelete(null);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir template",
+        description: error.message,
+      });
     },
   });
 
@@ -68,6 +97,7 @@ export function TemplatesList() {
                       variant="ghost"
                       size="icon"
                       className="text-destructive"
+                      onClick={() => setTemplateToDelete(template.id)}
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
@@ -92,6 +122,26 @@ export function TemplatesList() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={templateToDelete !== null} onOpenChange={() => setTemplateToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Template</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => templateToDelete && deleteTemplate.mutate(templateToDelete)}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
