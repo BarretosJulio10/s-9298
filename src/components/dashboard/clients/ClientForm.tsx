@@ -5,7 +5,6 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { FormHeader } from "./form/FormHeader";
 import { FormFooter } from "./form/FormFooter";
 import { ChargeTypeField } from "./form/ChargeTypeField";
-import { BirthDateField } from "./form/BirthDateField";
 import { DocumentField } from "./form/DocumentField";
 import { EmailField } from "./form/EmailField";
 import { PhoneField } from "./form/PhoneField";
@@ -47,8 +46,6 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               value={chargeType}
               onChange={setChargeType}
             />
-
-            <BirthDateField form={form} />
 
             <Input placeholder="Nome do cliente" {...form.register("name")} />
 

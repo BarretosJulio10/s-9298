@@ -5,6 +5,8 @@ import { Wand2 } from "lucide-react";
 import InputMask from "react-input-mask";
 import { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -37,48 +39,67 @@ export function DocumentField({ form }: DocumentFieldProps) {
       name="document"
       render={({ field }) => {
         const value = field.value || '';
-        const numericValue = value.replace(/\D/g, '');
-        const isCNPJ = numericValue.length > 11;
-        
-        const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-          const newValue = e.target.value;
-          const numericValue = newValue.replace(/\D/g, '');
-          
-          // Permite a entrada de até 14 dígitos (CNPJ)
-          if (numericValue.length <= 14) {
-            field.onChange(newValue);
-          }
-        };
         
         return (
-          <FormItem className="relative">
-            <FormControl>
-              <div className="flex gap-2">
-                <InputMask
-                  mask={isCNPJ ? "99.999.999/9999-99" : "999.999.999-99"}
-                  value={value}
-                  onChange={handleChange}
-                  maskChar={null}
+          <FormItem className="space-y-4">
+            <RadioGroup 
+              defaultValue="cpf" 
+              className="grid grid-cols-2 gap-4"
+              onValueChange={(value) => {
+                form.setValue('document', '');
+              }}
+            >
+              <div>
+                <RadioGroupItem value="cpf" id="cpf" className="peer sr-only" />
+                <Label
+                  htmlFor="cpf"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                 >
-                  {(inputProps: any) => (
-                    <Input 
-                      placeholder={isCNPJ ? "CNPJ" : "CPF"} 
-                      {...inputProps} 
-                    />
-                  )}
-                </InputMask>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={generateValidCPF}
-                  title="Gerar CPF válido"
-                  className="flex-shrink-0"
-                >
-                  <Wand2 className="h-4 w-4" />
-                </Button>
+                  CPF
+                </Label>
               </div>
-            </FormControl>
+              <div>
+                <RadioGroupItem value="cnpj" id="cnpj" className="peer sr-only" />
+                <Label
+                  htmlFor="cnpj"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                >
+                  CNPJ
+                </Label>
+              </div>
+            </RadioGroup>
+
+            <div className="flex gap-2">
+              <InputMask
+                mask={value.length > 11 ? "99.999.999/9999-99" : "999.999.999-99"}
+                value={value}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  const numericValue = newValue.replace(/\D/g, '');
+                  if (numericValue.length <= 14) {
+                    field.onChange(newValue);
+                  }
+                }}
+                maskChar={null}
+              >
+                {(inputProps: any) => (
+                  <Input 
+                    placeholder={value.length > 11 ? "CNPJ" : "CPF"}
+                    {...inputProps} 
+                  />
+                )}
+              </InputMask>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={generateValidCPF}
+                title="Gerar CPF válido"
+                className="flex-shrink-0"
+              >
+                <Wand2 className="h-4 w-4" />
+              </Button>
+            </div>
             <FormMessage />
           </FormItem>
         );
