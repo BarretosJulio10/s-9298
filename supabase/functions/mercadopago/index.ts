@@ -29,7 +29,6 @@ serve(async (req: Request) => {
     const { action, charge, company_id }: MercadoPagoRequest = await req.json()
     console.log('Received request:', { action, charge, company_id })
 
-    // Buscar credenciais do Mercado Pago
     const { data: gatewaySettings, error: settingsError } = await supabaseClient
       .from('payment_gateway_settings')
       .select('*')
@@ -45,28 +44,25 @@ serve(async (req: Request) => {
     console.log('Gateway settings found:', gatewaySettings)
 
     if (action === 'create_charge') {
-      // Validar valor da transação
       const transactionAmount = parseFloat(charge.amount.toString())
       if (isNaN(transactionAmount) || transactionAmount <= 0) {
         throw new Error('O valor da transação deve ser maior que zero')
       }
 
-      // Limpar documento (remover caracteres especiais)
       const cleanDocument = charge.customer_document.replace(/\D/g, '')
       const docType = cleanDocument.length > 11 ? 'CNPJ' : 'CPF'
 
-      // Gerar ID de idempotência único
       const idempotencyKey = crypto.randomUUID()
-
       const baseUrl = 'https://api.mercadopago.com'
+      const webhookUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/mercadopago-webhook`
 
       console.log('Creating Mercado Pago payment:', {
         amount: transactionAmount,
         document: cleanDocument,
-        docType
+        docType,
+        webhookUrl
       })
 
-      // Criar preferência de pagamento
       const preferenceResponse = await fetch(`${baseUrl}/checkout/preferences`, {
         method: 'POST',
         headers: {
@@ -100,7 +96,7 @@ serve(async (req: Request) => {
             failure: "https://www.failure.com",
             pending: "https://www.pending.com"
           },
-          notification_url: "https://www.your-site.com/webhook",
+          notification_url: webhookUrl,
           statement_descriptor: "PAGOUPIX",
           external_reference: idempotencyKey,
         }),
