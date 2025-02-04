@@ -13,17 +13,17 @@ export function CompanySettingsForm() {
       <Route
         path="/"
         element={
-          <Tabs defaultValue="charge" className="space-y-6">
+          <Tabs defaultValue="payment" className="space-y-6">
             <TabsList>
-              <TabsTrigger value="charge">Cobranças</TabsTrigger>
               <TabsTrigger value="payment">Pagamentos</TabsTrigger>
+              <TabsTrigger value="charge">Cobranças</TabsTrigger>
               <TabsTrigger value="notifications">Notificações</TabsTrigger>
             </TabsList>
-            <TabsContent value="charge">
-              <ChargeSettingsForm />
-            </TabsContent>
             <TabsContent value="payment" className="space-y-6">
               <PaymentSettings />
+            </TabsContent>
+            <TabsContent value="charge">
+              <ChargeSettingsForm />
             </TabsContent>
             <TabsContent value="notifications">
               <NotificationRulesForm />
