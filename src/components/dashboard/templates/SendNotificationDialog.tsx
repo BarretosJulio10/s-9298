@@ -26,6 +26,7 @@ interface SendNotificationDialogProps {
   template: {
     id: string;
     content: string;
+    image_url?: string;
   } | null;
 }
 
@@ -100,6 +101,15 @@ export function SendNotificationDialog({ open, onOpenChange, template }: SendNot
               <div className="mt-2 p-3 bg-gray-50 rounded-md text-sm text-gray-600 whitespace-pre-wrap">
                 {template?.content}
               </div>
+              {template?.image_url && (
+                <div className="mt-2">
+                  <img
+                    src={template.image_url}
+                    alt="Template image"
+                    className="max-w-full rounded-md"
+                  />
+                </div>
+              )}
             </div>
             <div className="flex justify-end gap-2">
               <Button

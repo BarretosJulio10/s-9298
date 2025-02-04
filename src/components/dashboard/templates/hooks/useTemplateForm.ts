@@ -9,6 +9,7 @@ const templateSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   type: z.string().min(1, "Tipo é obrigatório"),
   content: z.string().min(1, "Conteúdo é obrigatório"),
+  image_url: z.string().optional(),
 });
 
 export type TemplateFormData = z.infer<typeof templateSchema>;
@@ -19,6 +20,7 @@ interface UseTemplateFormProps {
     name: string;
     type: string;
     content: string;
+    image_url?: string;
   };
   onCancel: () => void;
 }
@@ -33,6 +35,7 @@ export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
       name: template?.name || "",
       type: template?.type || "",
       content: template?.content || "",
+      image_url: template?.image_url || "",
     },
   });
 
@@ -48,6 +51,7 @@ export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
             name: values.name,
             type: values.type,
             content: values.content,
+            image_url: values.image_url,
           })
           .eq("id", template.id);
 
@@ -60,6 +64,7 @@ export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
             name: values.name,
             type: values.type,
             content: values.content,
+            image_url: values.image_url,
           });
 
         if (error) throw error;
