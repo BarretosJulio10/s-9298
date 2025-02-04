@@ -190,11 +190,7 @@ export function PaymentGatewayList() {
                     ? "Mercado Pago"
                     : gateway.gateway === "asaas"
                     ? "ASAAS"
-                    : gateway.gateway === "paghiper"
-                    ? "PagHiper"
-                    : gateway.gateway === "picpay"
-                    ? "PicPay"
-                    : "PagBank"}
+                    : "PagHiper"}
                 </Label>
               </div>
             ))}
