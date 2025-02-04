@@ -4,6 +4,7 @@ import { NotificationRulesForm } from "./NotificationRulesForm";
 import { AsaasGatewayForm } from "./payment/gateways/AsaasGatewayForm";
 import { MercadoPagoGatewayForm } from "./payment/gateways/MercadoPagoGatewayForm";
 import { PaymentMethodSettings } from "./payment/PaymentMethodSettings";
+import { PaymentGatewayList } from "@/components/admin/settings/payment/PaymentGatewayList";
 
 export function CompanySettingsForm() {
   return (
@@ -17,8 +18,9 @@ export function CompanySettingsForm() {
         <ChargeSettingsForm />
       </TabsContent>
       <TabsContent value="payment" className="space-y-6">
-        <AsaasGatewayForm />
+        <PaymentGatewayList />
         <MercadoPagoGatewayForm />
+        <AsaasGatewayForm />
         <PaymentMethodSettings />
       </TabsContent>
       <TabsContent value="notifications">
