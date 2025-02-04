@@ -3,7 +3,9 @@ import { ptBR } from "date-fns/locale";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy, FileEdit, Ban, ExternalLink } from "lucide-react";
+import { Copy, FileEdit, Ban, ExternalLink, Send } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { callWhatsAppAPI } from "@/lib/whatsapp";
 
 interface ChargeTableRowProps {
   charge: {
@@ -20,6 +22,8 @@ interface ChargeTableRowProps {
 }
 
 export function ChargeTableRow({ charge }: ChargeTableRowProps) {
+  const { toast } = useToast();
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "paid":
@@ -47,6 +51,49 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
         return "Cancelado";
       default:
         return status;
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (charge.payment_link) {
+      await navigator.clipboard.writeText(charge.payment_link);
+      toast({
+        description: "Link de pagamento copiado!",
+      });
+    }
+  };
+
+  const handleSendMessage = async () => {
+    try {
+      if (!charge.payment_link) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao enviar mensagem",
+          description: "Link de pagamento não disponível",
+        });
+        return;
+      }
+
+      const message = `Olá! Você tem uma cobrança no valor de ${new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(charge.amount)}. Link para pagamento: ${charge.payment_link}`;
+
+      await callWhatsAppAPI("sendMessage", {
+        phone: "PHONE_NUMBER", // Você precisará adicionar o número de telefone do cliente na interface da cobrança
+        message: message,
+      });
+
+      toast({
+        description: "Mensagem enviada com sucesso!",
+      });
+    } catch (error) {
+      console.error("Erro ao enviar mensagem:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao enviar mensagem",
+        description: "Não foi possível enviar a mensagem",
+      });
     }
   };
 
@@ -87,7 +134,7 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => navigator.clipboard.writeText(charge.payment_link!)}
+                onClick={handleCopyLink}
                 title="Copiar link"
               >
                 <Copy className="h-4 w-4" />
@@ -99,6 +146,14 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
                 title="Abrir link"
               >
                 <ExternalLink className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleSendMessage}
+                title="Enviar por WhatsApp"
+              >
+                <Send className="h-4 w-4" />
               </Button>
             </>
           )}
