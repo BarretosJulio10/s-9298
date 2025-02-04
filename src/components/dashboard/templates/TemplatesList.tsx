@@ -97,17 +97,15 @@ export function TemplatesList() {
       {showForm && (
         <TemplateForm
           template={selectedTemplate}
-          onClose={handleFormClose}
+          onCancel={handleFormClose}
         />
       )}
 
       {showSendDialog && selectedTemplate && (
         <SendNotificationDialog
+          open={showSendDialog}
+          onOpenChange={setShowSendDialog}
           template={selectedTemplate}
-          onClose={() => {
-            setShowSendDialog(false);
-            setSelectedTemplate(null);
-          }}
         />
       )}
     </div>
