@@ -30,7 +30,8 @@ const AdminSettings = () => {
       const { data, error } = await supabase
         .from("configurations")
         .select("*")
-        .single();
+        .limit(1)
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -55,11 +56,19 @@ const AdminSettings = () => {
       stripe_product_id?: string;
       stripe_price_id?: string;
     }) => {
-      const { error } = await supabase
-        .from("configurations")
-        .upsert([values], { onConflict: "id" });
-
-      if (error) throw error;
+      // Se já existe uma configuração, atualiza. Senão, cria uma nova.
+      if (config?.id) {
+        const { error } = await supabase
+          .from("configurations")
+          .update(values)
+          .eq('id', config.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("configurations")
+          .insert([values]);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["configurations"] });
