@@ -47,13 +47,18 @@ export function AdminSidebar() {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+      
       toast({
         title: "Logout realizado com sucesso",
         description: "Você será redirecionado para a página principal",
       });
+      
       navigate("/");
     } catch (error) {
+      console.error("Erro ao fazer logout:", error);
       toast({
         title: "Erro ao realizar logout",
         description: "Tente novamente mais tarde",
