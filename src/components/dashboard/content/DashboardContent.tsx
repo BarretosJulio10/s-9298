@@ -4,9 +4,6 @@ import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
 import { DashboardStats } from "@/components/dashboard/stats/DashboardStats";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { TemplateForm } from "@/components/dashboard/templates/TemplateForm";
 
 interface DashboardContentProps {
   showChargeForm: boolean;
@@ -20,7 +17,6 @@ export function DashboardContent({
   activeSection 
 }: DashboardContentProps) {
   const { session } = useAuth();
-  const [showNewTemplateForm, setShowNewTemplateForm] = useState(false);
 
   if (showChargeForm) {
     return (
