@@ -66,7 +66,6 @@ export function PagHiperGatewayForm() {
         title: "Configurações salvas",
         description: "As configurações do PagHiper foram atualizadas com sucesso.",
       });
-      navigate(-1);
     },
     onError: (error) => {
       toast({
@@ -91,7 +90,7 @@ export function PagHiperGatewayForm() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/dashboard/settings/payment")}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
