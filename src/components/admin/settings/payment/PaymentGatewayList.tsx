@@ -74,6 +74,10 @@ export function PaymentGatewayList() {
     gatewayMutation.mutate({ id, enabled: true, isDefault: true });
   };
 
+  const handleConfigureGateway = (gateway: string) => {
+    navigate(`/dashboard/settings/payment/${gateway}`);
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -90,7 +94,7 @@ export function PaymentGatewayList() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => navigate("/dashboard/settings/payment/mercadopago")}
+                    onClick={() => handleConfigureGateway("mercadopago")}
                   >
                     <Settings className="h-4 w-4" />
                   </Button>
@@ -135,7 +139,7 @@ export function PaymentGatewayList() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => navigate("/dashboard/settings/payment/asaas")}
+                    onClick={() => handleConfigureGateway("asaas")}
                   >
                     <Settings className="h-4 w-4" />
                   </Button>
@@ -180,7 +184,7 @@ export function PaymentGatewayList() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => navigate("/dashboard/settings/payment/paghiper")}
+                    onClick={() => handleConfigureGateway("paghiper")}
                   >
                     <Settings className="h-4 w-4" />
                   </Button>
