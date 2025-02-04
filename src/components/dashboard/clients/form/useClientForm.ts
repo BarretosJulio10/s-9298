@@ -4,9 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 
-type Client = Database["public"]["Tables"]["clients"]["Insert"] & {
-  template_id?: string | null;
-};
+type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 export const useClientForm = (onClose: () => void) => {
   const { toast } = useToast();
@@ -31,7 +29,7 @@ export const useClientForm = (onClose: () => void) => {
       charge_amount: 0,
       payment_methods: ['pix'],
       charge_type: 'recurring',
-      template_id: null,
+      birth_date: null,
     },
   });
 
