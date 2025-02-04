@@ -19,7 +19,9 @@ interface ChargeTableRowProps {
 }
 
 export function ChargeTableRow({ charge }: ChargeTableRowProps) {
-  console.log("Payment link:", charge.payment_link); // Debug log
+  // Adiciona logs para debug
+  console.log("Charge data:", charge);
+  console.log("Payment link:", charge.payment_link);
 
   return (
     <TableRow>

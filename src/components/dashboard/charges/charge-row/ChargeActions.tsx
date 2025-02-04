@@ -15,11 +15,20 @@ interface ChargeActionsProps {
 
 export function ChargeActions({ paymentLink, status }: ChargeActionsProps) {
   const { toast } = useToast();
-  console.log("ChargeActions - paymentLink:", paymentLink); // Debug log
-  console.log("ChargeActions - status:", status); // Debug log
+  
+  // Adiciona logs para debug
+  console.log("ChargeActions - paymentLink:", paymentLink);
+  console.log("ChargeActions - status:", status);
 
   const handleCopyLink = async () => {
-    if (!paymentLink) return;
+    if (!paymentLink) {
+      toast({
+        variant: "destructive",
+        title: "Link não disponível",
+        description: "Esta cobrança ainda não possui um link de pagamento.",
+      });
+      return;
+    }
 
     try {
       await navigator.clipboard.writeText(paymentLink);
@@ -36,45 +45,49 @@ export function ChargeActions({ paymentLink, status }: ChargeActionsProps) {
     }
   };
 
+  if (!paymentLink) {
+    return (
+      <div className="flex justify-end">
+        <span className="text-sm text-muted-foreground">Sem link</span>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-end gap-2">
-      {paymentLink && (
-        <>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleCopyLink}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Copiar link de pagamento</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => window.open(paymentLink, '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Abrir link de pagamento</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </>
-      )}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleCopyLink}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Copiar link de pagamento</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => window.open(paymentLink, '_blank')}
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Abrir link de pagamento</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }
