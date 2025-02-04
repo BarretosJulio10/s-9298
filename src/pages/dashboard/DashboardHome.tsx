@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { DashboardContent } from "@/components/dashboard/content/DashboardContent";
+import { DashboardSidebarMenu } from "@/components/dashboard/sidebar/DashboardSidebarMenu";
 
 const DashboardHome = () => {
   const [showChargeForm, setShowChargeForm] = useState(false);
@@ -10,23 +11,23 @@ const DashboardHome = () => {
   };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 mt-1">
-            Gerencie suas cobranças e acompanhe seus resultados
-          </p>
-        </div>
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      <aside className="w-64 bg-white border-r border-gray-200">
+        <DashboardSidebarMenu 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection} 
+        />
+      </aside>
 
-      <DashboardContent 
-        showChargeForm={showChargeForm}
-        onBack={handleBack}
-        activeSection={activeSection}
-      />
+      <main className="flex-1 p-8">
+        <DashboardContent 
+          showChargeForm={showChargeForm}
+          onBack={handleBack}
+          activeSection={activeSection}
+        />
+      </main>
     </div>
   );
-}
+};
 
 export default DashboardHome;
