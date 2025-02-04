@@ -24,23 +24,26 @@ interface MercadoPagoGatewayFormData {
 
 export function MercadoPagoGatewayForm() {
   const { toast } = useToast();
-  const { session } = useAuth();
+  const { session, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   // Buscar configurações existentes
   const { data: existingSettings } = useQuery({
-    queryKey: ["mercadopago-settings"],
+    queryKey: ["mercadopago-settings", session?.user?.id],
     queryFn: async () => {
+      if (!session?.user?.id) throw new Error("Usuário não autenticado");
+
       const { data, error } = await supabase
         .from("payment_gateway_settings")
         .select("*")
-        .eq("company_id", session?.user?.id)
+        .eq("company_id", session.user.id)
         .eq("gateway", "mercadopago")
         .maybeSingle();
 
       if (error) throw error;
       return data;
     },
+    enabled: !!session?.user?.id, // Só executa quando tivermos o ID do usuário
   });
 
   const form = useForm<MercadoPagoGatewayFormData>({
@@ -86,6 +89,10 @@ export function MercadoPagoGatewayForm() {
       setIsLoading(false);
     }
   };
+
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <Card>
