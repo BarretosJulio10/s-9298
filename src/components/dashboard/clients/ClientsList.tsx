@@ -13,12 +13,14 @@ import { ClientForm } from "./ClientForm";
 import { ClientSearchBar } from "./list/ClientSearchBar";
 import { ClientStatus } from "./list/ClientStatus";
 import { ClientActions } from "./list/ClientActions";
+import { ClientChargesHistory } from "./list/ClientChargesHistory";
 import { useClients } from "./list/useClients";
 
 export function ClientsList() {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage, setPerPage] = useState("10");
+  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
 
   const { data: clientsWithCharges, isLoading } = useClients();
 
@@ -68,7 +70,14 @@ export function ClientsList() {
             {filteredClients?.map((client) => (
               <TableRow key={client.id}>
                 <TableCell>{client.id.slice(0, 4)}</TableCell>
-                <TableCell>{client.name}</TableCell>
+                <TableCell>
+                  <button
+                    onClick={() => setSelectedClient({ id: client.id, name: client.name })}
+                    className="text-left hover:text-primary transition-colors"
+                  >
+                    {client.name}
+                  </button>
+                </TableCell>
                 <TableCell className="text-center">{client.phone}</TableCell>
                 <TableCell className="text-center">
                   {new Date(client.created_at).toLocaleDateString('pt-BR')}
@@ -105,6 +114,12 @@ export function ClientsList() {
       <ClientForm 
         open={showForm}
         onClose={() => setShowForm(false)}
+      />
+
+      <ClientChargesHistory
+        clientId={selectedClient?.id || null}
+        clientName={selectedClient?.name || ""}
+        onClose={() => setSelectedClient(null)}
       />
     </div>
   );
