@@ -75,7 +75,7 @@ export function PaymentGatewayList() {
   };
 
   const handleConfigureGateway = (gateway: string) => {
-    navigate(`/dashboard/settings/payment/${gateway}`);
+    navigate(`payment/${gateway}`);
   };
 
   return (
