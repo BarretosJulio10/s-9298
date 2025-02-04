@@ -25,10 +25,7 @@ const AdminCompanies = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          plans(name)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -90,7 +87,6 @@ const AdminCompanies = () => {
             <TableHead>Nome da Empresa</TableHead>
             <TableHead>CNPJ</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Plano</TableHead>
             <TableHead>WhatsApp</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Data de Cadastro</TableHead>
@@ -103,7 +99,6 @@ const AdminCompanies = () => {
               <TableCell>{company.company_name || "-"}</TableCell>
               <TableCell>{company.cnpj || "-"}</TableCell>
               <TableCell>{company.email}</TableCell>
-              <TableCell>{company.plans?.name || "Sem plano"}</TableCell>
               <TableCell>{company.whatsapp || "-"}</TableCell>
               <TableCell>
                 <Badge
