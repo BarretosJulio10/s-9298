@@ -592,11 +592,119 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_closings: {
+        Row: {
+          closed_at: string
+          closing_balance: number
+          company_id: string
+          created_at: string
+          id: string
+          month: number
+          opening_balance: number
+          total_expense: number
+          total_income: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          closed_at?: string
+          closing_balance?: number
+          company_id: string
+          created_at?: string
+          id?: string
+          month: number
+          opening_balance?: number
+          total_expense?: number
+          total_income?: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          closed_at?: string
+          closing_balance?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          month?: number
+          opening_balance?: number
+          total_expense?: number
+          total_income?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_closings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          charge_id: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          payment_method: string | null
+          transaction_date: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          charge_id?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          transaction_date?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          charge_id?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          transaction_date?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      close_monthly_wallet: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
