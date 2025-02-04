@@ -16,7 +16,6 @@ interface MercadoPagoRequest {
 }
 
 serve(async (req: Request) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -28,10 +27,9 @@ serve(async (req: Request) => {
     )
 
     const { action, charge, company_id }: MercadoPagoRequest = await req.json()
-
     console.log('Received request:', { action, charge, company_id })
 
-    // Buscar as credenciais do Mercado Pago da empresa
+    // Buscar credenciais do Mercado Pago
     const { data: gatewaySettings, error: settingsError } = await supabaseClient
       .from('payment_gateway_settings')
       .select('*')
@@ -47,33 +45,29 @@ serve(async (req: Request) => {
     console.log('Gateway settings found:', gatewaySettings)
 
     if (action === 'create_charge') {
-      console.log('Creating charge with Mercado Pago:', charge)
-      
-      // Validar e formatar o valor da transação
-      const transactionAmount = Math.abs(Number(charge.amount))
+      // Validar valor da transação
+      const transactionAmount = parseFloat(charge.amount.toString())
       if (isNaN(transactionAmount) || transactionAmount <= 0) {
         throw new Error('O valor da transação deve ser maior que zero')
       }
-      
-      // Formatar a data para o formato esperado pelo Mercado Pago
-      const dueDate = new Date(charge.due_date)
-      dueDate.setHours(23, 59, 59)
-      const formattedDueDate = dueDate.toISOString()
-      
-      // Limpar o documento (remover caracteres especiais)
+
+      // Limpar documento (remover caracteres especiais)
       const cleanDocument = charge.customer_document.replace(/\D/g, '')
-      
-      // Gerar um ID de idempotência único baseado nos dados da cobrança
+      const docType = cleanDocument.length > 11 ? 'CNPJ' : 'CPF'
+
+      // Gerar ID de idempotência único
       const idempotencyKey = crypto.randomUUID()
-      
-      const baseUrl = gatewaySettings.environment === 'production' 
-        ? 'https://api.mercadopago.com'
-        : 'https://api.mercadopago.com'
 
-      console.log('Making request to Mercado Pago with amount:', transactionAmount)
-      console.log('Clean document:', cleanDocument)
+      const baseUrl = 'https://api.mercadopago.com'
 
-      const response = await fetch(`${baseUrl}/v1/payments`, {
+      console.log('Creating Mercado Pago payment:', {
+        amount: transactionAmount,
+        document: cleanDocument,
+        docType
+      })
+
+      // Criar preferência de pagamento
+      const preferenceResponse = await fetch(`${baseUrl}/checkout/preferences`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${gatewaySettings.api_key}`,
@@ -81,34 +75,49 @@ serve(async (req: Request) => {
           'X-Idempotency-Key': idempotencyKey,
         },
         body: JSON.stringify({
-          transaction_amount: transactionAmount,
-          description: `Cobrança para ${charge.customer_name}`,
-          payment_method_id: charge.payment_method === 'credit_card' ? 'credit_card' : 'pix',
+          items: [{
+            title: `Cobrança para ${charge.customer_name}`,
+            quantity: 1,
+            currency_id: 'BRL',
+            unit_price: transactionAmount
+          }],
           payer: {
             email: charge.customer_email,
             identification: {
-              type: cleanDocument.length > 11 ? 'CNPJ' : 'CPF',
-              number: cleanDocument,
+              type: docType,
+              number: cleanDocument
             },
-            first_name: charge.customer_name.split(' ')[0],
-            last_name: charge.customer_name.split(' ').slice(1).join(' ') || charge.customer_name,
+            name: charge.customer_name
           },
-          date_of_expiration: formattedDueDate,
+          payment_methods: {
+            excluded_payment_methods: [],
+            excluded_payment_types: [],
+            installments: 1
+          },
+          auto_return: "approved",
+          back_urls: {
+            success: "https://www.success.com",
+            failure: "https://www.failure.com",
+            pending: "https://www.pending.com"
+          },
+          notification_url: "https://www.your-site.com/webhook",
+          statement_descriptor: "PAGOUPIX",
+          external_reference: idempotencyKey,
         }),
       })
 
-      const mpResponse = await response.json()
+      const mpResponse = await preferenceResponse.json()
       console.log('Mercado Pago response:', mpResponse)
 
-      if (!response.ok) {
+      if (!preferenceResponse.ok) {
         throw new Error(`Erro ao criar cobrança: ${mpResponse.message || JSON.stringify(mpResponse)}`)
       }
 
       return new Response(
         JSON.stringify({
           id: mpResponse.id,
-          status: mpResponse.status,
-          payment_link: mpResponse.point_of_interaction?.transaction_data?.ticket_url || '',
+          status: 'pending',
+          payment_link: mpResponse.init_point,
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
