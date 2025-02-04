@@ -16,7 +16,6 @@ interface ChargeActionsProps {
 export function ChargeActions({ paymentLink, status }: ChargeActionsProps) {
   const { toast } = useToast();
   
-  // Adiciona logs para debug
   console.log("ChargeActions - paymentLink:", paymentLink);
   console.log("ChargeActions - status:", status);
 
@@ -37,6 +36,7 @@ export function ChargeActions({ paymentLink, status }: ChargeActionsProps) {
         description: "O link de pagamento foi copiado para sua área de transferência.",
       });
     } catch (error) {
+      console.error("Erro ao copiar link:", error);
       toast({
         variant: "destructive",
         title: "Erro ao copiar link",

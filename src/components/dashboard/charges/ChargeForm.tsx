@@ -32,7 +32,6 @@ export function ChargeForm() {
   const form = useForm<ChargeFormData>();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Busca os gateways disponíveis e o gateway padrão
   const { data: gateways } = useQuery({
     queryKey: ["payment-gateways"],
     queryFn: async () => {
@@ -47,7 +46,6 @@ export function ChargeForm() {
     },
   });
 
-  // Busca o gateway padrão
   const defaultGateway = gateways?.find(g => g.is_default);
 
   const onSubmit = async (data: ChargeFormData) => {
@@ -62,16 +60,19 @@ export function ChargeForm() {
           company_id: session.user.id,
           customer_name: data.customer_name,
           customer_email: data.customer_email,
-          customer_document: data.customer_document,
+          customer_document: data.customer_document.replace(/\D/g, ''), // Remove caracteres não numéricos
           amount: parseFloat(data.amount),
           due_date: data.due_date,
           gateway_id: data.gateway_id || defaultGateway?.id,
-          status: "pending"
+          status: "pending",
+          payment_method: "pix"
         })
         .select()
         .single();
 
       if (chargeError) throw chargeError;
+
+      console.log("Charge created:", charge); // Log para debug
 
       // Agora vamos gerar o link de pagamento baseado no gateway selecionado
       const selectedGateway = gateways?.find(g => g.id === (data.gateway_id || defaultGateway?.id));
@@ -87,7 +88,7 @@ export function ChargeForm() {
             charge: {
               customer_name: data.customer_name,
               customer_email: data.customer_email,
-              customer_document: data.customer_document,
+              customer_document: data.customer_document.replace(/\D/g, ''),
               amount: parseFloat(data.amount),
               due_date: data.due_date,
               payment_method: "pix"
@@ -97,6 +98,7 @@ export function ChargeForm() {
         });
 
         const mpResponse = await response.json();
+        console.log("Mercado Pago response:", mpResponse); // Log para debug
         
         if (!response.ok) throw new Error(mpResponse.error);
 
@@ -111,10 +113,14 @@ export function ChargeForm() {
 
         if (updateError) throw updateError;
 
-        toast({
-          title: "Link de pagamento gerado",
-          description: "O link foi gerado e a cobrança foi criada com sucesso",
-        });
+        // Copia o link para a área de transferência
+        if (mpResponse.payment_link) {
+          await navigator.clipboard.writeText(mpResponse.payment_link);
+          toast({
+            title: "Link de pagamento gerado",
+            description: "O link foi copiado para sua área de transferência",
+          });
+        }
       }
 
       form.reset();
