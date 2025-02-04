@@ -49,6 +49,11 @@ serve(async (req: Request) => {
     if (action === 'create_charge') {
       console.log('Creating charge with Mercado Pago:', charge)
       
+      // Formatar a data para o formato esperado pelo Mercado Pago
+      const dueDate = new Date(charge.due_date)
+      dueDate.setHours(23, 59, 59)
+      const formattedDueDate = dueDate.toISOString()
+      
       const baseUrl = gatewaySettings.environment === 'production' 
         ? 'https://api.mercadopago.com'
         : 'https://api.mercadopago.com'
@@ -72,7 +77,7 @@ serve(async (req: Request) => {
             first_name: charge.customer_name.split(' ')[0],
             last_name: charge.customer_name.split(' ').slice(1).join(' '),
           },
-          date_of_expiration: charge.due_date,
+          date_of_expiration: formattedDueDate,
         }),
       })
 
