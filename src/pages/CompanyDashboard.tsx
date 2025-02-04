@@ -9,6 +9,7 @@ import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySett
 import { DashboardSidebarMenu } from "@/components/dashboard/sidebar/DashboardSidebarMenu";
 import { DashboardSidebarFooter } from "@/components/dashboard/sidebar/DashboardSidebarFooter";
 import { ClientsList } from "@/components/dashboard/clients/ClientsList";
+import { WalletContent } from "@/components/dashboard/wallet/WalletContent";
 
 type ActiveSection = "home" | "clients" | "plans" | "wallet" | "charges" | "templates" | "settings";
 
@@ -71,10 +72,8 @@ const CompanyDashboard = () => {
         return <DashboardHome />;
       case "clients":
         return <ClientsList />;
-      case "plans":
-        return <div>Em desenvolvimento</div>;
       case "wallet":
-        return <div>Em desenvolvimento</div>;
+        return <WalletContent />;
       case "charges":
         return <CompanyCharges companyId={session?.user?.id || ""} />;
       case "settings":
