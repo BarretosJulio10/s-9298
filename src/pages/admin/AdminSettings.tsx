@@ -35,12 +35,20 @@ const AdminSettings = () => {
       if (error) throw error;
       return data;
     },
+    onSuccess: (data) => {
+      if (data) {
+        setApiKey(data.asaas_api_key || "");
+        setEnvironment(data.asaas_environment || "sandbox");
+        setStripeProductId(data.stripe_product_id || "");
+        setStripePriceId(data.stripe_price_id || "");
+      }
+    },
   });
 
   // Mutation para salvar configurações
   const mutation = useMutation({
-    mutationFn: async (values: { 
-      asaas_api_key: string; 
+    mutationFn: async (values: {
+      asaas_api_key: string;
       asaas_environment: string;
       stripe_product_id?: string;
       stripe_price_id?: string;
@@ -112,10 +120,7 @@ const AdminSettings = () => {
 
                 <div className="space-y-2">
                   <label htmlFor="environment">Ambiente</label>
-                  <Select
-                    value={environment}
-                    onValueChange={setEnvironment}
-                  >
+                  <Select value={environment} onValueChange={setEnvironment}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o ambiente" />
                     </SelectTrigger>
