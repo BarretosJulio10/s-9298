@@ -18,39 +18,42 @@ export function DashboardContent({
 }: DashboardContentProps) {
   const { session } = useAuth();
 
-  if (showChargeForm) {
-    return (
-      <div className="mt-6">
-        <ChargeForm />
-        <Button 
-          variant="outline" 
-          onClick={onBack}
-          className="mt-4"
-        >
-          Voltar para Lista
-        </Button>
-      </div>
-    );
-  }
-
-  if (activeSection === "templates") {
-    return (
-      <div className="mt-6">
-        <TemplatesList />
-      </div>
-    );
-  }
-
-  return (
-    <div className="mt-6 space-y-8">
-      <DashboardStats />
-
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Cobranças</h2>
+  const renderContent = () => {
+    if (showChargeForm) {
+      return (
+        <div className="mt-6">
+          <ChargeForm />
+          <Button 
+            variant="outline" 
+            onClick={onBack}
+            className="mt-4"
+          >
+            Voltar para Lista
+          </Button>
         </div>
-        {session?.user?.id && <ChargesList companyId={session.user.id} />}
+      );
+    }
+
+    if (activeSection === "templates") {
+      return (
+        <div className="mt-6">
+          <TemplatesList />
+        </div>
+      );
+    }
+
+    return (
+      <div className="mt-6 space-y-8">
+        <DashboardStats />
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Cobranças</h2>
+          </div>
+          {session?.user?.id && <ChargesList companyId={session.user.id} />}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  return renderContent();
 }

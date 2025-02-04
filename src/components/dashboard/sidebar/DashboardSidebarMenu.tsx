@@ -1,27 +1,23 @@
 import { Home, CreditCard, User, Wallet, MessageSquare, Settings } from "lucide-react";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { useNavigate } from "react-router-dom";
 
 interface DashboardSidebarMenuProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
 }
 
+const menuItems = [
+  { icon: Home, label: "Início", section: "home" },
+  { icon: User, label: "Clientes", section: "clients" },
+  { icon: Wallet, label: "Carteira", section: "wallet" },
+  { icon: CreditCard, label: "Cobranças", section: "charges" },
+  { icon: MessageSquare, label: "Templates", section: "templates" },
+  { icon: Settings, label: "Configurações", section: "settings" },
+] as const;
+
 export function DashboardSidebarMenu({ 
   activeSection, 
   onSectionChange 
 }: DashboardSidebarMenuProps) {
-  const navigate = useNavigate();
-
-  const menuItems = [
-    { icon: Home, label: "Início", section: "home" },
-    { icon: User, label: "Clientes", section: "clients" },
-    { icon: Wallet, label: "Carteira", section: "wallet" },
-    { icon: CreditCard, label: "Cobranças", section: "charges" },
-    { icon: MessageSquare, label: "Templates", section: "templates" },
-    { icon: Settings, label: "Configurações", section: "settings" },
-  ];
-
   return (
     <div className="flex-1 space-y-1 px-3 py-2">
       {menuItems.map((item) => (
