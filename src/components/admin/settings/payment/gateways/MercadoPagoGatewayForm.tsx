@@ -28,7 +28,7 @@ export function MercadoPagoGatewayForm() {
         .select("*")
         .eq("company_id", session.user.id)
         .eq("gateway", "mercadopago")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
