@@ -545,6 +545,10 @@ export type Database = {
           id: string
           plan_id: string | null
           status: Database["public"]["Enums"]["company_status"] | null
+          stripe_customer_id: string | null
+          subscription_end_date: string | null
+          subscription_id: string | null
+          subscription_status: string | null
           updated_at: string
           whatsapp: string | null
         }
@@ -557,6 +561,10 @@ export type Database = {
           id: string
           plan_id?: string | null
           status?: Database["public"]["Enums"]["company_status"] | null
+          stripe_customer_id?: string | null
+          subscription_end_date?: string | null
+          subscription_id?: string | null
+          subscription_status?: string | null
           updated_at?: string
           whatsapp?: string | null
         }
@@ -569,6 +577,10 @@ export type Database = {
           id?: string
           plan_id?: string | null
           status?: Database["public"]["Enums"]["company_status"] | null
+          stripe_customer_id?: string | null
+          subscription_end_date?: string | null
+          subscription_id?: string | null
+          subscription_status?: string | null
           updated_at?: string
           whatsapp?: string | null
         }
