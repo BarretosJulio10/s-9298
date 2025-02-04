@@ -111,18 +111,18 @@ export function PaymentGatewayList() {
                       }}
                     />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem 
-                      value={gateways?.find(g => g.gateway === "mercadopago")?.id || ""} 
-                      id="mercadopago"
-                      checked={gateways?.find(g => g.gateway === "mercadopago")?.is_default || false}
-                      onClick={() => {
-                        const gateway = gateways?.find(g => g.gateway === "mercadopago");
-                        if (gateway) handleDefaultGateway(gateway.id);
-                      }}
-                    />
-                    <Label htmlFor="mercadopago">Gateway Principal</Label>
-                  </div>
+                  <RadioGroup
+                    value={gateways?.find(g => g.gateway === "mercadopago" && g.is_default)?.id}
+                    onValueChange={(value) => {
+                      const gateway = gateways?.find(g => g.id === value);
+                      if (gateway) handleDefaultGateway(gateway.id);
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value={gateways?.find(g => g.gateway === "mercadopago")?.id || ""} id="mercadopago" />
+                      <Label htmlFor="mercadopago">Gateway Principal</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
               </CardContent>
             </Card>
@@ -156,18 +156,18 @@ export function PaymentGatewayList() {
                       }}
                     />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem 
-                      value={gateways?.find(g => g.gateway === "asaas")?.id || ""} 
-                      id="asaas"
-                      checked={gateways?.find(g => g.gateway === "asaas")?.is_default || false}
-                      onClick={() => {
-                        const gateway = gateways?.find(g => g.gateway === "asaas");
-                        if (gateway) handleDefaultGateway(gateway.id);
-                      }}
-                    />
-                    <Label htmlFor="asaas">Gateway Principal</Label>
-                  </div>
+                  <RadioGroup
+                    value={gateways?.find(g => g.gateway === "asaas" && g.is_default)?.id}
+                    onValueChange={(value) => {
+                      const gateway = gateways?.find(g => g.id === value);
+                      if (gateway) handleDefaultGateway(gateway.id);
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value={gateways?.find(g => g.gateway === "asaas")?.id || ""} id="asaas" />
+                      <Label htmlFor="asaas">Gateway Principal</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
               </CardContent>
             </Card>
@@ -201,18 +201,18 @@ export function PaymentGatewayList() {
                       }}
                     />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem 
-                      value={gateways?.find(g => g.gateway === "paghiper")?.id || ""} 
-                      id="paghiper"
-                      checked={gateways?.find(g => g.gateway === "paghiper")?.is_default || false}
-                      onClick={() => {
-                        const gateway = gateways?.find(g => g.gateway === "paghiper");
-                        if (gateway) handleDefaultGateway(gateway.id);
-                      }}
-                    />
-                    <Label htmlFor="paghiper">Gateway Principal</Label>
-                  </div>
+                  <RadioGroup
+                    value={gateways?.find(g => g.gateway === "paghiper" && g.is_default)?.id}
+                    onValueChange={(value) => {
+                      const gateway = gateways?.find(g => g.id === value);
+                      if (gateway) handleDefaultGateway(gateway.id);
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value={gateways?.find(g => g.gateway === "paghiper")?.id || ""} id="paghiper" />
+                      <Label htmlFor="paghiper">Gateway Principal</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
               </CardContent>
             </Card>
