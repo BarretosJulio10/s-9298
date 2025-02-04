@@ -29,6 +29,8 @@ serve(async (req: Request) => {
 
     const { action, charge, company_id }: MercadoPagoRequest = await req.json()
 
+    console.log('Received request:', { action, charge, company_id })
+
     // Buscar as credenciais do Mercado Pago da empresa
     const { data: gatewaySettings, error: settingsError } = await supabaseClient
       .from('payment_gateway_settings')
@@ -41,6 +43,8 @@ serve(async (req: Request) => {
       console.error('Error fetching gateway settings:', settingsError)
       throw new Error('Credenciais do Mercado Pago não encontradas')
     }
+
+    console.log('Gateway settings found:', gatewaySettings)
 
     if (action === 'create_charge') {
       console.log('Creating charge with Mercado Pago:', charge)
