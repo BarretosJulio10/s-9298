@@ -14,7 +14,8 @@ export function useClients() {
           *,
           client_charges (
             status,
-            due_date
+            due_date,
+            payment_link
           )
         `)
         .eq("company_id", user.id)
