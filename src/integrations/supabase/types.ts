@@ -462,6 +462,7 @@ export type Database = {
           environment: string | null
           gateway: Database["public"]["Enums"]["payment_gateway_type"]
           id: string
+          is_default: boolean | null
           updated_at: string
         }
         Insert: {
@@ -473,6 +474,7 @@ export type Database = {
           environment?: string | null
           gateway: Database["public"]["Enums"]["payment_gateway_type"]
           id?: string
+          is_default?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -484,6 +486,7 @@ export type Database = {
           environment?: string | null
           gateway?: Database["public"]["Enums"]["payment_gateway_type"]
           id?: string
+          is_default?: boolean | null
           updated_at?: string
         }
         Relationships: [
