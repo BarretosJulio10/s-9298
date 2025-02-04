@@ -22,7 +22,7 @@ const DashboardHome = () => {
           </p>
         </div>
         <DashboardActions 
-          onNewTemplate={() => setShowTemplateForm(true)}
+          onNewTemplate={() => {}} // Mantido para evitar erros de tipo, mas sem funcionalidade
         />
       </div>
 
