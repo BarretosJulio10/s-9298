@@ -1,10 +1,8 @@
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Copy, FileEdit, Ban } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { ChargeStatus } from "./charge-row/ChargeStatus";
+import { ChargeAmount } from "./charge-row/ChargeAmount";
+import { ChargeDate } from "./charge-row/ChargeDate";
+import { ChargeActions } from "./charge-row/ChargeActions";
 
 interface ChargeTableRowProps {
   charge: {
@@ -18,111 +16,36 @@ interface ChargeTableRowProps {
     payment_date: string | null;
     payment_link?: string;
   };
+  onEdit?: () => void;
+  onCancel?: () => void;
 }
 
-export function ChargeTableRow({ charge }: ChargeTableRowProps) {
-  const { toast } = useToast();
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "success";
-      case "pending":
-        return "warning";
-      case "overdue":
-        return "destructive";
-      case "cancelled":
-        return "secondary";
-      default:
-        return "secondary";
-    }
-  };
-
-  const formatStatus = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "Pago";
-      case "pending":
-        return "Pendente";
-      case "overdue":
-        return "Vencido";
-      case "cancelled":
-        return "Cancelado";
-      default:
-        return status;
-    }
-  };
-
-  const handleCopyLink = async () => {
-    if (charge.payment_link) {
-      await navigator.clipboard.writeText(charge.payment_link);
-      toast({
-        description: "Link de pagamento copiado!",
-      });
-    }
-  };
-
+export function ChargeTableRow({ charge, onEdit = () => {}, onCancel = () => {} }: ChargeTableRowProps) {
   return (
     <TableRow>
       <TableCell>{charge.customer_name}</TableCell>
-      <TableCell className="font-medium">
-        {new Intl.NumberFormat("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        }).format(charge.amount)}
+      <TableCell>
+        <ChargeAmount amount={charge.amount} />
       </TableCell>
       <TableCell>
-        {format(new Date(charge.due_date), "dd/MM/yyyy", {
-          locale: ptBR,
-        })}
+        <ChargeDate date={charge.due_date} />
       </TableCell>
       <TableCell>
-        <Badge variant={getStatusColor(charge.status)}>
-          {formatStatus(charge.status)}
-        </Badge>
+        <ChargeStatus status={charge.status} />
       </TableCell>
       <TableCell className="capitalize">
         {charge.payment_method === "pix" ? "PIX" : charge.payment_method}
       </TableCell>
       <TableCell>
-        {charge.payment_date
-          ? format(new Date(charge.payment_date), "dd/MM/yyyy", {
-              locale: ptBR,
-            })
-          : "-"}
+        <ChargeDate date={charge.payment_date} label="-" />
       </TableCell>
       <TableCell>
-        <div className="flex justify-end gap-2">
-          {charge.payment_link && charge.status !== "cancelled" && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleCopyLink}
-              title="Copiar link"
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          )}
-          {charge.status !== "cancelled" && charge.status !== "paid" && (
-            <>
-              <Button
-                variant="outline"
-                size="icon"
-                title="Editar"
-              >
-                <FileEdit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="text-destructive hover:bg-destructive/10"
-                title="Cancelar"
-              >
-                <Ban className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-        </div>
+        <ChargeActions
+          paymentLink={charge.payment_link}
+          status={charge.status}
+          onEdit={onEdit}
+          onCancel={onCancel}
+        />
       </TableCell>
     </TableRow>
   );
