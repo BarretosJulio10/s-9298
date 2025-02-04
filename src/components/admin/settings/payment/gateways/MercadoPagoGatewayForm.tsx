@@ -52,18 +52,15 @@ export function MercadoPagoGatewayForm() {
 
       const { error } = await supabase
         .from("payment_gateway_settings")
-        .upsert(
-          {
-            company_id: session.user.id,
-            gateway: "mercadopago",
-            api_key: values.api_key,
-            environment: values.environment,
-            enabled: true,
-          },
-          {
-            onConflict: "company_id,gateway",
-          }
-        );
+        .upsert({
+          company_id: session.user.id,
+          gateway: "mercadopago",
+          api_key: values.api_key,
+          environment: values.environment,
+          enabled: true,
+        }, {
+          onConflict: "company_id,gateway",
+        });
 
       if (error) throw error;
     },
