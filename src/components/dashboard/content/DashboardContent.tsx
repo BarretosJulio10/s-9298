@@ -8,11 +8,13 @@ import { useAuth } from "@/hooks/useAuth";
 interface DashboardContentProps {
   showChargeForm: boolean;
   onBack: () => void;
+  activeSection: string;
 }
 
 export function DashboardContent({ 
   showChargeForm, 
-  onBack 
+  onBack,
+  activeSection 
 }: DashboardContentProps) {
   const { session } = useAuth();
 
@@ -31,6 +33,15 @@ export function DashboardContent({
     );
   }
 
+  if (activeSection === "templates") {
+    return (
+      <div className="mt-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Templates de Mensagem</h2>
+        <TemplatesList />
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6 space-y-8">
       <DashboardStats />
@@ -40,13 +51,6 @@ export function DashboardContent({
           <h2 className="text-lg font-semibold text-gray-900">Cobranças</h2>
         </div>
         {session?.user?.id && <ChargesList companyId={session.user.id} />}
-      </div>
-
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Templates de Mensagem</h2>
-        </div>
-        <TemplatesList />
       </div>
     </div>
   );
