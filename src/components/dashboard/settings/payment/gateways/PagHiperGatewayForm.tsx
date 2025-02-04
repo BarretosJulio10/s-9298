@@ -15,13 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 
 interface PagHiperGatewayFormData {
@@ -32,7 +25,7 @@ interface PagHiperGatewayFormData {
 
 export function PagHiperGatewayForm() {
   const { toast } = useToast();
-  const { session, loading } = useAuth();
+  const { session } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const { data: existingSettings } = useQuery({
@@ -98,10 +91,6 @@ export function PagHiperGatewayForm() {
       setIsLoading(false);
     }
   };
-
-  if (loading) {
-    return <div>Carregando...</div>;
-  }
 
   return (
     <Card>

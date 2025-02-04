@@ -24,10 +24,9 @@ interface MercadoPagoGatewayFormData {
 
 export function MercadoPagoGatewayForm() {
   const { toast } = useToast();
-  const { session, loading } = useAuth();
+  const { session } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Buscar configurações existentes
   const { data: existingSettings } = useQuery({
     queryKey: ["mercadopago-settings", session?.user?.id],
     queryFn: async () => {
@@ -43,7 +42,7 @@ export function MercadoPagoGatewayForm() {
       if (error) throw error;
       return data;
     },
-    enabled: !!session?.user?.id, // Só executa quando tivermos o ID do usuário
+    enabled: !!session?.user?.id,
   });
 
   const form = useForm<MercadoPagoGatewayFormData>({
@@ -89,10 +88,6 @@ export function MercadoPagoGatewayForm() {
       setIsLoading(false);
     }
   };
-
-  if (loading) {
-    return <div>Carregando...</div>;
-  }
 
   return (
     <Card>

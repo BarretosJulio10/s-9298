@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
 
 interface AsaasGatewayFormData {
   api_key: string;
@@ -32,8 +33,33 @@ interface AsaasGatewayFormData {
 export function AsaasGatewayForm() {
   const { toast } = useToast();
   const { session } = useAuth();
-  const form = useForm<AsaasGatewayFormData>();
   const [isLoading, setIsLoading] = useState(false);
+
+  const { data: existingSettings } = useQuery({
+    queryKey: ["asaas-settings", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase
+        .from("payment_gateway_settings")
+        .select("*")
+        .eq("company_id", session.user.id)
+        .eq("gateway", "asaas")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!session?.user?.id,
+  });
+
+  const form = useForm<AsaasGatewayFormData>({
+    defaultValues: {
+      api_key: existingSettings?.api_key || "",
+      environment: existingSettings?.environment as "sandbox" | "production" || "sandbox",
+      enabled: existingSettings?.enabled || false,
+    },
+  });
 
   const onSubmit = async (data: AsaasGatewayFormData) => {
     if (!session?.user?.id) return;
@@ -42,13 +68,18 @@ export function AsaasGatewayForm() {
     try {
       const { error } = await supabase
         .from("payment_gateway_settings")
-        .upsert({
-          company_id: session.user.id,
-          gateway: "asaas",
-          api_key: data.api_key,
-          environment: data.environment,
-          enabled: data.enabled,
-        });
+        .upsert(
+          {
+            company_id: session.user.id,
+            gateway: "asaas",
+            api_key: data.api_key,
+            environment: data.environment,
+            enabled: data.enabled,
+          },
+          {
+            onConflict: "company_id,gateway",
+          }
+        );
 
       if (error) throw error;
 
