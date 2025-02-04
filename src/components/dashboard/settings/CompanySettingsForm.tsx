@@ -5,6 +5,7 @@ import { PaymentSettings } from "@/components/admin/settings/payment/PaymentSett
 import { Routes, Route } from "react-router-dom";
 import { MercadoPagoGatewayForm } from "./payment/gateways/MercadoPagoGatewayForm";
 import { AsaasGatewayForm } from "./payment/gateways/AsaasGatewayForm";
+import { PagHiperGatewayForm } from "./payment/gateways/PagHiperGatewayForm";
 
 export function CompanySettingsForm() {
   return (
@@ -32,6 +33,7 @@ export function CompanySettingsForm() {
       />
       <Route path="/payment/mercadopago" element={<MercadoPagoGatewayForm />} />
       <Route path="/payment/asaas" element={<AsaasGatewayForm />} />
+      <Route path="/payment/paghiper" element={<PagHiperGatewayForm />} />
     </Routes>
   );
 }
