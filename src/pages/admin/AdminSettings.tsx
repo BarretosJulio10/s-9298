@@ -13,12 +13,15 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChargeSettingsForm } from "@/components/admin/settings/ChargeSettingsForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminSettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [apiKey, setApiKey] = useState("");
   const [environment, setEnvironment] = useState("sandbox");
+  const [stripeProductId, setStripeProductId] = useState("");
+  const [stripePriceId, setStripePriceId] = useState("");
 
   // Buscar configurações existentes
   const { data: config } = useQuery({
@@ -36,7 +39,12 @@ const AdminSettings = () => {
 
   // Mutation para salvar configurações
   const mutation = useMutation({
-    mutationFn: async (values: { asaas_api_key: string; asaas_environment: string }) => {
+    mutationFn: async (values: { 
+      asaas_api_key: string; 
+      asaas_environment: string;
+      stripe_product_id?: string;
+      stripe_price_id?: string;
+    }) => {
       const { error } = await supabase
         .from("configurations")
         .upsert([values], { onConflict: "id" });
@@ -64,6 +72,8 @@ const AdminSettings = () => {
     mutation.mutate({
       asaas_api_key: apiKey,
       asaas_environment: environment,
+      stripe_product_id: stripeProductId,
+      stripe_price_id: stripePriceId,
     });
   };
 
@@ -76,46 +86,99 @@ const AdminSettings = () => {
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Configurações do Asaas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="apiKey">Chave API</label>
-              <Input
-                id="apiKey"
-                placeholder="Insira sua chave API do Asaas"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-              />
-            </div>
+      <Tabs defaultValue="asaas" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="asaas">Asaas</TabsTrigger>
+          <TabsTrigger value="stripe">Stripe</TabsTrigger>
+          <TabsTrigger value="charges">Cobranças</TabsTrigger>
+        </TabsList>
 
-            <div className="space-y-2">
-              <label htmlFor="environment">Ambiente</label>
-              <Select
-                value={environment}
-                onValueChange={setEnvironment}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o ambiente" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sandbox">Sandbox</SelectItem>
-                  <SelectItem value="production">Produção</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <TabsContent value="asaas">
+          <Card>
+            <CardHeader>
+              <CardTitle>Configurações do Asaas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="apiKey">Chave API</label>
+                  <Input
+                    id="apiKey"
+                    placeholder="Insira sua chave API do Asaas"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                  />
+                </div>
 
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Salvando..." : "Salvar configurações"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+                <div className="space-y-2">
+                  <label htmlFor="environment">Ambiente</label>
+                  <Select
+                    value={environment}
+                    onValueChange={setEnvironment}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o ambiente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sandbox">Sandbox</SelectItem>
+                      <SelectItem value="production">Produção</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-      <ChargeSettingsForm />
+                <Button type="submit" disabled={mutation.isPending}>
+                  {mutation.isPending ? "Salvando..." : "Salvar configurações"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="stripe">
+          <Card>
+            <CardHeader>
+              <CardTitle>Configurações do Stripe</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="stripeProductId">ID do Produto</label>
+                  <Input
+                    id="stripeProductId"
+                    placeholder="prod_..."
+                    value={stripeProductId}
+                    onChange={(e) => setStripeProductId(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    ID do produto no Stripe (começa com "prod_")
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="stripePriceId">ID do Preço</label>
+                  <Input
+                    id="stripePriceId"
+                    placeholder="price_..."
+                    value={stripePriceId}
+                    onChange={(e) => setStripePriceId(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    ID do preço no Stripe (começa com "price_")
+                  </p>
+                </div>
+
+                <Button type="submit" disabled={mutation.isPending}>
+                  {mutation.isPending ? "Salvando..." : "Salvar configurações"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="charges">
+          <ChargeSettingsForm />
+        </TabsContent>
+      </Tabs>
 
       {config && (
         <Card>
@@ -125,11 +188,19 @@ const AdminSettings = () => {
           <CardContent>
             <div className="space-y-2">
               <p>
-                <strong>Ambiente:</strong> {config.asaas_environment}
+                <strong>Ambiente Asaas:</strong> {config.asaas_environment}
               </p>
               <p>
-                <strong>Chave API:</strong>{" "}
+                <strong>Chave API Asaas:</strong>{" "}
                 {config.asaas_api_key ? "Configurada" : "Não configurada"}
+              </p>
+              <p>
+                <strong>ID do Produto Stripe:</strong>{" "}
+                {config.stripe_product_id || "Não configurado"}
+              </p>
+              <p>
+                <strong>ID do Preço Stripe:</strong>{" "}
+                {config.stripe_price_id || "Não configurado"}
               </p>
             </div>
           </CardContent>
