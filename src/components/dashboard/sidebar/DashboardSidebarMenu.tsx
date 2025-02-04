@@ -24,7 +24,7 @@ export function DashboardSidebarMenu({
 
   const handleClick = (section: string) => {
     if (section === "templates") {
-      navigate("/dashboard/templates/new");
+      onSectionChange(section);
     } else {
       onSectionChange(section);
     }
