@@ -73,7 +73,7 @@ export function MercadoPagoGatewayForm() {
         title: "Configurações salvas",
         description: "As configurações do Mercado Pago foram atualizadas com sucesso.",
       });
-      navigate("/dashboard/settings");
+      navigate(-1);
     },
     onError: (error) => {
       toast({
@@ -98,7 +98,7 @@ export function MercadoPagoGatewayForm() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/dashboard/settings")}
+          onClick={() => navigate(-1)}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>

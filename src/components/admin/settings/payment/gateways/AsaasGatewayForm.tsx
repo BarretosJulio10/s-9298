@@ -66,7 +66,7 @@ export function AsaasGatewayForm() {
         title: "Configurações salvas",
         description: "As configurações do Asaas foram atualizadas com sucesso.",
       });
-      navigate("/dashboard/settings");
+      navigate(-1);
     },
     onError: (error) => {
       toast({
@@ -91,7 +91,7 @@ export function AsaasGatewayForm() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/dashboard/settings")}
+          onClick={() => navigate(-1)}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
