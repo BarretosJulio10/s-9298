@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChargeSettingsForm } from "@/components/admin/settings/ChargeSettingsForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ExternalLink } from "lucide-react";
 
 const AdminSettings = () => {
   const { toast } = useToast();
@@ -56,7 +58,6 @@ const AdminSettings = () => {
       stripe_product_id?: string;
       stripe_price_id?: string;
     }) => {
-      // Se já existe uma configuração, atualiza. Senão, cria uma nova.
       if (config?.id) {
         const { error } = await supabase
           .from("configurations")
@@ -105,12 +106,69 @@ const AdminSettings = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="asaas" className="space-y-6">
+      <Tabs defaultValue="stripe" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="asaas">Asaas</TabsTrigger>
           <TabsTrigger value="stripe">Stripe</TabsTrigger>
+          <TabsTrigger value="asaas">Asaas</TabsTrigger>
           <TabsTrigger value="charges">Cobranças</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="stripe">
+          <Card>
+            <CardHeader>
+              <CardTitle>Configurações do Stripe</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Alert className="mb-6">
+                <AlertTitle>Importante</AlertTitle>
+                <AlertDescription>
+                  Os valores das cobranças devem ser configurados diretamente no painel do Stripe.
+                  Após configurar, copie os IDs do produto e do preço para os campos abaixo.
+                  <a 
+                    href="https://dashboard.stripe.com/products" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center text-primary hover:underline mt-2"
+                  >
+                    Acessar Painel do Stripe <ExternalLink className="ml-1 h-4 w-4" />
+                  </a>
+                </AlertDescription>
+              </Alert>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="stripeProductId">ID do Produto</label>
+                  <Input
+                    id="stripeProductId"
+                    placeholder="prod_..."
+                    value={stripeProductId}
+                    onChange={(e) => setStripeProductId(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    ID do produto no Stripe (começa com "prod_"). Você pode encontrar este ID na página do produto no painel do Stripe.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="stripePriceId">ID do Preço</label>
+                  <Input
+                    id="stripePriceId"
+                    placeholder="price_..."
+                    value={stripePriceId}
+                    onChange={(e) => setStripePriceId(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    ID do preço no Stripe (começa com "price_"). Este ID está vinculado ao valor da mensalidade configurado no Stripe.
+                  </p>
+                </div>
+
+                <Button type="submit" disabled={mutation.isPending}>
+                  {mutation.isPending ? "Salvando..." : "Salvar configurações"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="asaas">
           <Card>
@@ -140,47 +198,6 @@ const AdminSettings = () => {
                       <SelectItem value="production">Produção</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-
-                <Button type="submit" disabled={mutation.isPending}>
-                  {mutation.isPending ? "Salvando..." : "Salvar configurações"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="stripe">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configurações do Stripe</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="stripeProductId">ID do Produto</label>
-                  <Input
-                    id="stripeProductId"
-                    placeholder="prod_..."
-                    value={stripeProductId}
-                    onChange={(e) => setStripeProductId(e.target.value)}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    ID do produto no Stripe (começa com "prod_")
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="stripePriceId">ID do Preço</label>
-                  <Input
-                    id="stripePriceId"
-                    placeholder="price_..."
-                    value={stripePriceId}
-                    onChange={(e) => setStripePriceId(e.target.value)}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    ID do preço no Stripe (começa com "price_")
-                  </p>
                 </div>
 
                 <Button type="submit" disabled={mutation.isPending}>
