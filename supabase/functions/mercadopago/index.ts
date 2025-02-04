@@ -16,6 +16,7 @@ interface MercadoPagoRequest {
 }
 
 serve(async (req: Request) => {
+  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -42,7 +43,11 @@ serve(async (req: Request) => {
     }
 
     if (action === 'create_charge') {
-      const baseUrl = 'https://api.mercadopago.com'
+      console.log('Creating charge with Mercado Pago:', charge)
+      
+      const baseUrl = gatewaySettings.environment === 'production' 
+        ? 'https://api.mercadopago.com'
+        : 'https://api.mercadopago.com'
 
       const response = await fetch(`${baseUrl}/v1/payments`, {
         method: 'POST',
@@ -58,7 +63,7 @@ serve(async (req: Request) => {
             email: charge.customer_email,
             identification: {
               type: charge.customer_document.length > 11 ? 'CNPJ' : 'CPF',
-              number: charge.customer_document,
+              number: charge.customer_document.replace(/\D/g, ''),
             },
             first_name: charge.customer_name.split(' ')[0],
             last_name: charge.customer_name.split(' ').slice(1).join(' '),
@@ -71,7 +76,7 @@ serve(async (req: Request) => {
       console.log('Mercado Pago response:', mpResponse)
 
       if (!response.ok) {
-        throw new Error(`Erro ao criar cobrança: ${mpResponse.message || 'Erro desconhecido'}`)
+        throw new Error(`Erro ao criar cobrança: ${mpResponse.message || JSON.stringify(mpResponse)}`)
       }
 
       return new Response(
