@@ -45,11 +45,21 @@ export const useClientForm = (onClose: () => void) => {
           ? parseFloat(values.charge_amount) 
           : values.charge_amount;
 
-        console.log("Dados a serem enviados:", { 
-          ...values, 
+        // Remover campos que não existem na tabela
+        const clientData = {
+          name: values.name,
+          email: values.email,
+          document: values.document,
+          phone: values.phone,
+          status: values.status,
+          charge_amount,
+          payment_methods: values.payment_methods,
+          charge_type: values.charge_type,
+          birth_date: values.birth_date,
           company_id: user.id,
-          charge_amount 
-        });
+        };
+
+        console.log("Dados a serem enviados:", clientData);
 
         const { data: existingClients, error: checkError } = await supabase
           .from("clients")
@@ -69,11 +79,7 @@ export const useClientForm = (onClose: () => void) => {
 
         const { data, error } = await supabase
           .from("clients")
-          .insert([{
-            ...values,
-            company_id: user.id,
-            charge_amount: charge_amount || 0,
-          }])
+          .insert([clientData])
           .select()
           .maybeSingle();
 

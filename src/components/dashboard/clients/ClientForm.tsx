@@ -42,6 +42,8 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
       payment_methods: selectedPaymentMethods,
       charge_type: chargeType,
     };
+    // Remover o template_id antes de enviar
+    delete formData.template_id;
     mutation.mutate(formData);
   }
 
