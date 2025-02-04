@@ -27,7 +27,7 @@ export function PagHiperGatewayForm() {
         .select("*")
         .eq("company_id", session.user.id)
         .eq("gateway", "paghiper")
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       return data;
@@ -66,7 +66,7 @@ export function PagHiperGatewayForm() {
         title: "Configurações salvas",
         description: "As configurações do PagHiper foram atualizadas com sucesso.",
       });
-      navigate("/dashboard/settings");
+      navigate(-1);
     },
     onError: (error) => {
       toast({
@@ -91,7 +91,7 @@ export function PagHiperGatewayForm() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/dashboard/settings")}
+          onClick={() => navigate(-1)}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>

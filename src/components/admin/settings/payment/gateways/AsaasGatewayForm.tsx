@@ -2,14 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function AsaasGatewayForm() {
   const { toast } = useToast();
@@ -29,7 +28,7 @@ export function AsaasGatewayForm() {
         .select("*")
         .eq("company_id", session.user.id)
         .eq("gateway", "asaas")
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       return data;
@@ -67,7 +66,7 @@ export function AsaasGatewayForm() {
         title: "Configurações salvas",
         description: "As configurações do Asaas foram atualizadas com sucesso.",
       });
-      navigate("/dashboard/settings");
+      navigate(-1);
     },
     onError: (error) => {
       toast({
@@ -92,7 +91,7 @@ export function AsaasGatewayForm() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/dashboard/settings")}
+          onClick={() => navigate(-1)}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -106,18 +105,18 @@ export function AsaasGatewayForm() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="apiKey">Chave API</Label>
+              <label htmlFor="apiKey">Chave de API</label>
               <Input
                 id="apiKey"
                 type="password"
-                placeholder="Insira sua chave API do Asaas"
+                placeholder="Insira sua chave de API do Asaas"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="environment">Ambiente</Label>
+              <label htmlFor="environment">Ambiente</label>
               <Select value={environment} onValueChange={setEnvironment}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o ambiente" />
