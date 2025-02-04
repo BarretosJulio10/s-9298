@@ -6,7 +6,7 @@ interface ClientActionsProps {
   onSend: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  paymentLink?: string;
+  paymentLink?: string | null;
 }
 
 export function ClientActions({ onSend, onEdit, onDelete, paymentLink }: ClientActionsProps) {

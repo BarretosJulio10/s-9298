@@ -26,11 +26,18 @@ export function useClients() {
         throw clientsError;
       }
 
-      return clients.map(client => ({
-        ...client,
-        paymentStatus: getPaymentStatus(client.client_charges),
-        paymentLink: getLatestPaymentLink(client.client_charges)
-      }));
+      console.log("Clients data:", clients); // Debug log
+
+      return clients.map(client => {
+        const paymentLink = getLatestPaymentLink(client.client_charges);
+        console.log(`Client ${client.name} payment link:`, paymentLink); // Debug log
+        
+        return {
+          ...client,
+          paymentStatus: getPaymentStatus(client.client_charges),
+          paymentLink: paymentLink
+        };
+      });
     }
   });
 }
@@ -54,5 +61,6 @@ function getPaymentStatus(charges: any[]) {
 function getLatestPaymentLink(charges: any[]) {
   if (!charges || charges.length === 0) return null;
   const latestCharge = charges[0];
+  console.log("Latest charge:", latestCharge); // Debug log
   return latestCharge?.payment_link || null;
 }
