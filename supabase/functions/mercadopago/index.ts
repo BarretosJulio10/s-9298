@@ -49,6 +49,12 @@ serve(async (req: Request) => {
     if (action === 'create_charge') {
       console.log('Creating charge with Mercado Pago:', charge)
       
+      // Validar e formatar o valor da transação
+      const transactionAmount = Math.abs(Number(charge.amount))
+      if (isNaN(transactionAmount) || transactionAmount <= 0) {
+        throw new Error('O valor da transação deve ser maior que zero')
+      }
+      
       // Formatar a data para o formato esperado pelo Mercado Pago
       const dueDate = new Date(charge.due_date)
       dueDate.setHours(23, 59, 59)
@@ -61,6 +67,8 @@ serve(async (req: Request) => {
         ? 'https://api.mercadopago.com'
         : 'https://api.mercadopago.com'
 
+      console.log('Making request to Mercado Pago with amount:', transactionAmount)
+
       const response = await fetch(`${baseUrl}/v1/payments`, {
         method: 'POST',
         headers: {
@@ -69,7 +77,7 @@ serve(async (req: Request) => {
           'X-Idempotency-Key': idempotencyKey,
         },
         body: JSON.stringify({
-          transaction_amount: charge.amount,
+          transaction_amount: transactionAmount,
           description: `Cobrança para ${charge.customer_name}`,
           payment_method_id: charge.payment_method === 'credit_card' ? 'credit_card' : 'pix',
           payer: {
