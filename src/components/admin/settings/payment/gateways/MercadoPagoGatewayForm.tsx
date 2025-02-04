@@ -89,13 +89,17 @@ export function MercadoPagoGatewayForm() {
     });
   };
 
+  const handleBack = () => {
+    navigate("/dashboard/settings");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/dashboard/settings")}
+          onClick={handleBack}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
