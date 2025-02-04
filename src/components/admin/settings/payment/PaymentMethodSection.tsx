@@ -65,6 +65,9 @@ export function PaymentMethodSection({
                   <Settings className="h-4 w-4" />
                 </Button>
               </div>
+              <div className="mt-2 text-sm text-muted-foreground">
+                {gateway.enabled ? "Ativo" : "Inativo"}
+              </div>
             </div>
           ))}
         </div>

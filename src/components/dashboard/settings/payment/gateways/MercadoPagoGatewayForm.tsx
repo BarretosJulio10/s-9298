@@ -69,7 +69,7 @@ export function MercadoPagoGatewayForm() {
             gateway: "mercadopago",
             api_key: data.api_key,
             enabled: data.enabled,
-            environment: "production", // Mercado Pago não tem sandbox
+            environment: "production",
           },
           {
             onConflict: "company_id,gateway",
@@ -104,7 +104,7 @@ export function MercadoPagoGatewayForm() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/dashboard/settings/payment")}
+          onClick={() => navigate("/dashboard/settings")}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
