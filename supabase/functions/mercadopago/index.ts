@@ -60,6 +60,9 @@ serve(async (req: Request) => {
       dueDate.setHours(23, 59, 59)
       const formattedDueDate = dueDate.toISOString()
       
+      // Limpar o documento (remover caracteres especiais)
+      const cleanDocument = charge.customer_document.replace(/\D/g, '')
+      
       // Gerar um ID de idempotência único baseado nos dados da cobrança
       const idempotencyKey = crypto.randomUUID()
       
@@ -68,6 +71,7 @@ serve(async (req: Request) => {
         : 'https://api.mercadopago.com'
 
       console.log('Making request to Mercado Pago with amount:', transactionAmount)
+      console.log('Clean document:', cleanDocument)
 
       const response = await fetch(`${baseUrl}/v1/payments`, {
         method: 'POST',
@@ -83,11 +87,11 @@ serve(async (req: Request) => {
           payer: {
             email: charge.customer_email,
             identification: {
-              type: charge.customer_document.length > 11 ? 'CNPJ' : 'CPF',
-              number: charge.customer_document.replace(/\D/g, ''),
+              type: cleanDocument.length > 11 ? 'CNPJ' : 'CPF',
+              number: cleanDocument,
             },
             first_name: charge.customer_name.split(' ')[0],
-            last_name: charge.customer_name.split(' ').slice(1).join(' '),
+            last_name: charge.customer_name.split(' ').slice(1).join(' ') || charge.customer_name,
           },
           date_of_expiration: formattedDueDate,
         }),
