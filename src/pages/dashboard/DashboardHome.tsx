@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { DashboardStats } from "@/components/dashboard/stats/DashboardStats";
 import { DashboardContent } from "@/components/dashboard/content/DashboardContent";
 
 const DashboardHome = () => {
   const [showChargeForm, setShowChargeForm] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
 
   const handleBack = () => {
     setShowChargeForm(false);
@@ -23,6 +23,7 @@ const DashboardHome = () => {
       <DashboardContent 
         showChargeForm={showChargeForm}
         onBack={handleBack}
+        activeSection={activeSection}
       />
     </div>
   );
