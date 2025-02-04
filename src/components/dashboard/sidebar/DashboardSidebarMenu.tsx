@@ -18,11 +18,15 @@ export function DashboardSidebarMenu({
     { icon: User, label: "Clientes", section: "clients" },
     { icon: Wallet, label: "Carteira", section: "wallet" },
     { icon: CreditCard, label: "Cobranças", section: "charges" },
-    { icon: MessageSquare, label: "Templates", section: "templates" },
+    { icon: MessageSquare, label: "Templates", section: "templates", onClick: () => navigate("/dashboard/templates/new") },
     { icon: Settings, label: "Configurações", section: "settings" },
   ];
 
   const handleClick = (section: string) => {
+    const item = menuItems.find(item => item.section === section);
+    if (item?.onClick) {
+      item.onClick();
+    }
     onSectionChange(section);
   };
 
