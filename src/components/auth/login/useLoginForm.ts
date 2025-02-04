@@ -15,20 +15,20 @@ export const useLoginForm = () => {
     setIsLoading(true);
 
     try {
-      // Primeiro, tenta fazer o login
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (signInError) {
-        if (signInError.message === "Invalid login credentials") {
+      if (error) {
+        if (error.message === "Invalid login credentials") {
           toast({
             variant: "destructive",
             title: "Erro no login",
             description: "Email ou senha incorretos. Por favor, verifique suas credenciais.",
           });
         } else {
+          console.error("Erro detalhado:", error);
           toast({
             variant: "destructive",
             title: "Erro no login",
@@ -38,10 +38,7 @@ export const useLoginForm = () => {
         return;
       }
 
-      // Após login bem sucedido, busca o usuário atual
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
+      if (!data.user) {
         toast({
           variant: "destructive",
           title: "Erro",
@@ -54,8 +51,8 @@ export const useLoginForm = () => {
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('user_id', data.user.id)
+        .single();
 
       if (roleError) {
         console.error('Erro ao buscar papel do usuário:', roleError);
@@ -67,17 +64,8 @@ export const useLoginForm = () => {
         return;
       }
 
-      if (!roleData) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: "Perfil de usuário não encontrado. Por favor, contate o suporte.",
-        });
-        return;
-      }
-
       // Redireciona baseado no papel do usuário
-      if (roleData.role === 'admin') {
+      if (roleData?.role === 'admin') {
         navigate('/admin');
         toast({
           title: "Login realizado com sucesso",
@@ -91,7 +79,7 @@ export const useLoginForm = () => {
         });
       }
     } catch (error: any) {
-      console.error('Erro no processo de login:', error);
+      console.error('Erro detalhado:', error);
       toast({
         variant: "destructive",
         title: "Erro",

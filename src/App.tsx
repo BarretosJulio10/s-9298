@@ -8,7 +8,14 @@ import AppRoutes from "./components/routing/AppRoutes";
 import { useAuth } from "./hooks/useAuth";
 import { useUserRole } from "./hooks/useUserRole";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   const { session, loading, setLoading } = useAuth();
@@ -20,6 +27,7 @@ function App() {
     }
   }, [session, fetchUserRole]);
 
+  // Não renderiza nada enquanto estiver carregando
   if (loading) {
     return null;
   }
