@@ -40,23 +40,7 @@ export function DashboardContent({
   if (activeSection === "templates") {
     return (
       <div className="mt-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">Templates Criados</h2>
-          <Button 
-            onClick={() => setShowNewTemplateForm(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
-          >
-            + Novo template
-          </Button>
-        </div>
-
         <TemplatesList />
-
-        <Dialog open={showNewTemplateForm} onOpenChange={setShowNewTemplateForm}>
-          <DialogContent className="sm:max-w-[600px]">
-            <TemplateForm onCancel={() => setShowNewTemplateForm(false)} />
-          </DialogContent>
-        </Dialog>
       </div>
     );
   }
