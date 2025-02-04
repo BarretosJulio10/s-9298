@@ -181,6 +181,13 @@ export function ClientsList() {
                     onEdit={() => {}}
                     onDelete={() => {}}
                     paymentLink={client.paymentLink}
+                    client={{
+                      id: client.id,
+                      name: client.name,
+                      email: client.email,
+                      document: client.document,
+                      charge_amount: client.charge_amount
+                    }}
                   />
                 </TableCell>
               </TableRow>
