@@ -3,9 +3,10 @@ import { ChargeSettingsForm } from "@/components/admin/settings/ChargeSettingsFo
 import { NotificationRulesForm } from "./NotificationRulesForm";
 import { PaymentSettings } from "@/components/admin/settings/payment/PaymentSettings";
 import { Routes, Route } from "react-router-dom";
-import { MercadoPagoGatewayForm } from "./payment/gateways/MercadoPagoGatewayForm";
-import { AsaasGatewayForm } from "./payment/gateways/AsaasGatewayForm";
-import { PagHiperGatewayForm } from "./payment/gateways/PagHiperGatewayForm";
+import { MercadoPagoGatewayForm } from "@/components/admin/settings/payment/gateways/MercadoPagoGatewayForm";
+import { AsaasGatewayForm } from "@/components/admin/settings/payment/gateways/AsaasGatewayForm";
+import { PagHiperGatewayForm } from "@/components/admin/settings/payment/gateways/PagHiperGatewayForm";
+import { PaymentGatewayList } from "@/components/admin/settings/payment/PaymentGatewayList";
 
 export function CompanySettingsForm() {
   return (
@@ -20,7 +21,7 @@ export function CompanySettingsForm() {
               <TabsTrigger value="notifications">Notificações</TabsTrigger>
             </TabsList>
             <TabsContent value="payment" className="space-y-6">
-              <PaymentSettings />
+              <PaymentGatewayList />
             </TabsContent>
             <TabsContent value="charge">
               <ChargeSettingsForm />
