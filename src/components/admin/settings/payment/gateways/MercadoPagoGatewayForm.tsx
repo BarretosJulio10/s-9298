@@ -73,6 +73,7 @@ export function MercadoPagoGatewayForm() {
         title: "Configurações salvas",
         description: "As configurações do Mercado Pago foram atualizadas com sucesso.",
       });
+      navigate("/dashboard/settings");
     },
     onError: (error) => {
       toast({
