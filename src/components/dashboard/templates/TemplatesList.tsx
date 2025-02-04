@@ -10,8 +10,6 @@ import { EditTemplateDialog } from "./template-list/EditTemplateDialog";
 import { SendNotificationDialog } from "./SendNotificationDialog";
 import { templateTypeTranslations } from "./constants/templateTypes";
 import { TemplateForm } from "./TemplateForm";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 export function TemplatesList() {
   const { toast } = useToast();
@@ -19,7 +17,7 @@ export function TemplatesList() {
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [sendingTemplate, setSendingTemplate] = useState<any | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(true);
 
   const { data: templates, isLoading } = useQuery({
     queryKey: ["templates"],
@@ -68,9 +66,9 @@ export function TemplatesList() {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Novo Template</h1>
+          <h1 className="text-2xl font-bold">Templates</h1>
           <p className="text-muted-foreground">
-            Crie um novo template para suas mensagens
+            Gerencie suas cobranças e acompanhe seus resultados
           </p>
         </div>
         <TemplateForm onCancel={() => setShowForm(false)} />
@@ -87,20 +85,7 @@ export function TemplatesList() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Templates</h1>
-          <p className="text-muted-foreground">
-            Gerencie suas cobranças e acompanhe seus resultados
-          </p>
-        </div>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Template
-        </Button>
-      </div>
-
+    <>
       <div className="rounded-md border bg-white">
         <Table>
           <TemplateListHeader />
@@ -136,6 +121,6 @@ export function TemplatesList() {
         onOpenChange={(open) => !open && setSendingTemplate(null)}
         template={sendingTemplate}
       />
-    </div>
+    </>
   );
 }
