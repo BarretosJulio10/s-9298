@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders } from '../_shared/cors.ts'
 
 interface MercadoPagoRequest {
   action: 'create_charge'
@@ -20,7 +16,6 @@ interface MercadoPagoRequest {
 }
 
 serve(async (req: Request) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -47,9 +42,7 @@ serve(async (req: Request) => {
     }
 
     if (action === 'create_charge') {
-      const baseUrl = gatewaySettings.environment === 'production'
-        ? 'https://api.mercadopago.com'
-        : 'https://api.mercadopago.com' // MP não tem sandbox, usa mesmo endpoint
+      const baseUrl = 'https://api.mercadopago.com'
 
       const response = await fetch(`${baseUrl}/v1/payments`, {
         method: 'POST',
@@ -81,7 +74,6 @@ serve(async (req: Request) => {
         throw new Error(`Erro ao criar cobrança: ${mpResponse.message || 'Erro desconhecido'}`)
       }
 
-      // Retornar os dados relevantes da cobrança
       return new Response(
         JSON.stringify({
           id: mpResponse.id,

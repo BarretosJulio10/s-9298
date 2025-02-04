@@ -12,9 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -22,10 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 
 interface AsaasGatewayFormData {
   api_key: string;
+  api_secret: string;
   environment: "sandbox" | "production";
   enabled: boolean;
 }
@@ -56,6 +57,7 @@ export function AsaasGatewayForm() {
   const form = useForm<AsaasGatewayFormData>({
     defaultValues: {
       api_key: existingSettings?.api_key || "",
+      api_secret: existingSettings?.api_secret || "",
       environment: existingSettings?.environment as "sandbox" | "production" || "sandbox",
       enabled: existingSettings?.enabled || false,
     },
@@ -73,6 +75,7 @@ export function AsaasGatewayForm() {
             company_id: session.user.id,
             gateway: "asaas",
             api_key: data.api_key,
+            api_secret: data.api_secret,
             environment: data.environment,
             enabled: data.enabled,
           },
@@ -85,7 +88,7 @@ export function AsaasGatewayForm() {
 
       toast({
         title: "Gateway configurado",
-        description: "As configurações do Asaas foram salvas com sucesso",
+        description: "As configurações do ASAAS foram salvas com sucesso",
       });
     } catch (error: any) {
       toast({
@@ -112,6 +115,20 @@ export function AsaasGatewayForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Chave API</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="password" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="api_secret"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Chave Secreta</FormLabel>
                   <FormControl>
                     <Input {...field} type="password" />
                   </FormControl>

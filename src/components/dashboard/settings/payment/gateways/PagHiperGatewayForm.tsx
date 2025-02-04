@@ -68,7 +68,7 @@ export function PagHiperGatewayForm() {
             api_key: data.api_key,
             api_secret: data.api_secret,
             enabled: data.enabled,
-            environment: "production",
+            environment: "production", // PagHiper não tem ambiente de sandbox
           },
           {
             onConflict: "company_id,gateway",
@@ -105,7 +105,7 @@ export function PagHiperGatewayForm() {
               name="api_key"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>API Key</FormLabel>
+                  <FormLabel>Chave API</FormLabel>
                   <FormControl>
                     <Input {...field} type="password" />
                   </FormControl>
@@ -119,7 +119,7 @@ export function PagHiperGatewayForm() {
               name="api_secret"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>API Secret</FormLabel>
+                  <FormLabel>Token</FormLabel>
                   <FormControl>
                     <Input {...field} type="password" />
                   </FormControl>
