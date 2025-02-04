@@ -18,7 +18,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface MercadoPagoGatewayFormData {
   api_key: string;
-  api_secret: string;
   enabled: boolean;
 }
 
@@ -39,7 +38,6 @@ export function MercadoPagoGatewayForm() {
           company_id: session.user.id,
           gateway: "mercadopago",
           api_key: data.api_key,
-          api_secret: data.api_secret,
           enabled: data.enabled,
         });
 
@@ -74,20 +72,6 @@ export function MercadoPagoGatewayForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Access Token</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="password" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="api_secret"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Client Secret</FormLabel>
                   <FormControl>
                     <Input {...field} type="password" />
                   </FormControl>
