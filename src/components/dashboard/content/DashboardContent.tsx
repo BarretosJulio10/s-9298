@@ -6,13 +6,11 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardContentProps {
-  showTemplateForm: boolean;
   showChargeForm: boolean;
   onBack: () => void;
 }
 
 export function DashboardContent({ 
-  showTemplateForm, 
   showChargeForm, 
   onBack 
 }: DashboardContentProps) {

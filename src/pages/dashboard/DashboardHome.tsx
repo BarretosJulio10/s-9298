@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { DashboardStats } from "@/components/dashboard/stats/DashboardStats";
-import { DashboardActions } from "@/components/dashboard/actions/DashboardActions";
 import { DashboardContent } from "@/components/dashboard/content/DashboardContent";
 
 const DashboardHome = () => {
@@ -19,11 +18,9 @@ const DashboardHome = () => {
             Gerencie suas cobranças e acompanhe seus resultados
           </p>
         </div>
-        <DashboardActions onNewTemplate={() => {}} />
       </div>
 
       <DashboardContent 
-        showTemplateForm={false}
         showChargeForm={showChargeForm}
         onBack={handleBack}
       />
