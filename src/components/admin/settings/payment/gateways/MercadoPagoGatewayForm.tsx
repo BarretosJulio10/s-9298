@@ -112,11 +112,11 @@ export function MercadoPagoGatewayForm() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="apiKey">Chave de API</label>
+              <label htmlFor="apiKey">Access Token</label>
               <Input
                 id="apiKey"
                 type="password"
-                placeholder="Insira sua chave de API do Mercado Pago"
+                placeholder="Insira seu Access Token do Mercado Pago"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
               />
