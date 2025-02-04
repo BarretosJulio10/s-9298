@@ -24,6 +24,7 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
   return (
     <TableRow>
       <TableCell>{charge.customer_name}</TableCell>
+      <TableCell>{charge.customer_document}</TableCell>
       <TableCell>
         <ChargeAmount amount={charge.amount} />
       </TableCell>
@@ -39,7 +40,7 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
       <TableCell>
         <ChargeDate date={charge.payment_date} label="-" />
       </TableCell>
-      <TableCell>
+      <TableCell className="text-right">
         <ChargeActions
           paymentLink={charge.payment_link}
           status={charge.status}

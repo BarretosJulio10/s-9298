@@ -11,11 +11,9 @@ import {
 interface ChargeActionsProps {
   paymentLink?: string;
   status: string;
-  onEdit?: () => void;
-  onCancel?: () => void;
 }
 
-export function ChargeActions({ paymentLink, status, onEdit, onCancel }: ChargeActionsProps) {
+export function ChargeActions({ paymentLink, status }: ChargeActionsProps) {
   const { toast } = useToast();
   console.log("ChargeActions - paymentLink:", paymentLink); // Debug log
   console.log("ChargeActions - status:", status); // Debug log
@@ -39,13 +37,13 @@ export function ChargeActions({ paymentLink, status, onEdit, onCancel }: ChargeA
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex justify-end gap-2">
       {paymentLink && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
                 onClick={handleCopyLink}
               >
