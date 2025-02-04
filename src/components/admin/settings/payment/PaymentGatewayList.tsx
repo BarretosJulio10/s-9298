@@ -83,7 +83,7 @@ export function PaymentGatewayList() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Mercado Pago */}
-            <Card>
+            <Card className="border-2 hover:border-primary transition-colors">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Mercado Pago</CardTitle>
@@ -97,24 +97,38 @@ export function PaymentGatewayList() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Configure suas credenciais do Mercado Pago para começar a receber pagamentos.
-                </p>
-                <div className="flex items-center justify-between">
-                  <Label>Status</Label>
-                  <Switch
-                    checked={gateways?.find(g => g.gateway === "mercadopago")?.enabled || false}
-                    onCheckedChange={(checked) => {
-                      const gateway = gateways?.find(g => g.gateway === "mercadopago");
-                      if (gateway) handleGatewayToggle(gateway.id, checked);
-                    }}
-                  />
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Configure suas credenciais do Mercado Pago para começar a receber pagamentos.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <Label>Status</Label>
+                    <Switch
+                      checked={gateways?.find(g => g.gateway === "mercadopago")?.enabled || false}
+                      onCheckedChange={(checked) => {
+                        const gateway = gateways?.find(g => g.gateway === "mercadopago");
+                        if (gateway) handleGatewayToggle(gateway.id, checked);
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem 
+                      value={gateways?.find(g => g.gateway === "mercadopago")?.id || ""} 
+                      id="mercadopago"
+                      checked={gateways?.find(g => g.gateway === "mercadopago")?.is_default || false}
+                      onClick={() => {
+                        const gateway = gateways?.find(g => g.gateway === "mercadopago");
+                        if (gateway) handleDefaultGateway(gateway.id);
+                      }}
+                    />
+                    <Label htmlFor="mercadopago">Gateway Principal</Label>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Asaas */}
-            <Card>
+            {/* ASAAS */}
+            <Card className="border-2 hover:border-primary transition-colors">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">ASAAS</CardTitle>
@@ -128,24 +142,38 @@ export function PaymentGatewayList() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Configure suas credenciais do ASAAS para começar a receber pagamentos.
-                </p>
-                <div className="flex items-center justify-between">
-                  <Label>Status</Label>
-                  <Switch
-                    checked={gateways?.find(g => g.gateway === "asaas")?.enabled || false}
-                    onCheckedChange={(checked) => {
-                      const gateway = gateways?.find(g => g.gateway === "asaas");
-                      if (gateway) handleGatewayToggle(gateway.id, checked);
-                    }}
-                  />
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Configure suas credenciais do ASAAS para começar a receber pagamentos.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <Label>Status</Label>
+                    <Switch
+                      checked={gateways?.find(g => g.gateway === "asaas")?.enabled || false}
+                      onCheckedChange={(checked) => {
+                        const gateway = gateways?.find(g => g.gateway === "asaas");
+                        if (gateway) handleGatewayToggle(gateway.id, checked);
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem 
+                      value={gateways?.find(g => g.gateway === "asaas")?.id || ""} 
+                      id="asaas"
+                      checked={gateways?.find(g => g.gateway === "asaas")?.is_default || false}
+                      onClick={() => {
+                        const gateway = gateways?.find(g => g.gateway === "asaas");
+                        if (gateway) handleDefaultGateway(gateway.id);
+                      }}
+                    />
+                    <Label htmlFor="asaas">Gateway Principal</Label>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* PagHiper */}
-            <Card>
+            <Card className="border-2 hover:border-primary transition-colors">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">PagHiper</CardTitle>
@@ -159,48 +187,36 @@ export function PaymentGatewayList() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Configure suas credenciais do PagHiper para começar a receber pagamentos.
-                </p>
-                <div className="flex items-center justify-between">
-                  <Label>Status</Label>
-                  <Switch
-                    checked={gateways?.find(g => g.gateway === "paghiper")?.enabled || false}
-                    onCheckedChange={(checked) => {
-                      const gateway = gateways?.find(g => g.gateway === "paghiper");
-                      if (gateway) handleGatewayToggle(gateway.id, checked);
-                    }}
-                  />
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Configure suas credenciais do PagHiper para começar a receber pagamentos.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <Label>Status</Label>
+                    <Switch
+                      checked={gateways?.find(g => g.gateway === "paghiper")?.enabled || false}
+                      onCheckedChange={(checked) => {
+                        const gateway = gateways?.find(g => g.gateway === "paghiper");
+                        if (gateway) handleGatewayToggle(gateway.id, checked);
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem 
+                      value={gateways?.find(g => g.gateway === "paghiper")?.id || ""} 
+                      id="paghiper"
+                      checked={gateways?.find(g => g.gateway === "paghiper")?.is_default || false}
+                      onClick={() => {
+                        const gateway = gateways?.find(g => g.gateway === "paghiper");
+                        if (gateway) handleDefaultGateway(gateway.id);
+                      }}
+                    />
+                    <Label htmlFor="paghiper">Gateway Principal</Label>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Gateway Principal</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RadioGroup 
-            value={gateways?.find(g => g.is_default)?.id} 
-            onValueChange={handleDefaultGateway}
-            className="space-y-2"
-          >
-            {gateways?.map((gateway) => (
-              <div key={gateway.id} className="flex items-center space-x-2">
-                <RadioGroupItem value={gateway.id} id={`radio-${gateway.id}`} />
-                <Label htmlFor={`radio-${gateway.id}`}>
-                  {gateway.gateway === "mercadopago"
-                    ? "Mercado Pago"
-                    : gateway.gateway === "asaas"
-                    ? "ASAAS"
-                    : "PagHiper"}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
         </CardContent>
       </Card>
     </div>
