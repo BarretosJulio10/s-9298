@@ -1,38 +1,26 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface MercadoPagoGatewayFormData {
-  api_key: string;
-  enabled: boolean;
-}
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function MercadoPagoGatewayForm() {
   const { toast } = useToast();
-  const { session } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { session } = useAuth();
+  const [apiKey, setApiKey] = useState("");
+  const [environment, setEnvironment] = useState("sandbox");
 
-  const { data: existingSettings } = useQuery({
-    queryKey: ["mercadopago-settings", session?.user?.id],
+  const { data: gatewaySettings } = useQuery({
+    queryKey: ["payment-gateway-settings", "mercadopago", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) throw new Error("Usuário não autenticado");
 
@@ -41,7 +29,7 @@ export function MercadoPagoGatewayForm() {
         .select("*")
         .eq("company_id", session.user.id)
         .eq("gateway", "mercadopago")
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       return data;
@@ -49,112 +37,117 @@ export function MercadoPagoGatewayForm() {
     enabled: !!session?.user?.id,
   });
 
-  const form = useForm<MercadoPagoGatewayFormData>({
-    defaultValues: {
-      api_key: existingSettings?.api_key || "",
-      enabled: existingSettings?.enabled || false,
+  useEffect(() => {
+    if (gatewaySettings) {
+      setApiKey(gatewaySettings.api_key || "");
+      setEnvironment(gatewaySettings.environment || "sandbox");
+    }
+  }, [gatewaySettings]);
+
+  const mutation = useMutation({
+    mutationFn: async (values: {
+      api_key: string;
+      environment: string;
+    }) => {
+      if (!session?.user?.id) throw new Error("Usuário não autenticado");
+
+      if (gatewaySettings?.id) {
+        const { error } = await supabase
+          .from("payment_gateway_settings")
+          .update({
+            api_key: values.api_key,
+            environment: values.environment,
+          })
+          .eq("id", gatewaySettings.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("payment_gateway_settings")
+          .insert([
+            {
+              company_id: session.user.id,
+              gateway: "mercadopago",
+              api_key: values.api_key,
+              environment: values.environment,
+            },
+          ]);
+
+        if (error) throw error;
+      }
     },
-  });
-
-  const onSubmit = async (data: MercadoPagoGatewayFormData) => {
-    if (!session?.user?.id) return;
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase
-        .from("payment_gateway_settings")
-        .upsert(
-          {
-            company_id: session.user.id,
-            gateway: "mercadopago",
-            api_key: data.api_key,
-            enabled: data.enabled,
-            environment: "production",
-          },
-          {
-            onConflict: "company_id,gateway",
-          }
-        );
-
-      if (error) throw error;
-
-      await queryClient.invalidateQueries({ queryKey: ["payment-gateways"] });
-      await queryClient.invalidateQueries({ 
-        queryKey: ["mercadopago-settings", session.user.id] 
-      });
-
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payment-gateway-settings"] });
       toast({
         title: "Configurações salvas",
-        description: "As configurações do Mercado Pago foram salvas com sucesso",
+        description: "As configurações do Mercado Pago foram atualizadas com sucesso.",
       });
-    } catch (error: any) {
+    },
+    onError: (error) => {
       toast({
         variant: "destructive",
         title: "Erro ao salvar",
-        description: error.message,
+        description: "Ocorreu um erro ao salvar as configurações do Mercado Pago.",
       });
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    mutation.mutate({
+      api_key: apiKey,
+      environment: environment,
+    });
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/dashboard/settings")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h2 className="text-2xl font-bold">Configurar Mercado Pago</h2>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/dashboard/settings/payment")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h2 className="text-2xl font-bold tracking-tight">Configurações do Mercado Pago</h2>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Credenciais do Mercado Pago</CardTitle>
+          <CardTitle>Credenciais</CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="api_key"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Access Token</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="password" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="apiKey">Chave de API</Label>
+              <Input
+                id="apiKey"
+                placeholder="Insira sua chave de API do Mercado Pago"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
               />
+            </div>
 
-              <FormField
-                control={form.control}
-                name="enabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Ativo</FormLabel>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+            <div className="space-y-2">
+              <Label htmlFor="environment">Ambiente</Label>
+              <Select value={environment} onValueChange={setEnvironment}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o ambiente" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sandbox">Sandbox</SelectItem>
+                  <SelectItem value="production">Produção</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Salvando..." : "Salvar Configurações"}
-              </Button>
-            </form>
-          </Form>
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? "Salvando..." : "Salvar configurações"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
