@@ -8,22 +8,28 @@ import { useToast } from "@/hooks/use-toast";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 export function PaymentGatewayList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   const { data: gateways } = useQuery({
-    queryKey: ["payment-gateways"],
+    queryKey: ["payment-gateways", session?.user?.id],
     queryFn: async () => {
+      if (!session?.user?.id) throw new Error("Usuário não autenticado");
+
       const { data, error } = await supabase
         .from("payment_gateway_settings")
-        .select("*");
+        .select("*")
+        .eq("company_id", session.user.id);
 
       if (error) throw error;
       return data;
     },
+    enabled: !!session?.user?.id,
   });
 
   const gatewayMutation = useMutation({
