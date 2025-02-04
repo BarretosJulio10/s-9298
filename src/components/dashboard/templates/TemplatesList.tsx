@@ -9,7 +9,6 @@ import { DeleteTemplateDialog } from "./template-list/DeleteTemplateDialog";
 import { EditTemplateDialog } from "./template-list/EditTemplateDialog";
 import { SendNotificationDialog } from "./SendNotificationDialog";
 import { templateTypeTranslations } from "./constants/templateTypes";
-import { TemplateForm } from "./TemplateForm";
 
 export function TemplatesList() {
   const { toast } = useToast();
@@ -17,7 +16,6 @@ export function TemplatesList() {
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [sendingTemplate, setSendingTemplate] = useState<any | null>(null);
-  const [showForm, setShowForm] = useState(true);
 
   const { data: templates, isLoading } = useQuery({
     queryKey: ["templates"],
@@ -61,20 +59,6 @@ export function TemplatesList() {
       });
     },
   });
-
-  if (showForm) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Templates</h1>
-          <p className="text-muted-foreground">
-            Gerencie suas cobranças e acompanhe seus resultados
-          </p>
-        </div>
-        <TemplateForm onCancel={() => setShowForm(false)} />
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
