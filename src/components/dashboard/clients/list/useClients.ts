@@ -28,7 +28,8 @@ export function useClients() {
 
       return clients.map(client => ({
         ...client,
-        paymentStatus: getPaymentStatus(client.client_charges)
+        paymentStatus: getPaymentStatus(client.client_charges),
+        paymentLink: getLatestPaymentLink(client.client_charges)
       }));
     }
   });
@@ -44,7 +45,14 @@ function getPaymentStatus(charges: any[]) {
   
   const dueDate = new Date(latestCharge.due_date);
   const today = new Date();
+  today.setHours(0, 0, 0, 0); // Remove o horário para comparar apenas as datas
   
   if (dueDate < today) return "overdue";
-  return "sent";
+  return "pending";
+}
+
+function getLatestPaymentLink(charges: any[]) {
+  if (!charges || charges.length === 0) return null;
+  const latestCharge = charges[0];
+  return latestCharge?.payment_link || null;
 }

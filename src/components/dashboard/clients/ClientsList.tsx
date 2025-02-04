@@ -180,7 +180,7 @@ export function ClientsList() {
                     onSend={() => {}}
                     onEdit={() => {}}
                     onDelete={() => {}}
-                    paymentLink={client.client_charges?.[0]?.payment_link}
+                    paymentLink={client.paymentLink}
                   />
                 </TableCell>
               </TableRow>
