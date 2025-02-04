@@ -16,11 +16,11 @@ interface ChargeTableRowProps {
     payment_date: string | null;
     payment_link?: string;
   };
-  onEdit?: () => void;
-  onCancel?: () => void;
 }
 
-export function ChargeTableRow({ charge, onEdit = () => {}, onCancel = () => {} }: ChargeTableRowProps) {
+export function ChargeTableRow({ charge }: ChargeTableRowProps) {
+  console.log("Payment link:", charge.payment_link); // Debug log
+
   return (
     <TableRow>
       <TableCell>{charge.customer_name}</TableCell>
@@ -43,8 +43,6 @@ export function ChargeTableRow({ charge, onEdit = () => {}, onCancel = () => {} 
         <ChargeActions
           paymentLink={charge.payment_link}
           status={charge.status}
-          onEdit={onEdit}
-          onCancel={onCancel}
         />
       </TableCell>
     </TableRow>

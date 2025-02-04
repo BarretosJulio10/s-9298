@@ -28,6 +28,8 @@ export function ChargesList({ companyId }: ChargesListProps) {
         console.error("Erro ao buscar cobranças:", error);
         throw error;
       }
+      
+      console.log("Charges data:", data); // Debug log
       return data;
     },
   });

@@ -1,6 +1,12 @@
 import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ChargeActionsProps {
   paymentLink?: string;
@@ -11,6 +17,8 @@ interface ChargeActionsProps {
 
 export function ChargeActions({ paymentLink, status, onEdit, onCancel }: ChargeActionsProps) {
   const { toast } = useToast();
+  console.log("ChargeActions - paymentLink:", paymentLink); // Debug log
+  console.log("ChargeActions - status:", status); // Debug log
 
   const handleCopyLink = async () => {
     if (!paymentLink) return;
@@ -32,15 +40,23 @@ export function ChargeActions({ paymentLink, status, onEdit, onCancel }: ChargeA
 
   return (
     <div className="flex items-center gap-2">
-      {paymentLink && status !== "cancelled" && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleCopyLink}
-          title="Copiar link de pagamento"
-        >
-          <Copy className="h-4 w-4" />
-        </Button>
+      {paymentLink && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCopyLink}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Copiar link de pagamento</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
     </div>
   );
