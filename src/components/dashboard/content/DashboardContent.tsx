@@ -1,6 +1,5 @@
 import { ChargeForm } from "@/components/dashboard/charges/ChargeForm";
 import { ChargesList } from "@/components/dashboard/charges/ChargesList";
-import { TemplateForm } from "@/components/dashboard/templates/TemplateForm";
 import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
 import { DashboardStats } from "@/components/dashboard/stats/DashboardStats";
 import { Button } from "@/components/ui/button";
@@ -18,21 +17,6 @@ export function DashboardContent({
   onBack 
 }: DashboardContentProps) {
   const { session } = useAuth();
-
-  if (showTemplateForm) {
-    return (
-      <div className="mt-6">
-        <TemplateForm onCancel={onBack} />
-        <Button 
-          variant="outline" 
-          onClick={onBack}
-          className="mt-4"
-        >
-          Voltar para Lista
-        </Button>
-      </div>
-    );
-  }
 
   if (showChargeForm) {
     return (

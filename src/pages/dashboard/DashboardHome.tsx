@@ -4,11 +4,9 @@ import { DashboardActions } from "@/components/dashboard/actions/DashboardAction
 import { DashboardContent } from "@/components/dashboard/content/DashboardContent";
 
 const DashboardHome = () => {
-  const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [showChargeForm, setShowChargeForm] = useState(false);
 
   const handleBack = () => {
-    setShowTemplateForm(false);
     setShowChargeForm(false);
   };
 
@@ -21,13 +19,11 @@ const DashboardHome = () => {
             Gerencie suas cobranças e acompanhe seus resultados
           </p>
         </div>
-        <DashboardActions 
-          onNewTemplate={() => {}} // Mantido para evitar erros de tipo, mas sem funcionalidade
-        />
+        <DashboardActions onNewTemplate={() => {}} />
       </div>
 
       <DashboardContent 
-        showTemplateForm={showTemplateForm}
+        showTemplateForm={false}
         showChargeForm={showChargeForm}
         onBack={handleBack}
       />
