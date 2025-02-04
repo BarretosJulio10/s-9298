@@ -35,14 +35,16 @@ const AdminSettings = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      if (data) {
-        setApiKey(data.asaas_api_key || "");
-        setEnvironment(data.asaas_environment || "sandbox");
-        setStripeProductId(data.stripe_product_id || "");
-        setStripePriceId(data.stripe_price_id || "");
+    meta: {
+      onSuccess: (data) => {
+        if (data) {
+          setApiKey(data.asaas_api_key || "");
+          setEnvironment(data.asaas_environment || "sandbox");
+          setStripeProductId(data.stripe_product_id || "");
+          setStripePriceId(data.stripe_price_id || "");
+        }
       }
-    },
+    }
   });
 
   // Mutation para salvar configurações

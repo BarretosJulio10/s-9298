@@ -304,7 +304,7 @@ export type Database = {
           stripe_price_id: string | null
           stripe_product_id: string | null
           updated_at: string
-          whatsapp_instance_id: string | null;
+          whatsapp_instance_id: string | null
         }
         Insert: {
           asaas_api_key?: string | null
@@ -314,7 +314,7 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
-          whatsapp_instance_id?: string | null;
+          whatsapp_instance_id?: string | null
         }
         Update: {
           asaas_api_key?: string | null
@@ -324,7 +324,7 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
-          whatsapp_instance_id?: string | null;
+          whatsapp_instance_id?: string | null
         }
         Relationships: []
       }
@@ -697,7 +697,7 @@ export type Database = {
           id?: string
           payment_method?: string | null
           transaction_date?: string
-          type: string
+          type?: string
           updated_at?: string
         }
         Relationships: [
