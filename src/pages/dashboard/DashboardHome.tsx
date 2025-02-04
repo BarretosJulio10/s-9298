@@ -10,7 +10,7 @@ const DashboardHome = () => {
   };
 
   return (
-    <main className="flex-1">
+    <main>
       <DashboardContent 
         showChargeForm={showChargeForm}
         onBack={handleBack}

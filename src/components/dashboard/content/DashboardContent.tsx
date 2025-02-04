@@ -35,11 +35,7 @@ export function DashboardContent({
     }
 
     if (activeSection === "templates") {
-      return (
-        <div className="mt-6">
-          <TemplatesList />
-        </div>
-      );
+      return <TemplatesList />;
     }
 
     return (

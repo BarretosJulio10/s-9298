@@ -1,110 +1,115 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Table, TableBody } from "@/components/ui/table";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { TemplateListHeader } from "./template-list/TemplateListHeader";
-import { TemplateListRow } from "./template-list/TemplateListRow";
-import { DeleteTemplateDialog } from "./template-list/DeleteTemplateDialog";
-import { EditTemplateDialog } from "./template-list/EditTemplateDialog";
+import { TemplateForm } from "./TemplateForm";
 import { SendNotificationDialog } from "./SendNotificationDialog";
-import { templateTypeTranslations } from "./constants/templateTypes";
+import { TemplateListHeader } from "./template-list/TemplateListHeader";
+import { TemplateListItem } from "./template-list/TemplateListItem";
+
+interface Template {
+  id: string;
+  name: string;
+  content: string;
+  type: string;
+  image_url?: string;
+}
 
 export function TemplatesList() {
+  const { session } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
-  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
-  const [sendingTemplate, setSendingTemplate] = useState<any | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [showSendDialog, setShowSendDialog] = useState(false);
 
-  const { data: templates, isLoading } = useQuery({
+  const { data: templates, refetch } = useQuery({
     queryKey: ["templates"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
-
       const { data, error } = await supabase
         .from("message_templates")
         .select("*")
-        .eq("company_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Template[];
     },
   });
 
-  const deleteTemplate = useMutation({
-    mutationFn: async (templateId: string) => {
+  const handleDelete = async (template: Template) => {
+    try {
       const { error } = await supabase
         .from("message_templates")
         .delete()
-        .eq("id", templateId);
+        .eq("id", template.id);
 
       if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
+
       toast({
         title: "Template excluído",
         description: "O template foi excluído com sucesso",
       });
-      setTemplateToDelete(null);
-    },
-    onError: (error) => {
+
+      refetch();
+    } catch (error) {
       toast({
         variant: "destructive",
-        title: "Erro ao excluir template",
-        description: error.message,
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o template",
       });
-    },
-  });
+    }
+  };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Carregando templates...</p>
-      </div>
-    );
-  }
+  const handleEdit = (template: Template) => {
+    setSelectedTemplate(template);
+    setShowForm(true);
+  };
+
+  const handleSend = (template: Template) => {
+    setSelectedTemplate(template);
+    setShowSendDialog(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setSelectedTemplate(null);
+    refetch();
+  };
+
+  if (!session?.user?.id) return null;
 
   return (
-    <>
-      <div className="rounded-md border bg-white">
-        <Table>
-          <TemplateListHeader />
-          <TableBody>
-            {templates?.map((template) => (
-              <TemplateListRow
-                key={template.id}
-                template={template}
-                onEdit={setEditingTemplate}
-                onDelete={setTemplateToDelete}
-                onSend={setSendingTemplate}
-                templateTypeTranslations={templateTypeTranslations}
-              />
-            ))}
-          </TableBody>
-        </Table>
+    <div className="space-y-4">
+      <TemplateListHeader onNewTemplate={() => setShowForm(true)} />
+      
+      <div className="space-y-2">
+        {templates?.map((template) => (
+          <TemplateListItem
+            key={template.id}
+            template={template}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onSend={handleSend}
+          />
+        ))}
       </div>
 
-      <EditTemplateDialog
-        open={editingTemplate !== null}
-        onOpenChange={(open) => !open && setEditingTemplate(null)}
-        template={editingTemplate}
-      />
+      {showForm && (
+        <TemplateForm
+          template={selectedTemplate}
+          onClose={handleFormClose}
+        />
+      )}
 
-      <DeleteTemplateDialog
-        open={templateToDelete !== null}
-        onOpenChange={(open) => !open && setTemplateToDelete(null)}
-        onConfirm={() => templateToDelete && deleteTemplate.mutate(templateToDelete)}
-      />
-
-      <SendNotificationDialog
-        open={sendingTemplate !== null}
-        onOpenChange={(open) => !open && setSendingTemplate(null)}
-        template={sendingTemplate}
-      />
-    </>
+      {showSendDialog && selectedTemplate && (
+        <SendNotificationDialog
+          template={selectedTemplate}
+          onClose={() => {
+            setShowSendDialog(false);
+            setSelectedTemplate(null);
+          }}
+        />
+      )}
+    </div>
   );
 }
