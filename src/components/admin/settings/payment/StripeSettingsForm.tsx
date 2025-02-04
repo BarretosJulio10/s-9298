@@ -19,7 +19,7 @@ export function StripeSettingsForm() {
         .select("*")
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
