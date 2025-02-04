@@ -54,6 +54,9 @@ serve(async (req: Request) => {
       dueDate.setHours(23, 59, 59)
       const formattedDueDate = dueDate.toISOString()
       
+      // Gerar um ID de idempotência único baseado nos dados da cobrança
+      const idempotencyKey = crypto.randomUUID()
+      
       const baseUrl = gatewaySettings.environment === 'production' 
         ? 'https://api.mercadopago.com'
         : 'https://api.mercadopago.com'
@@ -63,6 +66,7 @@ serve(async (req: Request) => {
         headers: {
           'Authorization': `Bearer ${gatewaySettings.api_key}`,
           'Content-Type': 'application/json',
+          'X-Idempotency-Key': idempotencyKey,
         },
         body: JSON.stringify({
           transaction_amount: charge.amount,
