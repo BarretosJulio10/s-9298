@@ -23,11 +23,7 @@ export function DashboardSidebarMenu({
   ];
 
   const handleClick = (section: string) => {
-    if (section === "templates") {
-      onSectionChange(section);
-    } else {
-      onSectionChange(section);
-    }
+    onSectionChange(section);
   };
 
   return (
