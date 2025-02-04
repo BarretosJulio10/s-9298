@@ -32,8 +32,9 @@ const AdminSettings = () => {
       const { data, error } = await supabase
         .from("configurations")
         .select("*")
+        .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
       return data;
