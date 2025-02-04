@@ -1,0 +1,4 @@
+project_id = "pikxpmhpcsrstmikkpvg"
+
+[mercadopago]
+verify_jwt = true
