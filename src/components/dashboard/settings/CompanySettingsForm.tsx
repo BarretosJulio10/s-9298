@@ -32,9 +32,9 @@ export function CompanySettingsForm() {
           </Tabs>
         }
       />
-      <Route path="/payment/mercadopago" element={<MercadoPagoGatewayForm />} />
-      <Route path="/payment/asaas" element={<AsaasGatewayForm />} />
-      <Route path="/payment/paghiper" element={<PagHiperGatewayForm />} />
+      <Route path="payment/mercadopago" element={<MercadoPagoGatewayForm />} />
+      <Route path="payment/asaas" element={<AsaasGatewayForm />} />
+      <Route path="payment/paghiper" element={<PagHiperGatewayForm />} />
     </Routes>
   );
 }
