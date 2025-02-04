@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Send, Edit, Trash, Link2 } from "lucide-react";
+import { Send, Edit, Trash, Link2, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,12 +45,8 @@ export function ClientActions({ onSend, onEdit, onDelete, paymentLink, client }:
       if (chargeError) throw chargeError;
 
       // Gera o link de pagamento via Mercado Pago
-      const response = await fetch("/api/functions/v1/mercadopago", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const { data: mpResponse, error } = await supabase.functions.invoke('mercadopago', {
+        body: {
           action: "create_charge",
           charge: {
             customer_name: client.name,
@@ -61,12 +57,10 @@ export function ClientActions({ onSend, onEdit, onDelete, paymentLink, client }:
             payment_method: "pix"
           },
           company_id: session.user.id
-        }),
+        },
       });
 
-      const mpResponse = await response.json();
-      
-      if (!response.ok) throw new Error(mpResponse.error);
+      if (error) throw error;
 
       // Atualiza a cobrança com o link de pagamento
       const { error: updateError } = await supabase
@@ -122,6 +116,17 @@ export function ClientActions({ onSend, onEdit, onDelete, paymentLink, client }:
       >
         <Link2 className="h-4 w-4" />
       </Button>
+      {paymentLink && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          title="Copiar link de pagamento"
+          onClick={handleCopyLink}
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
+      )}
       <Button
         variant="ghost"
         size="icon"
