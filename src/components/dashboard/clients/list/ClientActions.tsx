@@ -116,7 +116,7 @@ export function ClientActions({ onSend, onEdit, paymentLink, client }: ClientAct
 
       if (clientError) throw clientError;
 
-      // Atualiza a lista de clientes
+      // Atualiza a lista de clientes e cobranças
       queryClient.invalidateQueries({ queryKey: ['clients-with-charges'] });
       queryClient.invalidateQueries({ queryKey: ['charges'] });
 
