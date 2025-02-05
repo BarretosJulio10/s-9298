@@ -1,5 +1,6 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FormLabel } from "@/components/ui/form";
+import { Repeat, CircleDot } from "lucide-react";
 
 interface ChargeTypeFieldProps {
   value: string;
@@ -18,7 +19,10 @@ export function ChargeTypeField({ value, onChange }: ChargeTypeFieldProps) {
         <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary">
           <RadioGroupItem value="recurring" id="recurring" />
           <label htmlFor="recurring" className="cursor-pointer flex-1">
-            <div className="font-medium">Recorrente</div>
+            <div className="font-medium flex items-center gap-2">
+              Recorrente
+              <Repeat className="h-4 w-4 text-muted-foreground" />
+            </div>
             <p className="text-sm text-muted-foreground">
               Cobranças automáticas mensais
             </p>
@@ -27,7 +31,10 @@ export function ChargeTypeField({ value, onChange }: ChargeTypeFieldProps) {
         <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:border-primary">
           <RadioGroupItem value="single" id="single" />
           <label htmlFor="single" className="cursor-pointer flex-1">
-            <div className="font-medium">Avulsa</div>
+            <div className="font-medium flex items-center gap-2">
+              Avulsa
+              <CircleDot className="h-4 w-4 text-muted-foreground" />
+            </div>
             <p className="text-sm text-muted-foreground">
               Cobrança única
             </p>
