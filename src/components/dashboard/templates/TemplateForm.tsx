@@ -4,13 +4,11 @@ import { TemplateFormActions } from "./template-form/TemplateFormActions";
 import { useTemplateForm } from "./hooks/useTemplateForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface TemplateFormProps {
   template?: {
@@ -51,37 +49,6 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
     uploading: false
   })));
   const { toast } = useToast();
-
-  const handleImageUpload = async (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      if (!event.target.files || event.target.files.length === 0) return;
-
-      const file = event.target.files[0];
-      if (!file.type.includes('image/png')) {
-        toast({
-          variant: "destructive",
-          title: "Erro no upload",
-          description: "Por favor, selecione apenas arquivos PNG."
-        });
-        return;
-      }
-
-      setSubtemplates(prev => prev.map((st, i) => 
-        i === index ? { ...st, imageFile: file } : st
-      ));
-
-      toast({
-        title: "Imagem selecionada com sucesso",
-      });
-    } catch (error) {
-      console.error('Erro ao selecionar imagem:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao selecionar imagem",
-        description: error.message,
-      });
-    }
-  };
 
   const handleSubmitWithSubtemplates = async (values: any) => {
     try {
@@ -191,29 +158,18 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Imagem do Template</label>
                   <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <Input
-                        type="file"
-                        accept="image/png"
-                        onChange={(e) => handleImageUpload(index, e)}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        disabled={subtemplates[index].uploading}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="relative"
-                        disabled={subtemplates[index].uploading}
-                      >
-                        <ImagePlus className="h-4 w-4 mr-2" />
-                        {subtemplates[index].uploading ? "Carregando..." : "Upload"}
-                      </Button>
-                    </div>
-                    {subtemplates[index].imageFile && (
-                      <span className="text-sm text-muted-foreground">
-                        {subtemplates[index].imageFile.name}
-                      </span>
-                    )}
+                    <Input
+                      type="file"
+                      accept="image/png"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setSubtemplates(prev => prev.map((st, i) => 
+                            i === index ? { ...st, imageFile: e.target.files![0] } : st
+                          ));
+                        }
+                      }}
+                      className="cursor-pointer"
+                    />
                   </div>
                   {subtemplates[index].imageFile && (
                     <div className="mt-2">
