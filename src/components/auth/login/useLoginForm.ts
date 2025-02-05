@@ -71,11 +71,17 @@ export const useLoginForm = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao painel administrativo!",
         });
-      } else {
+      } else if (roleData?.role === 'company') {
         navigate('/dashboard');
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao PagouPix!",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Tipo de usuário não reconhecido.",
         });
       }
     } catch (error: any) {
