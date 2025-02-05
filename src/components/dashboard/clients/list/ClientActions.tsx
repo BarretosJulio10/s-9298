@@ -8,7 +8,6 @@ import { useQueryClient } from "@tanstack/react-query";
 interface ClientActionsProps {
   onSend: () => void;
   onEdit: () => void;
-  onDelete: () => void;
   paymentLink?: string | null;
   client: {
     id: string;
@@ -100,11 +99,12 @@ export function ClientActions({ onSend, onEdit, paymentLink, client }: ClientAct
 
   const handleDelete = async () => {
     try {
-      // Primeiro, excluímos as cobranças relacionadas ao cliente
+      // Primeiro, excluímos apenas as cobranças pendentes relacionadas ao cliente
       const { error: chargesError } = await supabase
-        .from('client_charges')
+        .from('charges')
         .delete()
-        .eq('client_id', client.id);
+        .eq('customer_document', client.document)
+        .eq('status', 'pending');
 
       if (chargesError) throw chargesError;
 
@@ -118,6 +118,7 @@ export function ClientActions({ onSend, onEdit, paymentLink, client }: ClientAct
 
       // Atualiza a lista de clientes
       queryClient.invalidateQueries({ queryKey: ['clients-with-charges'] });
+      queryClient.invalidateQueries({ queryKey: ['charges'] });
 
       toast({
         description: "Cliente excluído com sucesso!",
