@@ -55,7 +55,7 @@ export function ClientTableRow({ client, onSelect, onEdit, onDelete }: ClientTab
   };
 
   return (
-    <TableRow className="hover:bg-gray-50">
+    <TableRow className="even:bg-gray-50">
       <TableCell className="font-medium text-left">
         {client.code}
       </TableCell>
@@ -75,7 +75,7 @@ export function ClientTableRow({ client, onSelect, onEdit, onDelete }: ClientTab
         <ClientStatus status={client.paymentStatus || 'pending'} />
       </TableCell>
       <TableCell>
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-center gap-2">
           <Button
             variant="ghost"
             size="icon"

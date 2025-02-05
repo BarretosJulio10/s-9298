@@ -29,7 +29,7 @@ export function InvoiceTableRow({
   };
 
   return (
-    <TableRow>
+    <TableRow className="even:bg-gray-50">
       <TableCell className="font-medium">{invoice.code}</TableCell>
       <TableCell>{invoice.client?.name || 'N/A'}</TableCell>
       <TableCell>{invoice.client?.email || 'N/A'}</TableCell>
@@ -50,7 +50,7 @@ export function InvoiceTableRow({
         </Badge>
       </TableCell>
       <TableCell>
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-center gap-2">
           <Button
             variant="outline"
             size="icon"
