@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WhatsAppStatus } from "@/components/admin/whatsapp/WhatsAppStatus";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -143,7 +143,7 @@ export function WhatsAppSettings() {
   };
 
   // Atualizar estado local com dados do banco
-  useState(() => {
+  useEffect(() => {
     if (whatsappConnection) {
       setIsConnected(whatsappConnection.is_connected);
       setQrCode(whatsappConnection.last_qr_code || "");
