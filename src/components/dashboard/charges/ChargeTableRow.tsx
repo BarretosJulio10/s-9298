@@ -1,6 +1,6 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Send, Link2, Copy, Trash } from "lucide-react";
+import { Send, Link2, Copy, Trash, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -62,6 +62,18 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
     }
   };
 
+  const handleSendCharge = () => {
+    toast({
+      description: "Funcionalidade de envio será implementada em breve!",
+    });
+  };
+
+  const handleEditCharge = () => {
+    toast({
+      description: "Funcionalidade de edição será implementada em breve!",
+    });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "paid":
@@ -115,14 +127,24 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
             : "-"}
         </TableCell>
         <TableCell>
-          <div className="flex items-center justify-end gap-1">
+          <div className="flex items-center justify-end gap-2">
             <Button
               variant="ghost"
               size="icon"
               className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
               title="Enviar cobrança"
+              onClick={handleSendCharge}
             >
               <Send className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              title="Editar cobrança"
+              onClick={handleEditCharge}
+            >
+              <Edit className="h-4 w-4" />
             </Button>
             {charge.payment_link && (
               <>
