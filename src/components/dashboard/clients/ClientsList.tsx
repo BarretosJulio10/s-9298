@@ -115,7 +115,6 @@ export function ClientsList() {
       <ClientsTable 
         clients={filteredClients || []}
         onSelectClient={setSelectedClient}
-        onSendMessage={() => {}}
         onEdit={() => {}}
       />
 

@@ -17,9 +17,9 @@ export function ClientsTable({ clients, onSelectClient, onEdit }: ClientsTablePr
     try {
       // Primeiro, excluir as cobranças pendentes ou atrasadas
       const { error: chargesError } = await supabase
-        .from('charges')
+        .from('client_charges')
         .delete()
-        .eq('customer_id', clientId)
+        .eq('client_id', clientId)
         .in('status', ['pending', 'overdue']);
 
       if (chargesError) throw chargesError;
