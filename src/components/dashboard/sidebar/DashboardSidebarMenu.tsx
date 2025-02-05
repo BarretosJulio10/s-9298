@@ -1,3 +1,4 @@
+
 import { Home, CreditCard, User, Wallet, MessageSquare, Settings } from "lucide-react";
 
 interface DashboardSidebarMenuProps {
@@ -9,7 +10,6 @@ const menuItems = [
   { icon: Home, label: "Início", section: "home" },
   { icon: User, label: "Clientes", section: "clients" },
   { icon: Wallet, label: "Carteira", section: "wallet" },
-  { icon: CreditCard, label: "Cobranças", section: "charges" },
   { icon: MessageSquare, label: "Templates", section: "templates" },
   { icon: Settings, label: "Configurações", section: "settings" },
 ] as const;
