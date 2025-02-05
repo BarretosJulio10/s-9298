@@ -16,7 +16,7 @@ export function WhatsAppSettings() {
       const { data, error } = await supabase
         .from("configurations")
         .select("*")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
