@@ -15,25 +15,14 @@ export function ClientsTable({ clients, onSelectClient, onEdit }: ClientsTablePr
 
   const handleDelete = async (clientId: string) => {
     try {
-      // Primeiro, excluir as cobranças pendentes ou atrasadas
-      const { error: chargesError } = await supabase
-        .from('client_charges')
-        .delete()
-        .eq('client_id', clientId)
-        .in('status', ['pending', 'overdue']);
+      const { error } = await supabase.functions.invoke('delete-client', {
+        body: { clientId }
+      });
 
-      if (chargesError) throw chargesError;
-
-      // Depois, excluir o cliente
-      const { error: clientError } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', clientId);
-
-      if (clientError) throw clientError;
+      if (error) throw error;
 
       toast({
-        description: "Cliente e cobranças pendentes excluídos com sucesso!",
+        description: "Cliente e cobranças excluídos com sucesso!",
       });
     } catch (error) {
       console.error('Erro ao excluir:', error);
