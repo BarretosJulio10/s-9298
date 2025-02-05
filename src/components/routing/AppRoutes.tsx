@@ -11,7 +11,7 @@ import AdminCharges from "@/pages/admin/AdminCharges";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 
-const AppRoutes = () => {
+export function AppRoutes() {
   const { session, loading, setLoading } = useAuth();
   const { userRole, fetchUserRole } = useUserRole(session, setLoading);
 
@@ -61,6 +61,4 @@ const AppRoutes = () => {
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
-};
-
-export default AppRoutes;
+}
