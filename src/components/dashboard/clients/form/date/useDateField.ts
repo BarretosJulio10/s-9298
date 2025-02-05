@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { format, parse } from "date-fns";
+import { format, parse, addDays } from "date-fns";
 import { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -29,7 +29,9 @@ export function useDateField(form: UseFormReturn<Client>) {
       const date = new Date(year, month, day);
       
       if (!isNaN(date.getTime())) {
-        form.setValue('birth_date', date.toISOString().split('T')[0]);
+        // Adiciona um dia à data antes de salvar
+        const adjustedDate = addDays(date, 1);
+        form.setValue('birth_date', adjustedDate.toISOString().split('T')[0]);
       }
     }
   };
@@ -39,7 +41,9 @@ export function useDateField(form: UseFormReturn<Client>) {
     if (date) {
       const parsedDate = new Date(date);
       if (!isNaN(parsedDate.getTime())) {
-        setInputDate(format(parsedDate, 'dd/MM/yyyy'));
+        // Subtrai um dia ao exibir para compensar o ajuste feito ao salvar
+        const displayDate = addDays(parsedDate, -1);
+        setInputDate(format(displayDate, 'dd/MM/yyyy'));
       }
     }
   }, [form.getValues('birth_date')]);
