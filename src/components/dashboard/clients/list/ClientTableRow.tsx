@@ -13,6 +13,9 @@ interface ClientTableRowProps {
 export function ClientTableRow({ client, onSelect, onEdit, onDelete }: ClientTableRowProps) {
   return (
     <TableRow className="cursor-pointer hover:bg-gray-50">
+      <TableCell className="font-medium text-left">
+        {client.code}
+      </TableCell>
       <TableCell className="font-medium" onClick={onSelect}>
         {client.name}
       </TableCell>

@@ -4,6 +4,7 @@ export function ClientTableHeader() {
   return (
     <TableHeader>
       <TableRow>
+        <TableHead className="text-left">Código</TableHead>
         <TableHead className="text-left">Nome</TableHead>
         <TableHead className="text-center">Email</TableHead>
         <TableHead className="text-center">Documento</TableHead>
