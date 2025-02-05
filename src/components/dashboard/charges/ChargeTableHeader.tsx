@@ -10,7 +10,7 @@ export function ChargeTableHeader() {
         <TableCell className="text-center">Status</TableCell>
         <TableCell className="text-center">Método</TableCell>
         <TableCell className="text-center">Data de Pagamento</TableCell>
-        <TableCell className="text-right">Ações</TableCell>
+        <TableCell className="text-center">Ações</TableCell>
       </TableRow>
     </TableHeader>
   );

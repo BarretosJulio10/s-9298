@@ -1,26 +1,19 @@
-import { TableRow } from "@/components/ui/table";
+import { TableRow, TableCell } from "@/components/ui/table";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
 import { CancelChargeDialog } from "./CancelChargeDialog";
-import { EditChargeDialog } from "./charge-list/EditChargeDialog";
-import { ChargeCustomerCell } from "./charge-row/ChargeCustomerCell";
-import { ChargeAmountCell } from "./charge-row/ChargeAmountCell";
-import { ChargeDateCell } from "./charge-row/ChargeDateCell";
-import { ChargeStatusCell } from "./charge-row/ChargeStatusCell";
-import { ChargeMethodCell } from "./charge-row/ChargeMethodCell";
-import { ChargeActionsCell } from "./charge-row/ChargeActionsCell";
 
 interface ChargeTableRowProps {
   charge: {
     id: string;
     customer_name: string;
-    customer_email: string;
     amount: number;
     due_date: string;
     status: string;
-    payment_link?: string | null;
     payment_method: string;
     payment_date?: string | null;
   };
@@ -28,7 +21,6 @@ interface ChargeTableRowProps {
 
 export function ChargeTableRow({ charge }: ChargeTableRowProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -61,29 +53,41 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
   return (
     <>
       <TableRow>
-        <ChargeCustomerCell name={charge.customer_name} />
-        <ChargeAmountCell amount={charge.amount} />
-        <ChargeDateCell date={charge.due_date} />
-        <ChargeStatusCell status={charge.status} />
-        <ChargeMethodCell method={charge.payment_method} />
-        <ChargeDateCell date={charge.payment_date || ""} />
-        <ChargeActionsCell
-          charge={charge}
-          onEdit={() => setIsEditDialogOpen(true)}
-          onDelete={() => setIsDeleteDialogOpen(true)}
-        />
+        <TableCell>{charge.customer_name}</TableCell>
+        <TableCell className="text-center">
+          {new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(charge.amount)}
+        </TableCell>
+        <TableCell className="text-center">
+          {new Date(charge.due_date).toLocaleDateString('pt-BR')}
+        </TableCell>
+        <TableCell className="text-center">{charge.status}</TableCell>
+        <TableCell className="text-center">{charge.payment_method}</TableCell>
+        <TableCell className="text-center">
+          {charge.payment_date 
+            ? new Date(charge.payment_date).toLocaleDateString('pt-BR')
+            : '-'}
+        </TableCell>
+        <TableCell className="text-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            onClick={() => setIsDeleteDialogOpen(true)}
+            disabled={charge.status === "paid"}
+            title="Excluir cobrança"
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        </TableCell>
       </TableRow>
 
       <CancelChargeDialog 
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDelete}
-      />
-
-      <EditChargeDialog
-        charge={charge}
-        isOpen={isEditDialogOpen}
-        onClose={() => setIsEditDialogOpen(false)}
       />
     </>
   );
