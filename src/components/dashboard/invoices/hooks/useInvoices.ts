@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Invoice } from "../types/Invoice";
@@ -34,6 +33,7 @@ export function useInvoices() {
         .select(`
           *,
           client:clients (
+            id,
             name,
             email,
             document,
@@ -65,7 +65,24 @@ export function useInvoices() {
         });
       }
 
-      return data as Invoice[];
+      // Garantir que os dados correspondam ao tipo Invoice
+      const invoices: Invoice[] = data?.map(invoice => ({
+        id: invoice.id,
+        code: invoice.code,
+        amount: invoice.amount,
+        status: invoice.status,
+        due_date: invoice.due_date,
+        payment_date: invoice.payment_date,
+        client: {
+          id: invoice.client.id,
+          name: invoice.client.name,
+          email: invoice.client.email,
+          document: invoice.client.document,
+          phone: invoice.client.phone
+        }
+      })) || [];
+
+      return invoices;
     },
     meta: {
       onError: (error: Error) => {
