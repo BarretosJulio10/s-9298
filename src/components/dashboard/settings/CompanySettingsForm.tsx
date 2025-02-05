@@ -7,6 +7,7 @@ import { MercadoPagoGatewayForm } from "@/components/admin/settings/payment/gate
 import { AsaasGatewayForm } from "@/components/admin/settings/payment/gateways/AsaasGatewayForm";
 import { PagHiperGatewayForm } from "@/components/admin/settings/payment/gateways/PagHiperGatewayForm";
 import { PaymentGatewayList } from "@/components/admin/settings/payment/PaymentGatewayList";
+import { WhatsAppSettings } from "./WhatsAppSettings";
 
 export function CompanySettingsForm() {
   return (
