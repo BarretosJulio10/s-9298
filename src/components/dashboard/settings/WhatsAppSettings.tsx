@@ -1,10 +1,11 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { callWhatsAppAPI } from "@/lib/whatsapp";
 
 export function WhatsAppSettings() {
   const [qrCode, setQrCode] = useState("");
@@ -28,18 +29,7 @@ export function WhatsAppSettings() {
 
   const handleGenerateQR = async () => {
     try {
-      const response = await fetch("/api/whatsapp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "qrcode",
-          instance: instanceId
-        })
-      });
-
-      const data = await response.json();
+      const data = await callWhatsAppAPI("qrcode");
 
       if (data.status === "success" && data.data?.QRCode) {
         setQrCode(data.data.QRCode);
@@ -70,19 +60,7 @@ export function WhatsAppSettings() {
     }
 
     try {
-      const response = await fetch("/api/whatsapp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          action: "configureWebhook",
-          instance: instanceId,
-          params: { webhookUrl }
-        })
-      });
-
-      const data = await response.json();
+      const data = await callWhatsAppAPI("configureWebhook", { webhookUrl });
 
       if (data.success) {
         toast({

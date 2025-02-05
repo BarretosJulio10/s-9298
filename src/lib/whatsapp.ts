@@ -11,7 +11,7 @@ export async function callWhatsAppAPI(action: string, params?: any) {
   }
 
   try {
-    const response = await fetch("/api/whatsapp", {
+    const response = await fetch("/functions/whatsapp", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
