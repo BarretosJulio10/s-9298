@@ -30,7 +30,7 @@ export function ChargeFrequencyField({ form }: ChargeFrequencyFieldProps) {
             defaultValue={field.value as string}
           >
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger className="text-secondary">
                 <SelectValue placeholder="Frequência" />
               </SelectTrigger>
             </FormControl>
