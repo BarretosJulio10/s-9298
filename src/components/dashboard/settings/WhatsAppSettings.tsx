@@ -14,7 +14,7 @@ export function WhatsAppSettings() {
   const { toast } = useToast();
 
   // Buscar configurações do admin e status da conexão
-  const { data: adminConfig } = useQuery({
+  const { data: adminConfig, isLoading: isLoadingConfig } = useQuery({
     queryKey: ["configurations"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -43,10 +43,6 @@ export function WhatsAppSettings() {
 
   const handleGenerateQR = async () => {
     try {
-      if (!adminConfig?.whatsapp_instance_id) {
-        throw new Error("ID da instância do WhatsApp não configurado no painel admin");
-      }
-
       const data = await callWhatsAppAPI("qrcode");
 
       if (data.success && data.data?.QRCode) {
@@ -156,7 +152,7 @@ export function WhatsAppSettings() {
         <CardTitle>Configurações do WhatsApp</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!adminConfig?.whatsapp_instance_id && (
+        {!isLoadingConfig && !adminConfig?.whatsapp_instance_id && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
