@@ -22,6 +22,7 @@ interface ClientActionsProps {
     email: string;
     document: string;
     phone: string;
+    charge_amount: number;
   };
   onEdit: () => void;
 }
@@ -33,25 +34,16 @@ export function ClientActions({ client, onEdit }: ClientActionsProps) {
 
   const handleDelete = async () => {
     try {
-      // Primeiro, exclui as faturas pendentes do cliente
-      const { error: invoicesError } = await supabase
-        .from("invoices")
+      // Primeiro, exclui as cobranças pendentes do cliente
+      const { error: chargesError } = await supabase
+        .from("client_charges")
         .delete()
         .eq("client_id", client.id)
-        .eq("status", "pendente");
-
-      if (invoicesError) throw invoicesError;
-
-      // Em seguida, exclui as cobranças pendentes do cliente
-      const { error: chargesError } = await supabase
-        .from("charges")
-        .delete()
-        .eq("customer_email", client.email)
         .eq("status", "pending");
 
       if (chargesError) throw chargesError;
 
-      // Por fim, exclui o cliente
+      // Em seguida, exclui o cliente
       const { error: clientError } = await supabase
         .from("clients")
         .delete()
@@ -60,9 +52,7 @@ export function ClientActions({ client, onEdit }: ClientActionsProps) {
       if (clientError) throw clientError;
 
       // Atualiza a lista de clientes e cobranças
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      queryClient.invalidateQueries({ queryKey: ["charges"] });
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-with-charges"] });
 
       toast({
         title: "Cliente excluído",
