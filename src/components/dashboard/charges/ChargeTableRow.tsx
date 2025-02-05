@@ -79,12 +79,12 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
 
   const handleSendCharge = async () => {
     try {
-      const { data: settings } = await supabase
-        .from('company_settings')
+      const { data: config } = await supabase
+        .from('configurations')
         .select('whatsapp_instance_id')
         .single();
 
-      if (!settings?.whatsapp_instance_id) {
+      if (!config?.whatsapp_instance_id) {
         toast({
           variant: "destructive",
           description: "Configuração do WhatsApp não encontrada.",
@@ -104,7 +104,7 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
         },
         body: JSON.stringify({
           action: "sendMessage",
-          instance: settings.whatsapp_instance_id,
+          instance: config.whatsapp_instance_id,
           params: {
             phone: charge.customer_email, // Assumindo que o email está armazenando o telefone temporariamente
             message: message
@@ -237,7 +237,7 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
 
       <EditChargeDialog
         charge={charge}
-        open={isEditDialogOpen}
+        isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
       />
     </>

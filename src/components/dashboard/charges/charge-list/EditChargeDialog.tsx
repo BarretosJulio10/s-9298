@@ -3,14 +3,15 @@ import { EditChargeForm } from "../EditChargeForm";
 
 interface EditChargeDialogProps {
   charge: any | null;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export function EditChargeDialog({ charge, onClose }: EditChargeDialogProps) {
+export function EditChargeDialog({ charge, isOpen, onClose }: EditChargeDialogProps) {
   if (!charge) return null;
 
   return (
-    <Dialog open={Boolean(charge)} onOpenChange={() => onClose()}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Editar Cobrança</DialogTitle>
