@@ -19,6 +19,7 @@ export function CompanySettingsForm() {
               <TabsTrigger value="payment">Pagamentos</TabsTrigger>
               <TabsTrigger value="charge">Cobranças</TabsTrigger>
               <TabsTrigger value="notifications">Notificações</TabsTrigger>
+              <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
             </TabsList>
             <TabsContent value="payment" className="space-y-6">
               <PaymentGatewayList />
@@ -28,6 +29,9 @@ export function CompanySettingsForm() {
             </TabsContent>
             <TabsContent value="notifications">
               <NotificationRulesForm />
+            </TabsContent>
+            <TabsContent value="whatsapp">
+              <WhatsAppSettings />
             </TabsContent>
           </Tabs>
         }
