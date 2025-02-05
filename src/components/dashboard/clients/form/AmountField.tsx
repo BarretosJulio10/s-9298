@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -13,13 +13,22 @@ export function AmountField({ form }: AmountFieldProps) {
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     const numericValue = value ? parseFloat(value) : 0;
-    form.setValue('charge_amount', numericValue);
+    form.setValue('charge_amount', numericValue, {
+      shouldValidate: true
+    });
   };
 
   return (
     <FormField
       control={form.control}
       name="charge_amount"
+      rules={{
+        required: "Valor da cobrança é obrigatório",
+        min: {
+          value: 0.01,
+          message: "Valor deve ser maior que zero"
+        }
+      }}
       render={({ field }) => (
         <FormItem className="w-48">
           <FormLabel>Valor da Cobrança</FormLabel>
@@ -34,9 +43,11 @@ export function AmountField({ form }: AmountFieldProps) {
                 placeholder="0.00"
                 onChange={handleAmountChange}
                 value={field.value || ''}
+                required
               />
             </div>
           </FormControl>
+          <FormMessage />
         </FormItem>
       )}
     />
