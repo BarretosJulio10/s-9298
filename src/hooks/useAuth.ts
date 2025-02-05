@@ -8,28 +8,42 @@ export function useAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Busca a sessão inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-      if (!session) {
+    // Verifica se há uma sessão persistida
+    const checkSession = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        console.log("Sessão atual:", currentSession);
+        setSession(currentSession);
+        
+        if (!currentSession) {
+          console.log("Sem sessão, redirecionando para /auth");
+          navigate("/auth");
+        }
+      } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
         navigate("/auth");
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    checkSession();
 
     // Escuta mudanças na autenticação
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", _event);
-      setSession(session);
-      setLoading(false);
-      if (!session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log("Mudança no estado da autenticação:", event, currentSession);
+      setSession(currentSession);
+
+      if (!currentSession) {
+        console.log("Sessão terminada, redirecionando para /auth");
         navigate("/auth");
       }
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   return { session, loading, setLoading };

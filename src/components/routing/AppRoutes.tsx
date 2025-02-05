@@ -15,19 +15,24 @@ interface AppRoutesProps {
 }
 
 const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
-  // Se não houver sessão, só permite acesso a rotas públicas
+  // Rotas públicas que não requerem autenticação
+  const publicRoutes = (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="*" element={<Navigate to="/auth" replace />} />
+    </Routes>
+  );
+
+  // Se não houver sessão, retorna apenas rotas públicas
   if (!session) {
-    return (
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="*" element={<Navigate to="/auth" replace />} />
-      </Routes>
-    );
+    console.log("Sem sessão, mostrando rotas públicas");
+    return publicRoutes;
   }
 
   // Rotas para administradores
   if (userRole === 'admin') {
+    console.log("Usuário admin, mostrando painel admin");
     return (
       <Routes>
         <Route path="/admin" element={<AdminDashboard />}>
@@ -43,6 +48,7 @@ const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
   }
 
   // Rotas para empresas
+  console.log("Usuário empresa, mostrando painel empresa");
   return (
     <Routes>
       <Route path="/dashboard/*" element={<CompanyDashboard />} />

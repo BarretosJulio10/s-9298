@@ -18,6 +18,20 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AuthenticatedApp />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+}
+
+function AuthenticatedApp() {
   const { session, loading, setLoading } = useAuth();
   const { userRole, fetchUserRole } = useUserRole(session, setLoading);
 
@@ -32,17 +46,7 @@ function App() {
     return null;
   }
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes session={session} userRole={userRole} />
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+  return <AppRoutes session={session} userRole={userRole} />;
 }
 
 export default App;
