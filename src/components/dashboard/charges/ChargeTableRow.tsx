@@ -43,7 +43,6 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
 
       if (error) throw error;
 
-      // Atualiza a lista de cobranças
       queryClient.invalidateQueries({ queryKey: ["charges"] });
 
       toast({
