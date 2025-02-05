@@ -13,13 +13,14 @@ export function WhatsAppSettings() {
   const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
 
-  const { data: config } = useQuery({
+  // Buscar configurações do admin
+  const { data: adminConfig } = useQuery({
     queryKey: ["configurations"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("configurations")
-        .select("*")
-        .maybeSingle();
+        .select("whatsapp_instance_id")
+        .single();
 
       if (error) throw error;
       return data;
@@ -28,6 +29,10 @@ export function WhatsAppSettings() {
 
   const handleGenerateQR = async () => {
     try {
+      if (!adminConfig?.whatsapp_instance_id) {
+        throw new Error("ID da instância do WhatsApp não configurado no painel admin");
+      }
+
       const data = await callWhatsAppAPI("qrcode");
 
       if (data.success && data.data?.QRCode) {
@@ -40,6 +45,7 @@ export function WhatsAppSettings() {
         throw new Error(data.message || "Falha ao gerar QR Code");
       }
     } catch (error) {
+      console.error("Erro ao gerar QR Code:", error);
       toast({
         variant: "destructive",
         title: "Erro ao gerar QR Code",
@@ -59,6 +65,7 @@ export function WhatsAppSettings() {
         });
       }
     } catch (error) {
+      console.error("Erro ao conectar:", error);
       toast({
         variant: "destructive",
         title: "Erro ao conectar",
@@ -79,6 +86,7 @@ export function WhatsAppSettings() {
         });
       }
     } catch (error) {
+      console.error("Erro ao desconectar:", error);
       toast({
         variant: "destructive",
         title: "Erro ao desconectar",
@@ -93,11 +101,11 @@ export function WhatsAppSettings() {
         <CardTitle>Configurações do WhatsApp</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!config?.whatsapp_instance_id && (
+        {!adminConfig?.whatsapp_instance_id && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              WhatsApp instance ID não configurado. Configure-o na seção de configurações.
+              ID da instância do WhatsApp não configurado no painel admin.
             </AlertDescription>
           </Alert>
         )}
