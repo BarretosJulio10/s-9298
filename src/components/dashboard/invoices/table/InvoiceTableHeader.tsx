@@ -9,10 +9,10 @@ export function InvoiceTableHeader() {
         <TableHead>Email</TableHead>
         <TableHead>Documento</TableHead>
         <TableHead>Telefone</TableHead>
-        <TableHead className="text-right">Valor</TableHead>
-        <TableHead>Vencimento</TableHead>
-        <TableHead>Status</TableHead>
-        <TableHead>Ações</TableHead>
+        <TableHead className="text-center">Valor</TableHead>
+        <TableHead className="text-center">Vencimento</TableHead>
+        <TableHead className="text-center">Status</TableHead>
+        <TableHead className="text-center">Ações</TableHead>
       </TableRow>
     </TableHeader>
   );

@@ -1,8 +1,6 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Send, FileEdit, ExternalLink, Trash2 } from "lucide-react";
-import { ClientStatus } from "./ClientStatus";
-import { useToast } from "@/hooks/use-toast";
 
 interface ClientTableRowProps {
   client: {
@@ -75,7 +73,7 @@ export function ClientTableRow({ client, onSelect, onEdit, onDelete }: ClientTab
         <ClientStatus status={client.paymentStatus || 'pending'} />
       </TableCell>
       <TableCell>
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-center gap-2">
           <Button
             variant="ghost"
             size="icon"
