@@ -46,6 +46,7 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
         <ChargeActions
           paymentLink={charge.payment_link}
           status={charge.status}
+          chargeId={charge.id}
         />
       </TableCell>
     </TableRow>
