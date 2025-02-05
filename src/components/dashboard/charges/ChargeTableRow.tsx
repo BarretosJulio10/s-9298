@@ -22,6 +22,7 @@ interface ChargeTableRowProps {
 export function ChargeTableRow({ charge }: ChargeTableRowProps) {
   return (
     <TableRow>
+      <TableCell>{charge.mercadopago_id || "-"}</TableCell>
       <TableCell>{charge.customer_name}</TableCell>
       <TableCell>{charge.customer_document}</TableCell>
       <TableCell>
@@ -38,9 +39,6 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
       </TableCell>
       <TableCell>
         <ChargeDate date={charge.payment_date} label="-" />
-      </TableCell>
-      <TableCell>
-        {charge.mercadopago_id || "-"}
       </TableCell>
       <TableCell className="text-right">
         <ChargeActions

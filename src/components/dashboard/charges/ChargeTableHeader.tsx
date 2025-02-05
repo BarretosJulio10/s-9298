@@ -4,6 +4,7 @@ export function ChargeTableHeader() {
   return (
     <TableHeader>
       <TableRow>
+        <TableHead>ID</TableHead>
         <TableHead>Cliente</TableHead>
         <TableHead>Documento</TableHead>
         <TableHead>Valor</TableHead>
@@ -11,7 +12,6 @@ export function ChargeTableHeader() {
         <TableHead>Status</TableHead>
         <TableHead>Método</TableHead>
         <TableHead>Data Pagamento</TableHead>
-        <TableHead>ID MP</TableHead>
         <TableHead className="text-right">Ações</TableHead>
       </TableRow>
     </TableHeader>
