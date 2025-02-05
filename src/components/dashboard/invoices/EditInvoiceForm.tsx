@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
 import { Invoice } from "./types/Invoice";
 
 interface EditInvoiceFormProps {
@@ -12,18 +12,23 @@ interface EditInvoiceFormProps {
 }
 
 export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
+  const { toast } = useToast();
   const [amount, setAmount] = useState(invoice?.amount || 0);
   const [status, setStatus] = useState<"pendente" | "atrasado" | "pago">(invoice?.status || "pendente");
   const [dueDate, setDueDate] = useState(invoice?.due_date || '');
-  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!invoice) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar os dados da fatura.",
+      });
+      onClose();
+    }
+  }, [invoice, toast, onClose]);
 
   if (!invoice) {
-    toast({
-      variant: "destructive",
-      title: "Erro",
-      description: "Não foi possível carregar os dados da fatura.",
-    });
-    onClose();
     return null;
   }
 
