@@ -55,6 +55,20 @@ export function InvoiceList() {
 
       console.log("Buscando faturas para o usuário:", user.id);
 
+      // Primeiro, vamos verificar se existem faturas diretamente
+      const { count, error: countError } = await supabase
+        .from("invoices")
+        .select("*", { count: 'exact', head: true })
+        .eq('company_id', user.id);
+
+      if (countError) {
+        console.error("Erro ao contar faturas:", countError);
+        throw countError;
+      }
+
+      console.log("Total de faturas encontradas:", count);
+
+      // Agora vamos buscar os dados completos
       const { data, error } = await supabase
         .from("invoices")
         .select(`
@@ -70,10 +84,28 @@ export function InvoiceList() {
 
       if (error) {
         console.error("Erro ao buscar faturas:", error);
+        console.error("Detalhes do erro:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
       console.log("Faturas encontradas:", data);
+      
+      // Verificando se os dados estão corretos
+      if (data) {
+        data.forEach((invoice, index) => {
+          console.log(`Fatura ${index + 1}:`, {
+            id: invoice.id,
+            amount: invoice.amount,
+            status: invoice.status,
+            client: invoice.client
+          });
+        });
+      }
+
       return data as Invoice[];
     },
   });
@@ -83,7 +115,7 @@ export function InvoiceList() {
     toast({
       variant: "destructive",
       title: "Erro ao carregar faturas",
-      description: "Não foi possível carregar as faturas. Tente novamente mais tarde.",
+      description: "Não foi possível carregar as faturas. Detalhes: " + (error as Error).message,
     });
   }
 
