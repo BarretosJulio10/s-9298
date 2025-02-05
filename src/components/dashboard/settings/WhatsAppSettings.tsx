@@ -1,18 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { WhatsAppStatus } from "@/components/admin/whatsapp/WhatsAppStatus";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { callWhatsAppAPI } from "@/lib/whatsapp";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { callWhatsAppAPI } from "@/lib/whatsapp";
 
 export function WhatsAppSettings() {
   const [qrCode, setQrCode] = useState("");
   const [isConnected, setIsConnected] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState("");
   const { toast } = useToast();
 
   const { data: config } = useQuery({
@@ -32,7 +30,7 @@ export function WhatsAppSettings() {
     try {
       const data = await callWhatsAppAPI("qrcode");
 
-      if (data.status === "success" && data.data?.QRCode) {
+      if (data.success && data.data?.QRCode) {
         setQrCode(data.data.QRCode);
         toast({
           title: "QR Code gerado com sucesso",
@@ -50,32 +48,41 @@ export function WhatsAppSettings() {
     }
   };
 
-  const handleConfigureWebhook = async () => {
-    if (!webhookUrl) {
-      toast({
-        variant: "destructive",
-        title: "URL do Webhook necessária",
-        description: "Por favor, insira a URL do webhook",
-      });
-      return;
-    }
-
+  const handleConnect = async () => {
     try {
-      const data = await callWhatsAppAPI("configureWebhook", { webhookUrl });
-
+      const data = await callWhatsAppAPI("connect");
       if (data.success) {
+        setIsConnected(true);
         toast({
-          title: "Webhook configurado com sucesso",
-          description: "O webhook foi configurado e começará a receber eventos",
+          title: "WhatsApp conectado",
+          description: "Seu WhatsApp foi conectado com sucesso",
         });
-      } else {
-        throw new Error(data.message || "Falha ao configurar webhook");
       }
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Erro ao configurar webhook",
-        description: error instanceof Error ? error.message : "Não foi possível configurar o webhook",
+        title: "Erro ao conectar",
+        description: error instanceof Error ? error.message : "Não foi possível conectar ao WhatsApp",
+      });
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      const data = await callWhatsAppAPI("disconnect");
+      if (data.success) {
+        setIsConnected(false);
+        setQrCode("");
+        toast({
+          title: "WhatsApp desconectado",
+          description: "Seu WhatsApp foi desconectado com sucesso",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao desconectar",
+        description: error instanceof Error ? error.message : "Não foi possível desconectar do WhatsApp",
       });
     }
   };
@@ -95,46 +102,13 @@ export function WhatsAppSettings() {
           </Alert>
         )}
 
-        <div className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-          <span className="text-sm">
-            {isConnected ? 'Conectado' : 'Desconectado'}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {!isConnected && !qrCode && config?.whatsapp_instance_id && (
-            <Button onClick={handleGenerateQR}>
-              Gerar QR Code
-            </Button>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="webhook" className="text-sm font-medium">URL do Webhook</label>
-          <div className="flex gap-2">
-            <Input
-              id="webhook"
-              placeholder="https://seu-webhook.com/whatsapp"
-              value={webhookUrl}
-              onChange={(e) => setWebhookUrl(e.target.value)}
-            />
-            <Button onClick={handleConfigureWebhook}>
-              Configurar Webhook
-            </Button>
-          </div>
-        </div>
-
-        {qrCode && !isConnected && (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold mb-2">QR Code</h3>
-            <img
-              src={qrCode}
-              alt="WhatsApp QR Code"
-              className="max-w-[300px] border rounded-lg"
-            />
-          </div>
-        )}
+        <WhatsAppStatus
+          isConnected={isConnected}
+          qrCode={qrCode}
+          onGenerateQR={handleGenerateQR}
+          onConnect={handleConnect}
+          onDisconnect={handleDisconnect}
+        />
       </CardContent>
     </Card>
   );
