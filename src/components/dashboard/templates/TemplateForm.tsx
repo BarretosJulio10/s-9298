@@ -1,15 +1,13 @@
 import { Form } from "@/components/ui/form";
 import { TemplateNameField } from "./template-form/TemplateNameField";
-import { TemplateTypeField } from "./template-form/TemplateTypeField";
 import { TemplateFormActions } from "./template-form/TemplateFormActions";
 import { useTemplateForm } from "./hooks/useTemplateForm";
-import { TemplateContentField } from "./template-form/TemplateContentField";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -116,8 +114,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
         .insert({
           company_id: user.id,
           name: values.name,
-          type: values.type,
-          content: values.content || "",
+          type: "main",
         })
         .select()
         .single();
@@ -163,8 +160,6 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
       <form onSubmit={form.handleSubmit(handleSubmitWithSubtemplates)} className="space-y-6">
         <div className="space-y-4">
           <TemplateNameField form={form} />
-          <TemplateTypeField form={form} />
-          <TemplateContentField form={form} />
         </div>
 
         <Separator className="my-6" />
