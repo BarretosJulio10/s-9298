@@ -39,7 +39,8 @@ export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
     e.preventDefault();
 
     try {
-      const { error } = await supabase
+      // Atualiza a fatura
+      const { error: invoiceError } = await supabase
         .from('invoices')
         .update({
           amount,
@@ -49,14 +50,27 @@ export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
         })
         .eq('id', invoice.id);
 
-      if (error) throw error;
+      if (invoiceError) throw invoiceError;
+
+      // Atualiza o cliente com o novo valor e status
+      const { error: clientError } = await supabase
+        .from('clients')
+        .update({
+          charge_amount: amount,
+          status: status === 'pago' ? 'active' : status === 'atrasado' ? 'overdue' : 'pending',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', invoice.client_id);
+
+      if (clientError) throw clientError;
 
       // Invalida o cache para forçar uma nova busca dos dados
       await queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      await queryClient.invalidateQueries({ queryKey: ["clients-with-charges"] });
 
       toast({
         title: "Fatura atualizada",
-        description: "A fatura foi atualizada com sucesso.",
+        description: "A fatura e o cliente foram atualizados com sucesso.",
       });
 
       onClose();
@@ -65,7 +79,7 @@ export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
       toast({
         variant: "destructive",
         title: "Erro ao atualizar",
-        description: "Não foi possível atualizar a fatura.",
+        description: "Não foi possível atualizar a fatura e o cliente.",
       });
     }
   };
