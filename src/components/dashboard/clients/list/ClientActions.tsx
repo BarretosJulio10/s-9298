@@ -25,9 +25,11 @@ interface ClientActionsProps {
     charge_amount: number;
   };
   onEdit: () => void;
+  onSend: () => void;
+  paymentLink?: string | null;
 }
 
-export function ClientActions({ client, onEdit }: ClientActionsProps) {
+export function ClientActions({ client, onEdit, onSend, paymentLink }: ClientActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -71,20 +73,20 @@ export function ClientActions({ client, onEdit }: ClientActionsProps) {
     }
   };
 
-  const handleSendMessage = async () => {
-    // Implementar a lógica para enviar mensagem
-    toast({
-      title: "Enviar mensagem",
-      description: "Funcionalidade a ser implementada.",
-    });
-  };
-
   const handleCopyLink = async () => {
-    // Implementar a lógica para copiar link
-    navigator.clipboard.writeText(`mailto:${client.email}`);
+    if (!paymentLink) {
+      toast({
+        variant: "destructive",
+        title: "Link não disponível",
+        description: "Não há link de pagamento disponível para este cliente.",
+      });
+      return;
+    }
+
+    navigator.clipboard.writeText(paymentLink);
     toast({
       title: "Link copiado",
-      description: "O link foi copiado para a área de transferência.",
+      description: "O link de pagamento foi copiado para a área de transferência.",
     });
   };
 
@@ -93,20 +95,22 @@ export function ClientActions({ client, onEdit }: ClientActionsProps) {
       <Button
         variant="ghost"
         size="icon"
-        onClick={handleSendMessage}
+        onClick={onSend}
         title="Enviar mensagem"
       >
         <Send className="h-4 w-4" />
       </Button>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleCopyLink}
-        title="Copiar link"
-      >
-        <Link className="h-4 w-4" />
-      </Button>
+      {paymentLink && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleCopyLink}
+          title="Copiar link"
+        >
+          <Link className="h-4 w-4" />
+        </Button>
+      )}
 
       <Button
         variant="ghost"
