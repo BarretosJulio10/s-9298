@@ -33,7 +33,7 @@ export function DashboardContent({
       <div className="mb-8 border-b border-gray-200 pb-4">
         <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
         <p className="mt-1 text-sm text-gray-500">
-          {activeSection === 'home' ? 'Bem-vindo ao seu painel de controle' : `Gerencie seus ${title.toLowerCase()} aqui`}
+          {activeSection === 'home' ? 'Bem-vindo ao seu painel de controle' : `Gerencie suas ${title.toLowerCase()} aqui`}
         </p>
       </div>
     );
@@ -43,6 +43,7 @@ export function DashboardContent({
     if (showChargeForm) {
       return (
         <div className="mt-6">
+          {renderHeader()}
           <ChargeForm />
           <Button 
             variant="outline" 
@@ -56,16 +57,22 @@ export function DashboardContent({
     }
 
     if (activeSection === "templates") {
-      return <TemplatesList />;
+      return (
+        <div>
+          {renderHeader()}
+          <TemplatesList />
+        </div>
+      );
     }
 
     return (
       <div className="mt-6 space-y-8">
-        <DashboardStats />
+        {renderHeader()}
+        {activeSection === "home" && <DashboardStats />}
         {activeSection === "charges" && (
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Cobranças</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Lista de Cobranças</h2>
             </div>
             {session?.user?.id && <ChargesList companyId={session.user.id} />}
           </div>
@@ -76,7 +83,6 @@ export function DashboardContent({
 
   return (
     <div className="p-6">
-      {renderHeader()}
       {renderContent()}
     </div>
   );
