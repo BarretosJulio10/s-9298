@@ -1,112 +1,77 @@
+
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { TemplateForm } from "./TemplateForm";
-import { SendNotificationDialog } from "./SendNotificationDialog";
-import { TemplateListHeader } from "./template-list/TemplateListHeader";
-import { TemplateListItem } from "./template-list/TemplateListItem";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { TemplateCard } from "./template-list/TemplateCard";
+import { TemplateForm } from "./template-form/TemplateForm";
 
 interface Template {
   id: string;
   name: string;
-  content: string;
   type: string;
-  image_url?: string;
+  content: string;
+  created_at: string;
 }
 
+const mockTemplates: Template[] = [
+  {
+    id: "1",
+    name: "Lembrete de Pagamento",
+    type: "payment_reminder",
+    content: "Olá {nome}, sua fatura no valor de {valor} vence em {vencimento}.",
+    created_at: "2024-03-20"
+  },
+  {
+    id: "2",
+    name: "Confirmação de Pagamento",
+    type: "payment_confirmation",
+    content: "Obrigado {nome}! Recebemos seu pagamento de {valor}.",
+    created_at: "2024-03-19"
+  }
+];
+
 export function TemplatesList() {
-  const { session } = useAuth();
-  const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [showSendDialog, setShowSendDialog] = useState(false);
-
-  const { data: templates, refetch } = useQuery({
-    queryKey: ["templates"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("message_templates")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      return data as Template[];
-    },
-  });
-
-  const handleDelete = async (template: Template) => {
-    try {
-      const { error } = await supabase
-        .from("message_templates")
-        .delete()
-        .eq("id", template.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Template excluído",
-        description: "O template foi excluído com sucesso",
-      });
-
-      refetch();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao excluir",
-        description: "Não foi possível excluir o template",
-      });
-    }
-  };
+  const [templates, setTemplates] = useState<Template[]>(mockTemplates);
 
   const handleEdit = (template: Template) => {
     setSelectedTemplate(template);
     setShowForm(true);
   };
 
-  const handleSend = (template: Template) => {
-    setSelectedTemplate(template);
-    setShowSendDialog(true);
+  const handleDelete = (templateId: string) => {
+    setTemplates(prev => prev.filter(t => t.id !== templateId));
   };
 
   const handleFormClose = () => {
     setShowForm(false);
     setSelectedTemplate(null);
-    refetch();
   };
 
-  if (!session?.user?.id) return null;
-
   return (
-    <div className="space-y-4">
-      <TemplateListHeader onNewTemplate={() => setShowForm(true)} />
-      
-      <div className="space-y-2">
-        {templates?.map((template) => (
-          <TemplateListItem
-            key={template.id}
-            template={template}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onSend={handleSend}
-          />
-        ))}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-900">Templates de Mensagem</h2>
+        <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Novo Template
+        </Button>
       </div>
 
-      {showForm && (
-        <TemplateForm
-          template={selectedTemplate}
-          onCancel={handleFormClose}
-        />
-      )}
-
-      {showSendDialog && selectedTemplate && (
-        <SendNotificationDialog
-          open={showSendDialog}
-          onOpenChange={setShowSendDialog}
-          template={selectedTemplate}
-        />
+      {showForm ? (
+        <TemplateForm onCancel={handleFormClose} template={selectedTemplate} />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {templates.map((template) => (
+            <TemplateCard
+              key={template.id}
+              template={template}
+              onEdit={() => handleEdit(template)}
+              onDelete={() => handleDelete(template.id)}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

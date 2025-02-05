@@ -1,3 +1,4 @@
+
 export const templateTypeTranslations: Record<string, string> = {
   "payment_reminder": "Lembrete de Pagamento",
   "payment_confirmation": "Confirmação de Pagamento",
