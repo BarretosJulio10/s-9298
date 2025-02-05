@@ -8,8 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 const templateSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   type: z.string().min(1, "Tipo é obrigatório"),
-  content: z.string().min(1, "Conteúdo é obrigatório"),
-  image_url: z.string().optional(),
 });
 
 export type TemplateFormData = z.infer<typeof templateSchema>;
@@ -20,12 +18,12 @@ interface UseTemplateFormProps {
     name: string;
     type: string;
     content: string;
-    image_url?: string;
   };
   onCancel: () => void;
+  onSuccess?: (templateId: string) => void;
 }
 
-export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
+export function useTemplateForm({ template, onCancel, onSuccess }: UseTemplateFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -34,8 +32,6 @@ export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
     defaultValues: {
       name: template?.name || "",
       type: template?.type || "",
-      content: template?.content || "",
-      image_url: template?.image_url || "",
     },
   });
 
@@ -45,32 +41,34 @@ export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
       if (!user) throw new Error("Usuário não autenticado");
 
       if (template?.id) {
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from("message_templates")
           .update({
             name: values.name,
             type: values.type,
-            content: values.content,
-            image_url: values.image_url,
           })
-          .eq("id", template.id);
+          .eq("id", template.id)
+          .select()
+          .single();
 
         if (error) throw error;
+        return data;
       } else {
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from("message_templates")
           .insert({
             company_id: user.id,
             name: values.name,
             type: values.type,
-            content: values.content,
-            image_url: values.image_url,
-          });
+          })
+          .select()
+          .single();
 
         if (error) throw error;
+        return data;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
       toast({
         title: template ? "Template atualizado" : "Template criado",
@@ -78,7 +76,11 @@ export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
           ? "O template foi atualizado com sucesso"
           : "O template foi criado com sucesso",
       });
-      onCancel();
+      if (onSuccess) {
+        onSuccess(data.id);
+      } else {
+        onCancel();
+      }
     },
     onError: (error) => {
       toast({

@@ -1,47 +1,61 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { TemplateCard } from "./template-list/TemplateCard";
-import { TemplateForm } from "./template-form/TemplateForm";
-
-interface Template {
-  id: string;
-  name: string;
-  type: string;
-  content: string;
-  created_at: string;
-}
-
-const mockTemplates: Template[] = [
-  {
-    id: "1",
-    name: "Lembrete de Pagamento",
-    type: "payment_reminder",
-    content: "Olá {nome}, sua fatura no valor de {valor} vence em {vencimento}.",
-    created_at: "2024-03-20"
-  },
-  {
-    id: "2",
-    name: "Confirmação de Pagamento",
-    type: "payment_confirmation",
-    content: "Obrigado {nome}! Recebemos seu pagamento de {valor}.",
-    created_at: "2024-03-19"
-  }
-];
+import { TemplateForm } from "./TemplateForm";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function TemplatesList() {
   const [showForm, setShowForm] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-  const [templates, setTemplates] = useState<Template[]>(mockTemplates);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
-  const handleEdit = (template: Template) => {
+  const { data: templates } = useQuery({
+    queryKey: ["templates"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data, error } = await supabase
+        .from("message_templates")
+        .select("*")
+        .eq("company_id", user.id)
+        .is("parent_id", null);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleEdit = (template) => {
     setSelectedTemplate(template);
     setShowForm(true);
   };
 
-  const handleDelete = (templateId: string) => {
-    setTemplates(prev => prev.filter(t => t.id !== templateId));
+  const handleDelete = async (templateId: string) => {
+    try {
+      // Primeiro deleta os subtemplates
+      await supabase
+        .from("message_templates")
+        .delete()
+        .eq("parent_id", templateId);
+
+      // Depois deleta o template principal
+      await supabase
+        .from("message_templates")
+        .delete()
+        .eq("id", templateId);
+
+      toast({
+        title: "Template excluído com sucesso",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir template",
+        description: error.message,
+      });
+    }
   };
 
   const handleFormClose = () => {
@@ -63,7 +77,7 @@ export function TemplatesList() {
         <TemplateForm onCancel={handleFormClose} template={selectedTemplate} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {templates.map((template) => (
+          {templates?.map((template) => (
             <TemplateCard
               key={template.id}
               template={template}

@@ -393,9 +393,13 @@ export type Database = {
           company_id: string
           content: string
           created_at: string
+          description: string | null
+          example_message: string | null
           id: string
           image_url: string | null
           name: string
+          parent_id: string | null
+          subtype: Database["public"]["Enums"]["template_subtype"] | null
           type: string
           updated_at: string
         }
@@ -403,9 +407,13 @@ export type Database = {
           company_id: string
           content: string
           created_at?: string
+          description?: string | null
+          example_message?: string | null
           id?: string
           image_url?: string | null
           name: string
+          parent_id?: string | null
+          subtype?: Database["public"]["Enums"]["template_subtype"] | null
           type: string
           updated_at?: string
         }
@@ -413,9 +421,13 @@ export type Database = {
           company_id?: string
           content?: string
           created_at?: string
+          description?: string | null
+          example_message?: string | null
           id?: string
           image_url?: string | null
           name?: string
+          parent_id?: string | null
+          subtype?: Database["public"]["Enums"]["template_subtype"] | null
           type?: string
           updated_at?: string
         }
@@ -425,6 +437,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_templates_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -848,6 +867,7 @@ export type Database = {
         | "pagbank"
       payment_method: "pix" | "boleto" | "credit_card"
       payment_method_type: "pix" | "credit_card" | "boleto"
+      template_subtype: "notification" | "delayed" | "paid"
       user_role: "admin" | "company"
     }
     CompositeTypes: {
