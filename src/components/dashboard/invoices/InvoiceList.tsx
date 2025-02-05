@@ -50,19 +50,28 @@ export function InvoiceList() {
   const { data: invoices, isLoading } = useQuery({
     queryKey: ["invoices"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
       const { data, error } = await supabase
         .from("invoices")
         .select(`
           *,
-          client:client_id (
+          client:clients (
             name,
             email,
             document,
             phone
           )
-        `);
+        `)
+        .eq('company_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao buscar faturas:", error);
+        throw error;
+      }
+
+      console.log("Dados das faturas:", data);
       return data as Invoice[];
     },
   });
@@ -117,10 +126,10 @@ export function InvoiceList() {
   const filteredInvoices = invoices?.filter((invoice) => {
     const matchesStatus = filterStatus === "all" || invoice.status === filterStatus;
     const searchFields = [
-      invoice.client.name,
-      invoice.client.email,
-      invoice.client.document,
-      invoice.client.phone,
+      invoice.client?.name,
+      invoice.client?.email,
+      invoice.client?.document,
+      invoice.client?.phone,
     ].map(field => field?.toLowerCase() || "");
 
     const matchesSearch = searchTerm === "" || searchFields.some(field => 
@@ -129,6 +138,10 @@ export function InvoiceList() {
 
     return matchesStatus && matchesSearch;
   });
+
+  if (isLoading) {
+    return <div>Carregando faturas...</div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -172,10 +185,10 @@ export function InvoiceList() {
           <TableBody>
             {filteredInvoices?.map((invoice) => (
               <TableRow key={invoice.id}>
-                <TableCell>{invoice.client.name}</TableCell>
-                <TableCell>{invoice.client.email}</TableCell>
-                <TableCell>{invoice.client.document}</TableCell>
-                <TableCell>{invoice.client.phone}</TableCell>
+                <TableCell>{invoice.client?.name || 'N/A'}</TableCell>
+                <TableCell>{invoice.client?.email || 'N/A'}</TableCell>
+                <TableCell>{invoice.client?.document || 'N/A'}</TableCell>
+                <TableCell>{invoice.client?.phone || 'N/A'}</TableCell>
                 <TableCell className="text-right">
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
@@ -221,7 +234,7 @@ export function InvoiceList() {
                 </TableCell>
               </TableRow>
             ))}
-            {filteredInvoices?.length === 0 && (
+            {(!filteredInvoices || filteredInvoices.length === 0) && (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-4">
                   Nenhuma fatura encontrada
