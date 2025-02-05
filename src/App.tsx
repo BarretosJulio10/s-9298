@@ -3,10 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
-import { useEffect } from "react";
 import AppRoutes from "./components/routing/AppRoutes";
-import { useAuth } from "./hooks/useAuth";
-import { useUserRole } from "./hooks/useUserRole";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,29 +21,11 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <AuthenticatedApp />
+          <AppRoutes />
         </TooltipProvider>
       </QueryClientProvider>
     </BrowserRouter>
   );
-}
-
-function AuthenticatedApp() {
-  const { session, loading, setLoading } = useAuth();
-  const { userRole, fetchUserRole } = useUserRole(session, setLoading);
-
-  useEffect(() => {
-    if (session?.user) {
-      fetchUserRole(session.user.id);
-    }
-  }, [session, fetchUserRole]);
-
-  // Não renderiza nada enquanto estiver carregando
-  if (loading) {
-    return null;
-  }
-
-  return <AppRoutes session={session} userRole={userRole} />;
 }
 
 export default App;

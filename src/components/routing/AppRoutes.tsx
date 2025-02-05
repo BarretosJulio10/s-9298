@@ -8,13 +8,18 @@ import AdminCompanies from "@/pages/admin/AdminCompanies";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminWhatsApp from "@/pages/admin/AdminWhatsApp";
 import AdminCharges from "@/pages/admin/AdminCharges";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 
-interface AppRoutesProps {
-  session: any;
-  userRole: string | null;
-}
+const AppRoutes = () => {
+  const { session, loading, setLoading } = useAuth();
+  const { userRole, fetchUserRole } = useUserRole(session, setLoading);
 
-const AppRoutes = ({ session, userRole }: AppRoutesProps) => {
+  // Não renderiza nada enquanto estiver carregando
+  if (loading) {
+    return null;
+  }
+
   // Rotas públicas que não requerem autenticação
   const publicRoutes = (
     <Routes>
