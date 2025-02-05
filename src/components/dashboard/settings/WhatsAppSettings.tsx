@@ -20,7 +20,7 @@ export function WhatsAppSettings() {
       const { data, error } = await supabase
         .from("configurations")
         .select("whatsapp_instance_id")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
