@@ -64,7 +64,7 @@ async function checkStatus(instance: string): Promise<Response> {
 
 async function getQRCode(instance: string): Promise<Response> {
   console.log("Generating QR code for instance:", instance);
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/qrcode`, {
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/qrcode?syncContacts=disable&returnQrcode=enable`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${instance}`,
