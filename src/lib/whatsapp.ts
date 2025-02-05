@@ -7,6 +7,7 @@ export async function callWhatsAppAPI(action: string, params?: any) {
     .maybeSingle();
 
   if (error) {
+    console.error("Erro ao buscar configurações:", error);
     throw new Error("Erro ao buscar configurações do WhatsApp");
   }
 
@@ -29,12 +30,14 @@ export async function callWhatsAppAPI(action: string, params?: any) {
 
     if (!response.ok) {
       const error = await response.json();
+      console.error("Erro na resposta da API:", error);
       throw new Error(error.message || "Erro ao enviar mensagem");
     }
 
     const data = await response.json();
     
     if (!data.success) {
+      console.error("Erro nos dados da API:", data);
       throw new Error(data.message || "Erro ao processar requisição do WhatsApp");
     }
 

@@ -10,6 +10,22 @@ interface WhatsAppResponse {
   message?: string;
 }
 
+interface QRCodeResponse {
+  event: string;
+  connectionKey: string;
+  qrcode: string;
+  moment: string;
+  retryCount: string;
+}
+
+interface ConnectionResponse {
+  event: string;
+  connectionKey: string;
+  connectedPhone: string;
+  connected: boolean;
+  moment: string;
+}
+
 async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -17,6 +33,7 @@ async function handleRequest(req: Request): Promise<Response> {
 
   try {
     const { action, instance, params } = await req.json();
+    console.log(`Processando ação ${action} para instância ${instance}`);
 
     switch (action) {
       case "status":
@@ -31,27 +48,25 @@ async function handleRequest(req: Request): Promise<Response> {
         return await sendMessage(instance, params);
       case "configureWebhook":
         return await configureWebhook(instance, params);
-      case "updateWebhookV3":
-        return await updateWebhookV3(instance);
       default:
+        console.error(`Ação inválida: ${action}`);
         return new Response(
-          JSON.stringify({ error: "Invalid action" }),
+          JSON.stringify({ success: false, error: "Ação inválida" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
     }
   } catch (error) {
-    console.error("Error handling request:", error);
+    console.error("Erro ao processar requisição:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ success: false, error: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 }
 
 async function checkStatus(instance: string): Promise<Response> {
-  console.log("Checking status for instance:", instance);
+  console.log("Verificando status da instância:", instance);
   const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/status`, {
-    method: "GET",
     headers: {
       "Authorization": `Bearer ${instance}`,
       "Content-Type": "application/json"
@@ -59,27 +74,28 @@ async function checkStatus(instance: string): Promise<Response> {
   });
 
   const data = await response.json();
-  console.log("Status response:", data);
+  console.log("Resposta do status:", data);
+  
   return new Response(
-    JSON.stringify(data),
+    JSON.stringify({ success: true, data }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }
 
 async function getQRCode(instance: string): Promise<Response> {
-  console.log("Generating QR code for instance:", instance);
+  console.log("Gerando QR code para instância:", instance);
   const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/qrcode?syncContacts=disable&returnQrcode=enable`, {
-    method: "GET",
     headers: {
       "Authorization": `Bearer ${instance}`,
       "Content-Type": "application/json"
     }
   });
 
-  const data = await response.json();
-  console.log("QR code response:", data);
+  const data: QRCodeResponse = await response.json();
+  console.log("QR code gerado:", data.qrcode ? "Sucesso" : "Falha");
+  
   return new Response(
-    JSON.stringify(data),
+    JSON.stringify({ success: true, data }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }
