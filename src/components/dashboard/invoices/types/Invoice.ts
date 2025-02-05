@@ -6,6 +6,7 @@ export interface Invoice {
   due_date: string;
   payment_date: string | null;
   client: {
+    id: string;
     name: string;
     email: string;
     document: string;
