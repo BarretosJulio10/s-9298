@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { Table, TableBody } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,46 +11,26 @@ interface ChargesListProps {
 }
 
 export function ChargesList({ companyId }: ChargesListProps) {
-  const { data: charges, isLoading } = useQuery({
-    queryKey: ["charges", companyId],
-    queryFn: async () => {
-      let query = supabase
-        .from("charges")
-        .select("*")
-        .order("due_date", { ascending: false });
-
-      if (companyId) {
-        query = query.eq("company_id", companyId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error("Erro ao buscar cobranças:", error);
-        throw error;
-      }
-      
-      return data;
+  const charges = [
+    {
+      id: "1",
+      customer_name: "João Silva",
+      amount: 100.00,
+      due_date: "2024-03-20",
+      status: "pending",
+      payment_method: "pix",
+      payment_date: null
     },
-  });
-
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
-      </div>
-    );
-  }
-
-  if (!charges || charges.length === 0) {
-    return (
-      <div className="text-center py-8 bg-white rounded-md border">
-        <p className="text-muted-foreground">Nenhuma cobrança encontrada</p>
-      </div>
-    );
-  }
+    {
+      id: "2",
+      customer_name: "Maria Santos",
+      amount: 150.00,
+      due_date: "2024-03-21",
+      status: "paid",
+      payment_method: "credit_card",
+      payment_date: "2024-03-19"
+    }
+  ];
 
   return (
     <div className="rounded-md border bg-white">

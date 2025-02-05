@@ -1,6 +1,7 @@
+
 import { TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Send, Link2, Pencil, Trash } from "lucide-react";
+import { Send, Link2, Pencil, Trash2 } from "lucide-react";
 
 interface ChargeActionsCellProps {
   status: string;
@@ -9,12 +10,12 @@ interface ChargeActionsCellProps {
 
 export function ChargeActionsCell({ status, onDelete }: ChargeActionsCellProps) {
   return (
-    <TableCell className="text-right">
-      <div className="flex justify-end gap-2">
+    <TableCell>
+      <div className="flex justify-end items-center gap-1">
         <Button
           variant="ghost"
           size="icon"
-          className="text-primary hover:text-primary/80 hover:bg-primary/10"
+          className="h-8 w-8 text-primary hover:text-primary/80 hover:bg-primary/10"
           disabled={status === "paid"}
           title="Enviar cobrança"
         >
@@ -24,7 +25,7 @@ export function ChargeActionsCell({ status, onDelete }: ChargeActionsCellProps) 
         <Button
           variant="ghost"
           size="icon"
-          className="text-primary hover:text-primary/80 hover:bg-primary/10"
+          className="h-8 w-8 text-primary hover:text-primary/80 hover:bg-primary/10"
           disabled={status === "paid"}
           title="Copiar link"
         >
@@ -34,7 +35,7 @@ export function ChargeActionsCell({ status, onDelete }: ChargeActionsCellProps) 
         <Button
           variant="ghost"
           size="icon"
-          className="text-primary hover:text-primary/80 hover:bg-primary/10"
+          className="h-8 w-8 text-primary hover:text-primary/80 hover:bg-primary/10"
           disabled={status === "paid"}
           title="Editar cobrança"
         >
@@ -44,12 +45,12 @@ export function ChargeActionsCell({ status, onDelete }: ChargeActionsCellProps) 
         <Button
           variant="ghost"
           size="icon"
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
           onClick={onDelete}
           disabled={status === "paid"}
           title="Excluir cobrança"
         >
-          <Trash className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
     </TableCell>

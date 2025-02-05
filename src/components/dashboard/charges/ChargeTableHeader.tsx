@@ -1,3 +1,4 @@
+
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export function ChargeTableHeader() {
@@ -10,7 +11,7 @@ export function ChargeTableHeader() {
         <TableHead className="text-center">Status</TableHead>
         <TableHead className="text-center">Método</TableHead>
         <TableHead className="text-center">Data de Pagamento</TableHead>
-        <TableHead className="text-right pr-4">Ações</TableHead>
+        <TableHead className="text-right">Ações</TableHead>
       </TableRow>
     </TableHeader>
   );
