@@ -1,23 +1,12 @@
 import { useState } from "react";
-import { Plus, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 import { ClientForm } from "./ClientForm";
 import { ClientSearchBar } from "./list/ClientSearchBar";
-import { ClientStatus } from "./list/ClientStatus";
-import { ClientActions } from "./list/ClientActions";
 import { ClientChargesHistory } from "./list/ClientChargesHistory";
 import { useClients } from "./list/useClients";
-import { useToast } from "@/hooks/use-toast";
-import { callWhatsAppAPI } from "@/lib/whatsapp";
 import { supabase } from "@/integrations/supabase/client";
+import { ClientListHeader } from "./list/ClientListHeader";
+import { ClientsTable } from "./list/ClientsTable";
 
 export function ClientsList() {
   const [showForm, setShowForm] = useState(false);
@@ -109,24 +98,11 @@ export function ClientsList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Button 
-          onClick={() => setShowForm(true)} 
-          className="bg-primary hover:bg-primary/90"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Cliente
-        </Button>
-
-        <Button
-          onClick={handleSendNotifications}
-          disabled={sending}
-          variant="secondary"
-        >
-          <Send className="h-4 w-4 mr-2" />
-          {sending ? "Enviando..." : "Enviar Notificações"}
-        </Button>
-      </div>
+      <ClientListHeader 
+        onNewClient={() => setShowForm(true)}
+        onSendNotifications={handleSendNotifications}
+        sending={sending}
+      />
 
       <ClientSearchBar
         perPage={perPage}
@@ -135,71 +111,12 @@ export function ClientsList() {
         onSearchChange={setSearchTerm}
       />
 
-      <div className="bg-white rounded-lg shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[60px]">ID</TableHead>
-              <TableHead className="w-[180px]">Nome</TableHead>
-              <TableHead className="text-center">WhatsApp</TableHead>
-              <TableHead className="text-center">Data</TableHead>
-              <TableHead className="text-center">Valor Cobrança</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-center w-[100px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredClients?.map((client) => (
-              <TableRow key={client.id}>
-                <TableCell>{client.id.slice(0, 4)}</TableCell>
-                <TableCell>
-                  <button
-                    onClick={() => setSelectedClient({ id: client.id, name: client.name })}
-                    className="text-left hover:text-primary transition-colors"
-                  >
-                    {client.name}
-                  </button>
-                </TableCell>
-                <TableCell className="text-center">{client.phone}</TableCell>
-                <TableCell className="text-center">
-                  {new Date(client.created_at).toLocaleDateString('pt-BR')}
-                </TableCell>
-                <TableCell className="text-center">
-                  {new Intl.NumberFormat('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL',
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(client.charge_amount)}
-                </TableCell>
-                <TableCell className="text-center">
-                  <ClientStatus status={client.paymentStatus} />
-                </TableCell>
-                <TableCell>
-                  <ClientActions
-                    onSend={() => {}}
-                    onEdit={() => {}}
-                    paymentLink={client.paymentLink}
-                    client={{
-                      id: client.id,
-                      name: client.name,
-                      email: client.email,
-                      document: client.document,
-                      phone: client.phone,
-                      charge_amount: client.charge_amount
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <div className="p-4 border-t">
-          <p className="text-sm text-gray-500">
-            Mostrando {filteredClients?.length || 0} de {clientsWithCharges?.length || 0} registros
-          </p>
-        </div>
-      </div>
+      <ClientsTable 
+        clients={filteredClients || []}
+        onSelectClient={setSelectedClient}
+        onSendMessage={() => {}}
+        onEdit={() => {}}
+      />
 
       <ClientForm 
         open={showForm}
