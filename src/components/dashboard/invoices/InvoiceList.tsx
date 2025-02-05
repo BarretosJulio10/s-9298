@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,7 +19,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Pencil, Trash2, Send } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { EditInvoiceDialog } from "./EditInvoiceDialog";
+import { DeleteInvoiceDialog } from "./DeleteInvoiceDialog";
 
 interface Invoice {
   id: string;
@@ -38,6 +42,10 @@ interface Invoice {
 export function InvoiceList() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [deletingInvoice, setDeletingInvoice] = useState<Invoice | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: invoices, isLoading } = useQuery({
     queryKey: ["invoices"],
@@ -58,6 +66,42 @@ export function InvoiceList() {
       return data as Invoice[];
     },
   });
+
+  const handleDelete = async () => {
+    if (!deletingInvoice) return;
+
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', deletingInvoice.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Fatura excluída",
+        description: "A fatura foi excluída com sucesso.",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      setDeletingInvoice(null);
+    } catch (error) {
+      console.error('Erro ao excluir fatura:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir a fatura.",
+      });
+    }
+  };
+
+  const handleSendInvoice = async (invoice: Invoice) => {
+    // TODO: Implementar envio de fatura
+    toast({
+      title: "Enviar fatura",
+      description: "Funcionalidade a ser implementada.",
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -122,6 +166,7 @@ export function InvoiceList() {
               <TableHead className="text-right">Valor</TableHead>
               <TableHead>Vencimento</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -145,11 +190,40 @@ export function InvoiceList() {
                     {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                   </Badge>
                 </TableCell>
+                <TableCell>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleSendInvoice(invoice)}
+                      title="Enviar fatura"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setEditingInvoice(invoice)}
+                      title="Editar fatura"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setDeletingInvoice(invoice)}
+                      className="text-destructive hover:text-destructive"
+                      title="Excluir fatura"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
             {filteredInvoices?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-4">
+                <TableCell colSpan={8} className="text-center py-4">
                   Nenhuma fatura encontrada
                 </TableCell>
               </TableRow>
@@ -157,6 +231,18 @@ export function InvoiceList() {
           </TableBody>
         </Table>
       </div>
+
+      <EditInvoiceDialog
+        invoice={editingInvoice}
+        open={!!editingInvoice}
+        onOpenChange={(open) => !open && setEditingInvoice(null)}
+      />
+
+      <DeleteInvoiceDialog
+        open={!!deletingInvoice}
+        onOpenChange={(open) => !open && setDeletingInvoice(null)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
