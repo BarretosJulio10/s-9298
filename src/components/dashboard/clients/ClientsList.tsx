@@ -179,7 +179,6 @@ export function ClientsList() {
                   <ClientActions
                     onSend={() => {}}
                     onEdit={() => {}}
-                    onDelete={() => {}}
                     paymentLink={client.paymentLink}
                     client={{
                       id: client.id,
