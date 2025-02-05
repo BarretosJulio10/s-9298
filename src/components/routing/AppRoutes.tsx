@@ -35,6 +35,13 @@ export function AppRoutes() {
     return publicRoutes;
   }
 
+  // Busca o papel do usuário se ainda não foi buscado
+  if (!userRole && session.user) {
+    console.log("Buscando papel do usuário");
+    fetchUserRole(session.user.id);
+    return null;
+  }
+
   // Rotas para administradores
   if (userRole === 'admin') {
     console.log("Usuário admin, mostrando painel admin");
