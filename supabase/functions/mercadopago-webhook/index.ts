@@ -56,6 +56,8 @@ serve(async (req) => {
       })
 
       if (!mpResponse.ok) {
+        const errorText = await mpResponse.text()
+        console.error('Erro na resposta do Mercado Pago:', errorText)
         throw new Error(`Erro ao buscar pagamento: ${mpResponse.statusText}`)
       }
 
@@ -111,6 +113,8 @@ serve(async (req) => {
         }
 
         console.log('Processamento concluído com sucesso')
+      } else {
+        console.log(`Pagamento não aprovado. Status: ${payment.status}`)
       }
     }
 
