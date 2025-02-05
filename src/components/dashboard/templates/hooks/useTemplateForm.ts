@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 const templateSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   type: z.string().min(1, "Tipo é obrigatório"),
+  content: z.string().optional(),
+  image_url: z.string().optional(),
 });
 
 export type TemplateFormData = z.infer<typeof templateSchema>;
@@ -32,6 +34,8 @@ export function useTemplateForm({ template, onCancel, onSuccess }: UseTemplateFo
     defaultValues: {
       name: template?.name || "",
       type: template?.type || "",
+      content: template?.content || "",
+      image_url: "",
     },
   });
 
@@ -46,6 +50,7 @@ export function useTemplateForm({ template, onCancel, onSuccess }: UseTemplateFo
           .update({
             name: values.name,
             type: values.type,
+            content: values.content || "",
           })
           .eq("id", template.id)
           .select()
@@ -60,6 +65,7 @@ export function useTemplateForm({ template, onCancel, onSuccess }: UseTemplateFo
             company_id: user.id,
             name: values.name,
             type: values.type,
+            content: values.content || "",
           })
           .select()
           .single();

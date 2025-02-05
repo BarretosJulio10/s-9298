@@ -5,10 +5,12 @@ import { TemplateCard } from "./template-list/TemplateCard";
 import { TemplateForm } from "./TemplateForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export function TemplatesList() {
   const [showForm, setShowForm] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const { toast } = useToast();
 
   const { data: templates } = useQuery({
     queryKey: ["templates"],

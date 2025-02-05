@@ -41,7 +41,7 @@ export function TemplateContentField({ form }: TemplateContentFieldProps) {
         .from('template_images')
         .getPublicUrl(filePath);
 
-      form.setValue('image_url', publicUrl);
+      form.setValue("image_url", publicUrl);
 
       toast({
         title: "Imagem carregada com sucesso",
@@ -100,7 +100,7 @@ export function TemplateContentField({ form }: TemplateContentFieldProps) {
               <div className="relative">
                 <Input
                   type="file"
-                  accept="image/*"
+                  accept="image/png"
                   onChange={handleImageUpload}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                   disabled={uploading}
