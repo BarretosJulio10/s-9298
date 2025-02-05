@@ -66,7 +66,7 @@ export const useCreateClient = (onSuccess: () => void) => {
       throw new Error("Erro ao cadastrar cliente: nenhum dado retornado");
     }
 
-    // Gerar cobrança automática
+    // Gerar fatura automática
     const uniqueChargeId = Math.floor(10000 + Math.random() * 90000).toString();
 
     // Usar a data de vencimento escolhida no cadastro e adicionar 1 dia
@@ -80,46 +80,41 @@ export const useCreateClient = (onSuccess: () => void) => {
     const adjustedDate = addDays(new Date(dueDate), 1);
     const adjustedDueDate = format(adjustedDate, 'yyyy-MM-dd');
 
-    const { data: charge, error: chargeError } = await supabase
-      .from("charges")
+    // Criar fatura na tabela invoices
+    const { data: invoice, error: invoiceError } = await supabase
+      .from("invoices")
       .insert({
         company_id: user.id,
-        customer_name: client.name,
-        customer_email: client.email,
-        customer_document: client.document,
+        client_id: client.id,
         amount: client.charge_amount,
         due_date: adjustedDueDate,
-        status: "pending",
-        payment_method: "pix",
-        mercadopago_id: uniqueChargeId
+        status: 'pendente'
       })
       .select()
       .single();
 
-    if (chargeError) {
-      console.error("Erro ao criar cobrança:", chargeError);
+    if (invoiceError) {
+      console.error("Erro ao criar fatura:", invoiceError);
       toast({
         variant: "destructive",
         title: "Aviso",
-        description: "Cliente cadastrado, mas houve um erro ao gerar a cobrança.",
+        description: "Cliente cadastrado, mas houve um erro ao gerar a fatura.",
       });
     }
 
     // Criar registro na tabela client_charges
-    if (charge) {
-      const { error: clientChargeError } = await supabase
-        .from("client_charges")
-        .insert({
-          client_id: client.id,
-          amount: client.charge_amount,
-          due_date: adjustedDueDate,
-          status: "pending",
-          payment_method: "pix"
-        });
+    const { error: clientChargeError } = await supabase
+      .from("client_charges")
+      .insert({
+        client_id: client.id,
+        amount: client.charge_amount,
+        due_date: adjustedDueDate,
+        status: "pending",
+        payment_method: "pix"
+      });
 
-      if (clientChargeError) {
-        console.error("Erro ao vincular cobrança ao cliente:", clientChargeError);
-      }
+    if (clientChargeError) {
+      console.error("Erro ao vincular cobrança ao cliente:", clientChargeError);
     }
 
     return client;
