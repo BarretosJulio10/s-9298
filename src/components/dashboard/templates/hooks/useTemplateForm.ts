@@ -8,6 +8,7 @@ const templateSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   type: z.string().min(1, "Tipo é obrigatório"),
   content: z.string().optional(),
+  image_url: z.string().optional(),
 });
 
 export type TemplateFormData = z.infer<typeof templateSchema>;
@@ -18,6 +19,7 @@ interface UseTemplateFormProps {
     name: string;
     type: string;
     content: string;
+    image_url?: string;
   };
   onCancel: () => void;
 }
@@ -32,11 +34,30 @@ export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
       name: template?.name || "",
       type: template?.type || "",
       content: template?.content || "",
+      image_url: template?.image_url || "",
     },
   });
 
+  const onSubmit = async (data: TemplateFormData) => {
+    try {
+      // Lógica de submissão será implementada aqui
+      toast({
+        title: template ? "Template atualizado" : "Template criado",
+      });
+      queryClient.invalidateQueries(["templates"]);
+      onCancel();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao salvar template",
+        description: error.message,
+      });
+    }
+  };
+
   return {
     form,
+    onSubmit,
     isSubmitting: form.formState.isSubmitting,
   };
 }

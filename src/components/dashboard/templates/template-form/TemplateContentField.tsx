@@ -24,10 +24,18 @@ export function TemplateContentField({ form }: TemplateContentFieldProps) {
       }
 
       const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+      if (!file.type.includes('image/png')) {
+        toast({
+          variant: "destructive",
+          title: "Erro no upload",
+          description: "Por favor, selecione apenas arquivos PNG."
+        });
+        return;
+      }
 
       setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('template_images')
