@@ -15,14 +15,11 @@ interface ChargeTableRowProps {
     payment_method: string;
     payment_date: string | null;
     payment_link?: string;
+    mercadopago_id?: string;
   };
 }
 
 export function ChargeTableRow({ charge }: ChargeTableRowProps) {
-  // Adiciona logs para debug
-  console.log("Charge data:", charge);
-  console.log("Payment link:", charge.payment_link);
-
   return (
     <TableRow>
       <TableCell>{charge.customer_name}</TableCell>
@@ -41,6 +38,9 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
       </TableCell>
       <TableCell>
         <ChargeDate date={charge.payment_date} label="-" />
+      </TableCell>
+      <TableCell>
+        {charge.mercadopago_id || "-"}
       </TableCell>
       <TableCell className="text-right">
         <ChargeActions

@@ -11,6 +11,7 @@ export function ChargeTableHeader() {
         <TableHead>Status</TableHead>
         <TableHead>Método</TableHead>
         <TableHead>Data Pagamento</TableHead>
+        <TableHead>ID MP</TableHead>
         <TableHead className="text-right">Ações</TableHead>
       </TableRow>
     </TableHeader>
