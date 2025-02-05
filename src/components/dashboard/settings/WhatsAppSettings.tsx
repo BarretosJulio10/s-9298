@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { callWhatsAppAPI } from "@/lib/whatsapp";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export function WhatsAppSettings() {
   const [qrCode, setQrCode] = useState("");
@@ -84,6 +86,15 @@ export function WhatsAppSettings() {
         <CardTitle>Configurações do WhatsApp</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {!config?.whatsapp_instance_id && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              WhatsApp instance ID não configurado. Configure-o na seção de configurações.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
           <span className="text-sm">
@@ -92,7 +103,7 @@ export function WhatsAppSettings() {
         </div>
 
         <div className="flex items-center gap-4">
-          {!isConnected && !qrCode && (
+          {!isConnected && !qrCode && config?.whatsapp_instance_id && (
             <Button onClick={handleGenerateQR}>
               Gerar QR Code
             </Button>
