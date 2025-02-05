@@ -47,7 +47,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
   const { form, onSubmit, isSubmitting } = useTemplateForm({ template, onCancel });
   const [subtemplates, setSubtemplates] = useState(subtemplateTypes.map(() => ({
     content: "",
-    imageUrl: "",
+    imageFile: null as File | null,
     uploading: false
   })));
   const { toast } = useToast();
@@ -67,39 +67,19 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
       }
 
       setSubtemplates(prev => prev.map((st, i) => 
-        i === index ? { ...st, uploading: true } : st
-      ));
-
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('template_images')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('template_images')
-        .getPublicUrl(filePath);
-
-      setSubtemplates(prev => prev.map((st, i) => 
-        i === index ? { ...st, imageUrl: publicUrl, uploading: false } : st
+        i === index ? { ...st, imageFile: file } : st
       ));
 
       toast({
-        title: "Imagem carregada com sucesso",
+        title: "Imagem selecionada com sucesso",
       });
     } catch (error) {
-      console.error('Erro ao fazer upload:', error);
+      console.error('Erro ao selecionar imagem:', error);
       toast({
         variant: "destructive",
-        title: "Erro ao fazer upload da imagem",
+        title: "Erro ao selecionar imagem",
         description: error.message,
       });
-      setSubtemplates(prev => prev.map((st, i) => 
-        i === index ? { ...st, uploading: false } : st
-      ));
     }
   };
 
@@ -115,6 +95,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
           company_id: user.id,
           name: values.name,
           type: "main",
+          content: ""
         })
         .select()
         .single();
@@ -122,23 +103,42 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
       if (mainError) throw mainError;
 
       // Criar subtemplates
-      const subtemplatePromises = subtemplateTypes.map((type, index) => 
-        supabase
+      for (let i = 0; i < subtemplateTypes.length; i++) {
+        const type = subtemplateTypes[i];
+        const subtemplate = subtemplates[i];
+        let imageUrl = "";
+
+        if (subtemplate.imageFile) {
+          const fileExt = subtemplate.imageFile.name.split('.').pop();
+          const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('template_images')
+            .upload(filePath, subtemplate.imageFile);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('template_images')
+            .getPublicUrl(filePath);
+
+          imageUrl = publicUrl;
+        }
+
+        await supabase
           .from('message_templates')
           .insert({
             company_id: user.id,
             parent_id: mainTemplate.id,
-            content: subtemplates[index].content || "",
-            image_url: subtemplates[index].imageUrl,
+            content: subtemplate.content || "",
+            image_url: imageUrl,
             subtype: type.type,
             name: type.title,
             description: type.description,
             example_message: type.example,
             type: "subtemplate"
-          })
-      );
-
-      await Promise.all(subtemplatePromises);
+          });
+      }
 
       toast({
         title: "Template criado com sucesso",
@@ -191,13 +191,6 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Imagem do Template</label>
                   <div className="flex items-center gap-4">
-                    <Input
-                      type="text"
-                      value={subtemplates[index].imageUrl}
-                      readOnly
-                      placeholder="URL da imagem"
-                      className="flex-1"
-                    />
                     <div className="relative">
                       <Input
                         type="file"
@@ -216,11 +209,16 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
                         {subtemplates[index].uploading ? "Carregando..." : "Upload"}
                       </Button>
                     </div>
+                    {subtemplates[index].imageFile && (
+                      <span className="text-sm text-muted-foreground">
+                        {subtemplates[index].imageFile.name}
+                      </span>
+                    )}
                   </div>
-                  {subtemplates[index].imageUrl && (
+                  {subtemplates[index].imageFile && (
                     <div className="mt-2">
                       <img
-                        src={subtemplates[index].imageUrl}
+                        src={URL.createObjectURL(subtemplates[index].imageFile)}
                         alt="Preview"
                         className="max-w-[200px] rounded-md"
                       />

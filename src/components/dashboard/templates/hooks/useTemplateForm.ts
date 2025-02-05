@@ -16,7 +16,7 @@ interface UseTemplateFormProps {
     name: string;
     type: string;
     content: string;
-  };
+  } | null;
   onCancel: () => void;
 }
 
