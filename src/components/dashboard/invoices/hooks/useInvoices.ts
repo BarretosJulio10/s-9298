@@ -67,12 +67,14 @@ export function useInvoices() {
 
       return data as Invoice[];
     },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Erro ao carregar faturas",
-        description: "Detalhes: " + error.message,
-      });
-    },
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar faturas",
+          description: "Detalhes: " + error.message,
+        });
+      }
+    }
   });
 }
