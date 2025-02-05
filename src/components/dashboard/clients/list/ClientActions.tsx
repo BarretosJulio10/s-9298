@@ -1,187 +1,159 @@
-import { Button } from "@/components/ui/button";
-import { Send, Edit, Trash, Link2, Copy } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Send, Pencil, Trash2, Link } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface ClientActionsProps {
-  onSend: () => void;
-  onEdit: () => void;
-  paymentLink?: string | null;
   client: {
     id: string;
     name: string;
     email: string;
     document: string;
-    charge_amount: number;
+    phone: string;
   };
+  onEdit: () => void;
 }
 
-export function ClientActions({ onSend, onEdit, paymentLink, client }: ClientActionsProps) {
+export function ClientActions({ client, onEdit }: ClientActionsProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
-  const { session } = useAuth();
   const queryClient = useQueryClient();
-
-  const handleGenerateCharge = async () => {
-    if (!session?.user?.id) return;
-
-    try {
-      // Primeiro, cria a cobrança no banco
-      const { data: charge, error: chargeError } = await supabase
-        .from("charges")
-        .insert({
-          company_id: session.user.id,
-          customer_name: client.name,
-          customer_email: client.email,
-          customer_document: client.document,
-          amount: client.charge_amount,
-          due_date: new Date().toISOString().split('T')[0], // Data atual como vencimento
-          status: "pending",
-          payment_method: "pix"
-        })
-        .select()
-        .single();
-
-      if (chargeError) throw chargeError;
-
-      // Gera o link de pagamento via Mercado Pago
-      const { data: mpResponse, error } = await supabase.functions.invoke('mercadopago', {
-        body: {
-          action: "create_charge",
-          charge: {
-            customer_name: client.name,
-            customer_email: client.email,
-            customer_document: client.document,
-            amount: client.charge_amount,
-            due_date: new Date().toISOString().split('T')[0],
-            payment_method: "pix"
-          },
-          company_id: session.user.id
-        },
-      });
-
-      if (error) throw error;
-
-      // Atualiza a cobrança com o link de pagamento
-      const { error: updateError } = await supabase
-        .from("charges")
-        .update({ 
-          payment_link: mpResponse.payment_link,
-          status: mpResponse.status 
-        })
-        .eq("id", charge.id);
-
-      if (updateError) throw updateError;
-
-      toast({
-        title: "Link de pagamento gerado",
-        description: "O link foi gerado com sucesso",
-      });
-    } catch (error: any) {
-      console.error("Erro ao gerar cobrança:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao gerar link",
-        description: error.message,
-      });
-    }
-  };
-
-  const handleCopyLink = () => {
-    if (paymentLink) {
-      navigator.clipboard.writeText(paymentLink);
-      toast({
-        description: "Link de pagamento copiado!",
-      });
-    }
-  };
 
   const handleDelete = async () => {
     try {
-      // Primeiro, excluímos apenas as cobranças pendentes relacionadas ao cliente
-      const { error: chargesError } = await supabase
-        .from('client_charges')
+      // Primeiro, exclui as faturas pendentes do cliente
+      const { error: invoicesError } = await supabase
+        .from("invoices")
         .delete()
-        .eq('client_id', client.id)
-        .eq('status', 'pending');
+        .eq("client_id", client.id)
+        .eq("status", "pendente");
+
+      if (invoicesError) throw invoicesError;
+
+      // Em seguida, exclui as cobranças pendentes do cliente
+      const { error: chargesError } = await supabase
+        .from("charges")
+        .delete()
+        .eq("customer_email", client.email)
+        .eq("status", "pending");
 
       if (chargesError) throw chargesError;
 
-      // Depois, excluímos o cliente
+      // Por fim, exclui o cliente
       const { error: clientError } = await supabase
-        .from('clients')
+        .from("clients")
         .delete()
-        .eq('id', client.id);
+        .eq("id", client.id);
 
       if (clientError) throw clientError;
 
       // Atualiza a lista de clientes e cobranças
-      queryClient.invalidateQueries({ queryKey: ['clients-with-charges'] });
-      queryClient.invalidateQueries({ queryKey: ['charges'] });
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["charges"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
 
       toast({
-        description: "Cliente excluído com sucesso!",
+        title: "Cliente excluído",
+        description: "O cliente foi excluído com sucesso.",
       });
-    } catch (error: any) {
-      console.error('Erro ao excluir cliente:', error);
+    } catch (error) {
+      console.error("Erro ao excluir cliente:", error);
       toast({
         variant: "destructive",
-        title: "Erro ao excluir cliente",
-        description: error.message,
+        title: "Erro ao excluir",
+        description:
+          "Ocorreu um erro ao excluir o cliente. Por favor, tente novamente.",
       });
+    } finally {
+      setShowDeleteDialog(false);
     }
   };
 
+  const handleSendMessage = async () => {
+    // Implementar a lógica para enviar mensagem
+    toast({
+      title: "Enviar mensagem",
+      description: "Funcionalidade a ser implementada.",
+    });
+  };
+
+  const handleCopyLink = async () => {
+    // Implementar a lógica para copiar link
+    navigator.clipboard.writeText(`mailto:${client.email}`);
+    toast({
+      title: "Link copiado",
+      description: "O link foi copiado para a área de transferência.",
+    });
+  };
+
   return (
-    <div className="flex items-center justify-center gap-1">
+    <div className="flex items-center justify-end gap-2">
       <Button
         variant="ghost"
         size="icon"
-        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-        title="Enviar cobrança"
-        onClick={onSend}
+        onClick={handleSendMessage}
+        title="Enviar mensagem"
       >
         <Send className="h-4 w-4" />
       </Button>
+
       <Button
         variant="ghost"
         size="icon"
-        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-        title="Gerar link de pagamento"
-        onClick={handleGenerateCharge}
+        onClick={handleCopyLink}
+        title="Copiar link"
       >
-        <Link2 className="h-4 w-4" />
+        <Link className="h-4 w-4" />
       </Button>
-      {paymentLink && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-          title="Copiar link de pagamento"
-          onClick={handleCopyLink}
-        >
-          <Copy className="h-4 w-4" />
-        </Button>
-      )}
+
       <Button
         variant="ghost"
         size="icon"
-        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-        title="Editar cliente"
         onClick={onEdit}
+        title="Editar cliente"
       >
-        <Edit className="h-4 w-4" />
+        <Pencil className="h-4 w-4" />
       </Button>
+
       <Button
         variant="ghost"
         size="icon"
-        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+        onClick={() => setShowDeleteDialog(true)}
+        className="text-red-500 hover:text-red-700 hover:bg-red-50"
         title="Excluir cliente"
-        onClick={handleDelete}
       >
-        <Trash className="h-4 w-4" />
+        <Trash2 className="h-4 w-4" />
       </Button>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este cliente? Esta ação não pode ser
+              desfeita. As cobranças pagas serão mantidas como histórico.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
+              Sim, excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
