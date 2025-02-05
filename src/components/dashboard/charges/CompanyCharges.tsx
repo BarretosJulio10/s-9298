@@ -11,17 +11,24 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 
 interface CompanyChargesProps {
   companyId: string;
 }
 
 export const CompanyCharges = ({ companyId }: CompanyChargesProps) => {
+  const { toast } = useToast();
+  
   const { data: charges = [], isLoading } = useQuery({
     queryKey: ["company-charges", companyId],
     queryFn: async () => {
       console.log("Buscando cobranças para company_id:", companyId);
       
+      if (!companyId) {
+        throw new Error("ID da empresa não fornecido");
+      }
+
       const { data, error } = await supabase
         .from("charges")
         .select("*")
@@ -30,6 +37,11 @@ export const CompanyCharges = ({ companyId }: CompanyChargesProps) => {
 
       if (error) {
         console.error("Erro ao buscar cobranças:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar cobranças",
+          description: "Não foi possível carregar as cobranças. Por favor, tente novamente."
+        });
         throw error;
       }
       
@@ -37,6 +49,7 @@ export const CompanyCharges = ({ companyId }: CompanyChargesProps) => {
       return data || [];
     },
     enabled: !!companyId,
+    retry: 1
   });
 
   if (isLoading) {
