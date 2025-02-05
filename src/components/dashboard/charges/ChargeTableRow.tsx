@@ -106,7 +106,7 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
           action: "sendMessage",
           instance: config.whatsapp_instance_id,
           params: {
-            phone: charge.customer_email, // Assumindo que o email está armazenando o telefone temporariamente
+            phone: charge.customer_email,
             message: message
           }
         })
