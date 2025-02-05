@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
-const WHATSAPP_API_ENDPOINT = "http://167.114.6.95/api/v1";
+const WHATSAPP_API_ENDPOINT = "https://api.wapi.com";
 
 interface WhatsAppResponse {
   success: boolean;
@@ -44,11 +44,10 @@ async function handleRequest(req: Request): Promise<Response> {
 }
 
 async function checkStatus(instance: string): Promise<Response> {
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/status`, {
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/instance/status?connectionKey=${instance}`, {
     method: "GET",
     headers: {
-      "Accept": "application/json",
-      "Token": instance,
+      "Authorization": `Bearer ${instance}`,
       "Content-Type": "application/json"
     }
   });
@@ -61,11 +60,10 @@ async function checkStatus(instance: string): Promise<Response> {
 }
 
 async function getQRCode(instance: string): Promise<Response> {
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/qr`, {
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/instance/getQrcode?connectionKey=${instance}&syncContacts=false&returnQrcode=true`, {
     method: "GET",
     headers: {
-      "Accept": "application/json",
-      "Token": instance,
+      "Authorization": `Bearer ${instance}`,
       "Content-Type": "application/json"
     }
   });
@@ -78,17 +76,12 @@ async function getQRCode(instance: string): Promise<Response> {
 }
 
 async function connectWhatsApp(instance: string): Promise<Response> {
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/connect`, {
-    method: "POST",
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/instance/connect?connectionKey=${instance}`, {
+    method: "GET",
     headers: {
-      "Accept": "application/json",
-      "Token": instance,
+      "Authorization": `Bearer ${instance}`,
       "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      "Subscribe": ["Message"],
-      "Immediate": false
-    })
+    }
   });
 
   const data = await response.json();
@@ -99,11 +92,10 @@ async function connectWhatsApp(instance: string): Promise<Response> {
 }
 
 async function disconnectWhatsApp(instance: string): Promise<Response> {
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/logout`, {
-    method: "POST",
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/instance/logout?connectionKey=${instance}`, {
+    method: "GET",
     headers: {
-      "Accept": "application/json",
-      "Token": instance,
+      "Authorization": `Bearer ${instance}`,
       "Content-Type": "application/json"
     }
   });
@@ -117,25 +109,22 @@ async function disconnectWhatsApp(instance: string): Promise<Response> {
 
 async function sendMessage(instance: string, params: any): Promise<Response> {
   const { phone, message } = params;
-  const data = {
-    Id: Math.floor(Math.random() * 9000000 + 1000000).toString(),
-    Phone: phone,
-    Body: message
-  };
-
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/send/text`, {
+  
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/message/text?connectionKey=${instance}`, {
     method: "POST",
     headers: {
-      "Accept": "application/json",
-      "Token": instance,
+      "Authorization": `Bearer ${instance}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      phone: phone,
+      message: message
+    })
   });
 
-  const responseData = await response.json();
+  const data = await response.json();
   return new Response(
-    JSON.stringify(responseData),
+    JSON.stringify(data),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }
