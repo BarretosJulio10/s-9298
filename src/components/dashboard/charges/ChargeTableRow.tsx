@@ -1,6 +1,6 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Send, Link2, Copy, Trash, Edit } from "lucide-react";
+import { Trash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,15 +27,6 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
   const queryClient = useQueryClient();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const handleCopyLink = () => {
-    if (charge.payment_link) {
-      navigator.clipboard.writeText(charge.payment_link);
-      toast({
-        description: "Link de pagamento copiado!",
-      });
-    }
-  };
-
   const handleDelete = async () => {
     try {
       const { error } = await supabase
@@ -60,18 +51,6 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
         description: "Não foi possível excluir a cobrança.",
       });
     }
-  };
-
-  const handleSendCharge = () => {
-    toast({
-      description: "Funcionalidade de envio será implementada em breve!",
-    });
-  };
-
-  const handleEditCharge = () => {
-    toast({
-      description: "Funcionalidade de edição será implementada em breve!",
-    });
   };
 
   const getStatusColor = (status: string) => {
@@ -127,47 +106,7 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
             : "-"}
         </TableCell>
         <TableCell>
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-              title="Enviar cobrança"
-              onClick={handleSendCharge}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-              title="Editar cobrança"
-              onClick={handleEditCharge}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            {charge.payment_link && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  title="Link de pagamento"
-                  onClick={() => window.open(charge.payment_link, '_blank')}
-                >
-                  <Link2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  title="Copiar link de pagamento"
-                  onClick={handleCopyLink}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </>
-            )}
+          <div className="flex items-center justify-end">
             <Button
               variant="ghost"
               size="icon"
