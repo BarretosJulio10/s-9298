@@ -1,4 +1,4 @@
-import { Copy, ExternalLink } from "lucide-react";
+import { Copy, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -7,14 +7,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ChargeActionsProps {
   paymentLink?: string;
   status: string;
+  chargeId: string;
 }
 
-export function ChargeActions({ paymentLink, status }: ChargeActionsProps) {
+export function ChargeActions({ paymentLink, status, chargeId }: ChargeActionsProps) {
   const { toast } = useToast();
+  const { session } = useAuth();
   
   console.log("ChargeActions - paymentLink:", paymentLink);
   console.log("ChargeActions - status:", status);
@@ -41,6 +45,46 @@ export function ChargeActions({ paymentLink, status }: ChargeActionsProps) {
         variant: "destructive",
         title: "Erro ao copiar link",
         description: "Não foi possível copiar o link de pagamento.",
+      });
+    }
+  };
+
+  const checkPaymentStatus = async () => {
+    if (!paymentLink || status === 'paid') return;
+
+    try {
+      // Extrai o ID do pagamento do link do Mercado Pago
+      const prefId = paymentLink.split('pref_id=')[1];
+      if (!prefId) throw new Error('ID do pagamento não encontrado');
+
+      const { data, error } = await supabase.functions.invoke('check-mercadopago-payment', {
+        body: {
+          payment_id: prefId,
+          company_id: session?.user?.id
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.status === 'approved') {
+        toast({
+          title: "Pagamento confirmado!",
+          description: "O status da cobrança foi atualizado.",
+        });
+        // Recarrega a página para atualizar os dados
+        window.location.reload();
+      } else {
+        toast({
+          title: "Status verificado",
+          description: "O pagamento ainda não foi confirmado.",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao verificar pagamento:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao verificar pagamento",
+        description: "Não foi possível verificar o status do pagamento.",
       });
     }
   };
@@ -88,6 +132,25 @@ export function ChargeActions({ paymentLink, status }: ChargeActionsProps) {
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+
+      {status !== 'paid' && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={checkPaymentStatus}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Verificar pagamento</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
   );
 }
