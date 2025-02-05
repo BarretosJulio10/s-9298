@@ -9,30 +9,56 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Iniciando processamento do webhook do Mercado Pago')
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     const body = await req.json()
-    console.log('Webhook received:', body)
+    console.log('Payload recebido:', JSON.stringify(body))
 
     // Verifica se é uma notificação de pagamento
-    if (body.type === 'payment') {
+    if (body.type === 'payment' && body.data.id) {
       const paymentId = body.data.id
-      
+      console.log('ID do pagamento:', paymentId)
+
+      // Busca as configurações do gateway para obter o access token
+      const { data: gatewaySettings, error: settingsError } = await supabaseClient
+        .from('payment_gateway_settings')
+        .select('api_key, company_id')
+        .eq('gateway', 'mercadopago')
+        .single()
+
+      if (settingsError) {
+        console.error('Erro ao buscar configurações:', settingsError)
+        throw settingsError
+      }
+
+      if (!gatewaySettings?.api_key) {
+        throw new Error('Access token do Mercado Pago não encontrado')
+      }
+
       // Busca os detalhes do pagamento na API do Mercado Pago
       const mpResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
         headers: {
-          'Authorization': `Bearer ${Deno.env.get('MP_ACCESS_TOKEN')}`,
+          'Authorization': `Bearer ${gatewaySettings.api_key}`,
         },
       })
 
-      const payment = await mpResponse.json()
-      console.log('Payment details:', payment)
+      if (!mpResponse.ok) {
+        throw new Error(`Erro ao buscar pagamento: ${mpResponse.statusText}`)
+      }
 
+      const payment = await mpResponse.json()
+      console.log('Detalhes do pagamento:', JSON.stringify(payment))
+
+      // Verifica se o pagamento foi aprovado
       if (payment.status === 'approved') {
-        // Atualiza o status da cobrança no banco
+        console.log('Pagamento aprovado, atualizando cobrança...')
+
+        // Atualiza o status da cobrança
         const { error: updateError } = await supabaseClient
           .from('charges')
           .update({ 
@@ -42,46 +68,53 @@ serve(async (req) => {
           .eq('payment_link', payment.external_reference)
 
         if (updateError) {
-          console.error('Error updating charge:', updateError)
+          console.error('Erro ao atualizar cobrança:', updateError)
           throw updateError
         }
 
-        // Registra a transação na carteira
-        const { data: charge } = await supabaseClient
+        // Busca os detalhes da cobrança
+        const { data: charge, error: chargeError } = await supabaseClient
           .from('charges')
           .select('*')
           .eq('payment_link', payment.external_reference)
           .single()
 
-        if (charge) {
-          const { error: transactionError } = await supabaseClient
-            .from('wallet_transactions')
-            .insert({
-              company_id: charge.company_id,
-              type: 'income',
-              amount: charge.amount,
-              description: `Pagamento da cobrança ${charge.id}`,
-              payment_method: 'pix',
-              charge_id: charge.id
-            })
-
-          if (transactionError) {
-            console.error('Error creating transaction:', transactionError)
-            throw transactionError
-          }
+        if (chargeError) {
+          console.error('Erro ao buscar cobrança:', chargeError)
+          throw chargeError
         }
+
+        // Registra a transação na carteira
+        const { error: transactionError } = await supabaseClient
+          .from('wallet_transactions')
+          .insert({
+            company_id: charge.company_id,
+            type: 'income',
+            amount: charge.amount,
+            description: `Pagamento da cobrança ${charge.id}`,
+            payment_method: 'pix',
+            charge_id: charge.id,
+            transaction_date: new Date().toISOString()
+          })
+
+        if (transactionError) {
+          console.error('Erro ao criar transação:', transactionError)
+          throw transactionError
+        }
+
+        console.log('Processamento concluído com sucesso')
       }
     }
 
     return new Response(
-      JSON.stringify({ received: true }),
+      JSON.stringify({ success: true }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
       }
     )
   } catch (error) {
-    console.error('Error in webhook:', error)
+    console.error('Erro no webhook:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
