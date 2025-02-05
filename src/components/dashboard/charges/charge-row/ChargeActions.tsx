@@ -53,9 +53,11 @@ export function ChargeActions({ paymentLink, status, chargeId }: ChargeActionsPr
     if (!paymentLink || status === 'paid') return;
 
     try {
-      // Extrai o ID do pagamento do link do Mercado Pago
-      const prefId = paymentLink.split('pref_id=')[1];
-      if (!prefId) throw new Error('ID do pagamento não encontrado');
+      // Extrai o ID da preferência do link do Mercado Pago
+      const prefId = paymentLink.split('preference_id=')[1]?.split('&')[0];
+      if (!prefId) throw new Error('ID da preferência não encontrado');
+
+      console.log("Verificando pagamento com prefId:", prefId);
 
       const { data, error } = await supabase.functions.invoke('check-mercadopago-payment', {
         body: {
@@ -63,6 +65,8 @@ export function ChargeActions({ paymentLink, status, chargeId }: ChargeActionsPr
           company_id: session?.user?.id
         }
       });
+
+      console.log("Resposta da verificação:", data);
 
       if (error) throw error;
 

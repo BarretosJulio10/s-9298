@@ -34,17 +34,46 @@ serve(async (req) => {
     }
 
     // Consulta o status do pagamento na API do Mercado Pago
-    const mpResponse = await fetch(`https://api.mercadopago.com/v1/payments/${payment_id}`, {
+    // Alterado para usar a API de preferências em vez da API de pagamentos
+    const mpResponse = await fetch(`https://api.mercadopago.com/checkout/preferences/${payment_id}`, {
       headers: {
         'Authorization': `Bearer ${settings.api_key}`,
       },
     })
 
     if (!mpResponse.ok) {
+      console.error('Erro na resposta do Mercado Pago:', await mpResponse.text())
       throw new Error(`Erro ao consultar pagamento: ${mpResponse.statusText}`)
     }
 
-    const payment = await mpResponse.json()
+    const preference = await mpResponse.json()
+    console.log('Resposta do Mercado Pago:', preference)
+
+    // Busca o pagamento associado a esta preferência
+    const paymentsResponse = await fetch(`https://api.mercadopago.com/v1/payments/search?external_reference=${preference.external_reference}`, {
+      headers: {
+        'Authorization': `Bearer ${settings.api_key}`,
+      },
+    })
+
+    if (!paymentsResponse.ok) {
+      throw new Error('Erro ao buscar pagamentos associados')
+    }
+
+    const { results: payments } = await paymentsResponse.json()
+    const payment = payments[0] // Pega o pagamento mais recente
+
+    if (!payment) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: 'pending',
+          message: 'Pagamento ainda não realizado'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     console.log('Status do pagamento:', payment.status)
 
     // Se o pagamento estiver aprovado, atualiza a cobrança
@@ -53,7 +82,7 @@ serve(async (req) => {
       const { data: charge, error: chargeError } = await supabaseClient
         .from('charges')
         .select('*')
-        .eq('payment_link', payment.external_reference)
+        .eq('payment_link', preference.init_point)
         .maybeSingle()
 
       if (chargeError || !charge) {
@@ -65,7 +94,8 @@ serve(async (req) => {
         .from('charges')
         .update({ 
           status: 'paid',
-          payment_date: new Date().toISOString()
+          payment_date: new Date().toISOString(),
+          mercadopago_id: payment.id.toString()
         })
         .eq('id', charge.id)
 
@@ -89,22 +119,13 @@ serve(async (req) => {
       if (transactionError) {
         throw new Error('Erro ao registrar transação')
       }
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          status: payment.status,
-          message: 'Pagamento confirmado e cobrança atualizada'
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
     }
 
     return new Response(
       JSON.stringify({
         success: true,
         status: payment.status,
-        message: 'Status do pagamento verificado'
+        message: payment.status === 'approved' ? 'Pagamento confirmado e cobrança atualizada' : 'Status do pagamento verificado'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
