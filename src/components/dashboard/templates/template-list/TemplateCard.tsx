@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Send } from "lucide-react";
@@ -9,7 +8,7 @@ interface TemplateCardProps {
   template: {
     id: string;
     name: string;
-    type: string;
+    type: keyof typeof templateTypeTranslations;
     content: string;
     created_at: string;
   };
@@ -25,7 +24,7 @@ export function TemplateCard({ template, onEdit, onDelete }: TemplateCardProps) 
           <div className="space-y-1">
             <h3 className="font-medium text-gray-900">{template.name}</h3>
             <Badge variant="secondary">
-              {templateTypeTranslations[template.type] || template.type}
+              {templateTypeTranslations[template.type]}
             </Badge>
           </div>
         </div>

@@ -40,7 +40,7 @@ export function TemplateField({ form }: { form: any }) {
             <SelectContent>
               {templates?.map((template) => (
                 <SelectItem key={template.id} value={template.id}>
-                  {template.name} ({templateTypeTranslations[template.type]})
+                  {template.name} ({templateTypeTranslations[template.type as keyof typeof templateTypeTranslations]})
                 </SelectItem>
               ))}
             </SelectContent>

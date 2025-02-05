@@ -1,3 +1,10 @@
+export const templateTypeTranslations = {
+  main: "Principal",
+  notification: "Notificação",
+  delayed: "Atraso",
+  paid: "Pagamento"
+} as const;
+
 export const subtemplateTypes = [
   {
     type: "notification" as const,
@@ -18,3 +25,6 @@ export const subtemplateTypes = [
     example: "Olá {nome}, confirmamos o pagamento da sua fatura no valor de {valor}."
   }
 ] as const;
+
+export type TemplateType = keyof typeof templateTypeTranslations;
+export type SubtemplateType = typeof subtemplateTypes[number]['type'];
