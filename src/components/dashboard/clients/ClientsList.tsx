@@ -185,6 +185,7 @@ export function ClientsList() {
                       name: client.name,
                       email: client.email,
                       document: client.document,
+                      phone: client.phone,
                       charge_amount: client.charge_amount
                     }}
                   />
