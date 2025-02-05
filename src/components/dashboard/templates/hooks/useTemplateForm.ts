@@ -37,7 +37,8 @@ export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
         title: template ? "Template atualizado" : "Template criado",
       });
       
-      queryClient.invalidateQueries({
+      // Invalida a query para forçar uma nova busca dos dados
+      await queryClient.invalidateQueries({
         queryKey: ["templates"]
       });
       
