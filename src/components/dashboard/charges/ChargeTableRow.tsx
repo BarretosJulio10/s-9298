@@ -1,5 +1,5 @@
 
-import { TableRow } from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,7 +10,8 @@ import { ChargeAmountCell } from "./charge-row/ChargeAmountCell";
 import { ChargeDateCell } from "./charge-row/ChargeDateCell";
 import { ChargeStatusCell } from "./charge-row/ChargeStatusCell";
 import { ChargeMethodCell } from "./charge-row/ChargeMethodCell";
-import { ChargeActionsCell } from "./charge-row/ChargeActionsCell";
+import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ChargeTableRowProps {
   charge: {
@@ -65,10 +66,18 @@ export function ChargeTableRow({ charge, onDelete }: ChargeTableRowProps) {
         <ChargeStatusCell status={charge.status} />
         <ChargeMethodCell method={charge.payment_method} />
         <ChargeDateCell date={charge.payment_date || ""} />
-        <ChargeActionsCell 
-          status={charge.status} 
-          onDelete={() => setIsDeleteDialogOpen(true)} 
-        />
+        <TableCell className="text-right">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+            onClick={() => setIsDeleteDialogOpen(true)}
+            disabled={charge.status === "paid"}
+            title="Excluir cobrança"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </TableCell>
       </TableRow>
 
       <CancelChargeDialog 

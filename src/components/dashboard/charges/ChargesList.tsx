@@ -3,6 +3,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody } from "@/components/ui/table";
 import { ChargeTableHeader } from "./ChargeTableHeader";
 import { ChargeTableRow } from "./ChargeTableRow";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChargesListProps {
   companyId?: string;
@@ -11,35 +13,26 @@ interface ChargesListProps {
 export function ChargesList({ companyId }: ChargesListProps) {
   const { toast } = useToast();
 
-  const charges = [
-    {
-      id: "1",
-      customer_name: "JULIO CESAR QUINTANILHA BARRETO",
-      amount: 5.00,
-      due_date: "2024-02-09",
-      status: "pending",
-      payment_method: "pix",
-      payment_date: null
-    },
-    {
-      id: "2",
-      customer_name: "Barretos Burguer",
-      amount: 5.00,
-      due_date: "2024-02-09",
-      status: "pending",
-      payment_method: "pix",
-      payment_date: null
-    },
-    {
-      id: "3",
-      customer_name: "Julio Cesar",
-      amount: 5.00,
-      due_date: "2024-05-06",
-      status: "pending",
-      payment_method: "pix",
-      payment_date: null
+  const { data: charges = [], isLoading } = useQuery({
+    queryKey: ["charges"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("charges")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Erro ao buscar cobranças:", error);
+        throw error;
+      }
+
+      return data || [];
     }
-  ];
+  });
+
+  if (isLoading) {
+    return <div>Carregando cobranças...</div>;
+  }
 
   const handleDelete = (chargeId: string) => {
     toast({
