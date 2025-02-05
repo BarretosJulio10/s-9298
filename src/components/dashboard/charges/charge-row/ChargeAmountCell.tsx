@@ -7,9 +7,9 @@ interface ChargeAmountCellProps {
 export function ChargeAmountCell({ amount }: ChargeAmountCellProps) {
   return (
     <TableCell className="text-center">
-      {new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
+      {new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
       }).format(amount)}
     </TableCell>
   );

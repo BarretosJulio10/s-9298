@@ -1,9 +1,9 @@
 import { TableCell } from "@/components/ui/table";
 
 interface ChargeCustomerCellProps {
-  name: string;
+  customerName: string;
 }
 
-export function ChargeCustomerCell({ name }: ChargeCustomerCellProps) {
-  return <TableCell>{name}</TableCell>;
+export function ChargeCustomerCell({ customerName }: ChargeCustomerCellProps) {
+  return <TableCell>{customerName}</TableCell>;
 }

@@ -27,6 +27,8 @@ export function ChargeStatusCell({ status }: ChargeStatusCellProps) {
         return "Pendente";
       case "overdue":
         return "Vencido";
+      case "cancelled":
+        return "Cancelado";
       default:
         return status;
     }

@@ -1,4 +1,6 @@
 import { TableCell } from "@/components/ui/table";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface ChargeDateCellProps {
   date: string;
@@ -7,7 +9,9 @@ interface ChargeDateCellProps {
 export function ChargeDateCell({ date }: ChargeDateCellProps) {
   return (
     <TableCell className="text-center">
-      {new Date(date).toLocaleDateString('pt-BR')}
+      {format(new Date(date), "dd/MM/yyyy", {
+        locale: ptBR,
+      })}
     </TableCell>
   );
 }
