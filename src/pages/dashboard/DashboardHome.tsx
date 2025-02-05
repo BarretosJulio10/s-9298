@@ -1,22 +1,10 @@
-import { useState } from "react";
-import { DashboardContent } from "@/components/dashboard/content/DashboardContent";
+import { DashboardStats } from "@/components/dashboard/stats/DashboardStats";
 
 const DashboardHome = () => {
-  const [showChargeForm, setShowChargeForm] = useState(false);
-  const [activeSection, setActiveSection] = useState("home");
-
-  const handleBack = () => {
-    setShowChargeForm(false);
-  };
-
   return (
-    <main>
-      <DashboardContent 
-        showChargeForm={showChargeForm}
-        onBack={handleBack}
-        activeSection={activeSection}
-      />
-    </main>
+    <div className="space-y-8">
+      <DashboardStats />
+    </div>
   );
 };
 
