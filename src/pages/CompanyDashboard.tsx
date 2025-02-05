@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +11,7 @@ import { DashboardSidebarMenu } from "@/components/dashboard/sidebar/DashboardSi
 import { DashboardSidebarFooter } from "@/components/dashboard/sidebar/DashboardSidebarFooter";
 import { ClientsList } from "@/components/dashboard/clients/ClientsList";
 import { WalletContent } from "@/components/dashboard/wallet/WalletContent";
+import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
 
 type ActiveSection = "home" | "clients" | "plans" | "wallet" | "charges" | "templates" | "settings";
 
@@ -76,6 +78,8 @@ const CompanyDashboard = () => {
         return <WalletContent />;
       case "charges":
         return <CompanyCharges companyId={session?.user?.id || ""} />;
+      case "templates":
+        return <TemplatesList />;
       case "settings":
         return <CompanySettingsForm />;
       default:
