@@ -20,6 +20,13 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
   const { inputDate, handleDateInput } = useDateField(form);
   const [open, setOpen] = useState(false);
 
+  const handleSelect = (date: Date | undefined) => {
+    if (date) {
+      form.setValue('birth_date', date.toISOString().split('T')[0]);
+      setOpen(false);
+    }
+  };
+
   return (
     <FormField
       control={form.control}
@@ -40,6 +47,10 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                     "px-2 hover:bg-gray-100",
                     !field.value && "text-muted-foreground"
                   )}
+                  onClick={(e) => {
+                    e.preventDefault(); // Previne a propagação do evento
+                    e.stopPropagation(); // Previne a propagação do evento
+                  }}
                 >
                   <CalendarIcon className="h-4 w-4" />
                 </Button>
@@ -47,12 +58,7 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <DateCalendar
                   value={field.value}
-                  onSelect={(date) => {
-                    if (date) {
-                      field.onChange(date.toISOString().split('T')[0]);
-                      setOpen(false);
-                    }
-                  }}
+                  onSelect={handleSelect}
                 />
               </PopoverContent>
             </Popover>
