@@ -1,13 +1,17 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export async function callWhatsAppAPI(action: string, params?: any) {
-  const { data: config } = await supabase
+  const { data: config, error } = await supabase
     .from("configurations")
     .select("whatsapp_instance_id")
-    .single();
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Erro ao buscar configurações do WhatsApp");
+  }
 
   if (!config?.whatsapp_instance_id) {
-    throw new Error("WhatsApp instance ID não configurado");
+    throw new Error("WhatsApp instance ID não configurado. Configure-o na seção de configurações.");
   }
 
   try {
