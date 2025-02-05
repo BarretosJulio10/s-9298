@@ -1,9 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 serve(async (req) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -16,11 +19,16 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // Verifica se é um POST
+    if (req.method !== 'POST') {
+      throw new Error('Método não permitido')
+    }
+
     const body = await req.json()
     console.log('Payload recebido:', JSON.stringify(body))
 
     // Verifica se é uma notificação de pagamento
-    if (body.type === 'payment' && body.data.id) {
+    if (body.action === 'payment.updated' && body.data.id) {
       const paymentId = body.data.id
       console.log('ID do pagamento:', paymentId)
 
@@ -119,7 +127,7 @@ serve(async (req) => {
       JSON.stringify({ error: error.message }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400 
+        status: error.status || 400 
       }
     )
   }
