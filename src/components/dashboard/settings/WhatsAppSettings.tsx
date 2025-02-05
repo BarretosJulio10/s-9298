@@ -1,25 +1,39 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WhatsAppStatus } from "@/components/admin/whatsapp/WhatsAppStatus";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { callWhatsAppAPI } from "@/lib/whatsapp";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function WhatsAppSettings() {
   const [qrCode, setQrCode] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
 
-  // Buscar configurações do admin
+  // Buscar configurações do admin e status da conexão
   const { data: adminConfig } = useQuery({
     queryKey: ["configurations"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("configurations")
         .select("whatsapp_instance_id")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Buscar status da conexão do WhatsApp
+  const { data: whatsappConnection } = useQuery({
+    queryKey: ["whatsapp-connection"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("whatsapp_connections")
+        .select("*")
         .maybeSingle();
 
       if (error) throw error;
@@ -36,6 +50,17 @@ export function WhatsAppSettings() {
       const data = await callWhatsAppAPI("qrcode");
 
       if (data.success && data.data?.QRCode) {
+        // Atualizar o QR code no banco
+        const { error: updateError } = await supabase
+          .from("whatsapp_connections")
+          .upsert({
+            company_id: (await supabase.auth.getUser()).data.user?.id,
+            last_qr_code: data.data.QRCode,
+            is_connected: false,
+          });
+
+        if (updateError) throw updateError;
+
         setQrCode(data.data.QRCode);
         toast({
           title: "QR Code gerado com sucesso",
@@ -58,6 +83,17 @@ export function WhatsAppSettings() {
     try {
       const data = await callWhatsAppAPI("connect");
       if (data.success) {
+        // Atualizar status da conexão no banco
+        const { error: updateError } = await supabase
+          .from("whatsapp_connections")
+          .upsert({
+            company_id: (await supabase.auth.getUser()).data.user?.id,
+            is_connected: true,
+            last_connection_date: new Date().toISOString(),
+          });
+
+        if (updateError) throw updateError;
+
         setIsConnected(true);
         toast({
           title: "WhatsApp conectado",
@@ -78,6 +114,17 @@ export function WhatsAppSettings() {
     try {
       const data = await callWhatsAppAPI("disconnect");
       if (data.success) {
+        // Atualizar status da conexão no banco
+        const { error: updateError } = await supabase
+          .from("whatsapp_connections")
+          .upsert({
+            company_id: (await supabase.auth.getUser()).data.user?.id,
+            is_connected: false,
+            last_qr_code: null,
+          });
+
+        if (updateError) throw updateError;
+
         setIsConnected(false);
         setQrCode("");
         toast({
@@ -94,6 +141,14 @@ export function WhatsAppSettings() {
       });
     }
   };
+
+  // Atualizar estado local com dados do banco
+  useState(() => {
+    if (whatsappConnection) {
+      setIsConnected(whatsappConnection.is_connected);
+      setQrCode(whatsappConnection.last_qr_code || "");
+    }
+  }, [whatsappConnection]);
 
   return (
     <Card>

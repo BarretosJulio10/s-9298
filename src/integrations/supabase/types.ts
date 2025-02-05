@@ -723,6 +723,44 @@ export type Database = {
           },
         ]
       }
+      whatsapp_connections: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_connected: boolean | null
+          last_connection_date: string | null
+          last_qr_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_connected?: boolean | null
+          last_connection_date?: string | null
+          last_qr_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_connected?: boolean | null
+          last_connection_date?: string | null
+          last_qr_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_connections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
