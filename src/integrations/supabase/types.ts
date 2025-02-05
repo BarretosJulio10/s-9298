@@ -66,6 +66,7 @@ export type Database = {
           id: string
           interest_rate: number | null
           late_fee: number | null
+          mercadopago_id: string | null
           notification_date: string | null
           notification_sent: boolean | null
           payment_date: string | null
@@ -86,6 +87,7 @@ export type Database = {
           id?: string
           interest_rate?: number | null
           late_fee?: number | null
+          mercadopago_id?: string | null
           notification_date?: string | null
           notification_sent?: boolean | null
           payment_date?: string | null
@@ -106,6 +108,7 @@ export type Database = {
           id?: string
           interest_rate?: number | null
           late_fee?: number | null
+          mercadopago_id?: string | null
           notification_date?: string | null
           notification_sent?: boolean | null
           payment_date?: string | null
