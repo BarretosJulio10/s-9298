@@ -67,9 +67,13 @@ export const useCreateClient = (onSuccess: () => void) => {
 
     // Gerar cobrança automática
     const uniqueChargeId = Math.floor(10000 + Math.random() * 90000).toString();
-    const today = new Date();
-    const dueDate = new Date();
-    dueDate.setDate(today.getDate() + 3); // Vencimento em 3 dias
+
+    // Usar a data de vencimento escolhida no cadastro
+    const dueDate = values.birth_date;
+    if (!dueDate) {
+      console.error("Data de vencimento não fornecida");
+      throw new Error("Data de vencimento é obrigatória");
+    }
 
     const { data: charge, error: chargeError } = await supabase
       .from("charges")
@@ -79,7 +83,7 @@ export const useCreateClient = (onSuccess: () => void) => {
         customer_email: client.email,
         customer_document: client.document,
         amount: client.charge_amount,
-        due_date: dueDate.toISOString().split('T')[0],
+        due_date: dueDate,
         status: "pending",
         payment_method: "pix",
         mercadopago_id: uniqueChargeId
@@ -104,7 +108,7 @@ export const useCreateClient = (onSuccess: () => void) => {
         .insert({
           client_id: client.id,
           amount: client.charge_amount,
-          due_date: dueDate.toISOString().split('T')[0],
+          due_date: dueDate,
           status: "pending",
           payment_method: "pix"
         });
