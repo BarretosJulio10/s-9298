@@ -14,6 +14,7 @@ import { PaymentMethodsField } from "./form/PaymentMethodsField";
 import { AmountField } from "./form/AmountField";
 import { BirthDateField } from "./form/BirthDateField";
 import { TemplateField } from "./form/TemplateField";
+import { ChargeFrequencyField } from "./form/ChargeFrequencyField";
 import { useClientForm } from "./form/useClientForm";
 
 interface ClientFormProps {
@@ -37,9 +38,9 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
   };
 
   const handleClose = () => {
-    form.reset(); // Limpa todos os campos do formulário
-    setChargeType("recurring"); // Reseta o tipo de cobrança para o valor padrão
-    setSelectedPaymentMethods(["pix"]); // Reseta os métodos de pagamento para o valor padrão
+    form.reset();
+    setChargeType("recurring");
+    setSelectedPaymentMethods(["pix"]);
     onClose();
   };
 
@@ -84,7 +85,12 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                   <AmountField form={form} />
                 </div>
               </div>
-              <BirthDateField form={form} />
+              {chargeType === "recurring" && (
+                <>
+                  <ChargeFrequencyField form={form} />
+                  <BirthDateField form={form} />
+                </>
+              )}
               <TemplateField form={form} />
             </div>
 
