@@ -11,6 +11,7 @@ export function WhatsAppSettings() {
   const [isConnected, setIsConnected] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState("");
   const { toast } = useToast();
+  const instanceId = "1716319589869x721327290780988000"; // Seu ID específico
 
   const { data: config } = useQuery({
     queryKey: ["configurations"],
@@ -27,7 +28,17 @@ export function WhatsAppSettings() {
 
   const handleGenerateQR = async () => {
     try {
-      const response = await fetch("/api/whatsapp/qrcode");
+      const response = await fetch("/api/whatsapp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "qrcode",
+          instance: instanceId
+        })
+      });
+
       const data = await response.json();
 
       if (data.status === "success" && data.data?.QRCode) {
@@ -37,7 +48,7 @@ export function WhatsAppSettings() {
           description: "Escaneie o QR Code com seu WhatsApp",
         });
       } else {
-        throw new Error("Falha ao gerar QR Code");
+        throw new Error(data.message || "Falha ao gerar QR Code");
       }
     } catch (error) {
       toast({
@@ -66,7 +77,7 @@ export function WhatsAppSettings() {
         },
         body: JSON.stringify({
           action: "configureWebhook",
-          instance: config?.whatsapp_instance_id,
+          instance: instanceId,
           params: { webhookUrl }
         })
       });

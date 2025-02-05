@@ -31,6 +31,8 @@ async function handleRequest(req: Request): Promise<Response> {
         return await sendMessage(instance, params);
       case "configureWebhook":
         return await configureWebhook(instance, params);
+      case "updateWebhookV3":
+        return await updateWebhookV3(instance);
       default:
         return new Response(
           JSON.stringify({ error: "Invalid action" }),
@@ -82,8 +84,30 @@ async function getQRCode(instance: string): Promise<Response> {
   );
 }
 
+async function updateWebhookV3(instance: string): Promise<Response> {
+  console.log("Updating webhook to V3 for instance:", instance);
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/instance/updateWebhookV3?connectionKey=${instance}&value=enable`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${instance}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  const data = await response.json();
+  console.log("Webhook V3 update response:", data);
+  return new Response(
+    JSON.stringify(data),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
+
 async function configureWebhook(instance: string, params: { webhookUrl: string }): Promise<Response> {
   console.log("Configuring webhook for instance:", instance);
+  
+  // Primeiro ativa o webhook V3
+  await updateWebhookV3(instance);
+  
   const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/webhook`, {
     method: "POST",
     headers: {
