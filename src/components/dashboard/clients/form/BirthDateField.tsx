@@ -1,4 +1,4 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -33,11 +33,12 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
       name="birth_date"
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>Data de Início da Cobrança</FormLabel>
           <div className="flex gap-2">
             <DateInput 
               inputDate={inputDate} 
-              handleDateInput={handleDateInput} 
+              handleDateInput={handleDateInput}
+              placeholder="Data de Início da Cobrança"
+              className="text-muted-foreground"
             />
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>

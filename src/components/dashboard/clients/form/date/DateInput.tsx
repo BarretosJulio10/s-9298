@@ -1,23 +1,19 @@
 import { Input } from "@/components/ui/input";
-import { format } from "date-fns";
-import { UseFormReturn } from "react-hook-form";
-import type { Database } from "@/integrations/supabase/types";
-
-type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 interface DateInputProps {
   inputDate: string;
-  handleDateInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleDateInput: (value: string) => void;
+  placeholder?: string;
+  className?: string;
 }
 
-export function DateInput({ inputDate, handleDateInput }: DateInputProps) {
+export function DateInput({ inputDate, handleDateInput, placeholder, className }: DateInputProps) {
   return (
     <Input
-      placeholder="dd/mm/aaaa"
       value={inputDate}
-      onChange={handleDateInput}
-      maxLength={10}
-      className="w-full"
+      onChange={(e) => handleDateInput(e.target.value)}
+      placeholder={placeholder}
+      className={className}
     />
   );
 }
