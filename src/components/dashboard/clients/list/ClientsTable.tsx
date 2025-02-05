@@ -3,6 +3,7 @@ import { ClientTableHeader } from "./ClientTableHeader";
 import { ClientTableRow } from "./ClientTableRow";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ClientsTableProps {
   clients: any[];
@@ -12,6 +13,7 @@ interface ClientsTableProps {
 
 export function ClientsTable({ clients, onSelectClient, onEdit }: ClientsTableProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleDelete = async (clientId: string) => {
     try {
@@ -20,6 +22,9 @@ export function ClientsTable({ clients, onSelectClient, onEdit }: ClientsTablePr
       });
 
       if (error) throw error;
+
+      // Invalidar o cache para forçar uma nova busca
+      await queryClient.invalidateQueries({ queryKey: ["clients-with-charges"] });
 
       toast({
         description: "Cliente e cobranças excluídos com sucesso!",
