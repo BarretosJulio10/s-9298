@@ -12,7 +12,6 @@ export function WhatsAppSettings() {
   const [isConnected, setIsConnected] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState("");
   const { toast } = useToast();
-  const instanceId = "1716319589869x721327290780988000"; // Seu ID específico
 
   const { data: config } = useQuery({
     queryKey: ["configurations"],
