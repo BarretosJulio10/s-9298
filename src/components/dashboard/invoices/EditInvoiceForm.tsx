@@ -1,21 +1,33 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { Invoice } from "./types/Invoice";
 
 interface EditInvoiceFormProps {
-  invoice: any;
+  invoice: Invoice | null;
   onClose: () => void;
 }
 
 export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
-  const [amount, setAmount] = useState(invoice.amount);
-  const [status, setStatus] = useState(invoice.status);
-  const [dueDate, setDueDate] = useState(invoice.due_date);
+  // Usar valores padrão caso invoice seja nulo
+  const [amount, setAmount] = useState(invoice?.amount || 0);
+  const [status, setStatus] = useState(invoice?.status || 'pendente');
+  const [dueDate, setDueDate] = useState(invoice?.due_date || '');
   const { toast } = useToast();
+
+  // Se não houver fatura, mostrar mensagem e fechar
+  if (!invoice) {
+    toast({
+      variant: "destructive",
+      title: "Erro",
+      description: "Não foi possível carregar os dados da fatura.",
+    });
+    onClose();
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
