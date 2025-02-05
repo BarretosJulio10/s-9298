@@ -11,6 +11,7 @@ interface MercadoPagoRequest {
     amount: number
     due_date: string
     payment_method: string
+    charge_id: string
   }
   company_id: string
 }
@@ -52,23 +53,22 @@ serve(async (req: Request) => {
       const cleanDocument = charge.customer_document.replace(/\D/g, '')
       const docType = cleanDocument.length > 11 ? 'CNPJ' : 'CPF'
 
-      const idempotencyKey = crypto.randomUUID()
-      const baseUrl = 'https://api.mercadopago.com'
       const webhookUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/mercadopago-webhook`
 
       console.log('Creating Mercado Pago payment:', {
         amount: transactionAmount,
         document: cleanDocument,
         docType,
-        webhookUrl
+        webhookUrl,
+        charge_id: charge.charge_id
       })
 
-      const preferenceResponse = await fetch(`${baseUrl}/checkout/preferences`, {
+      const preferenceResponse = await fetch(`https://api.mercadopago.com/checkout/preferences`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${gatewaySettings.api_key}`,
           'Content-Type': 'application/json',
-          'X-Idempotency-Key': idempotencyKey,
+          'X-Idempotency-Key': charge.charge_id,
         },
         body: JSON.stringify({
           items: [{
@@ -98,7 +98,7 @@ serve(async (req: Request) => {
           },
           notification_url: webhookUrl,
           statement_descriptor: "PAGOUPIX",
-          external_reference: idempotencyKey,
+          external_reference: charge.charge_id,
         }),
       })
 

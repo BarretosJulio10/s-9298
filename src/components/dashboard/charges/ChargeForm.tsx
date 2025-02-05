@@ -48,11 +48,17 @@ export function ChargeForm() {
 
   const defaultGateway = gateways?.find(g => g.is_default);
 
+  const generateUniqueId = () => {
+    return 'chr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  };
+
   const onSubmit = async (data: ChargeFormData) => {
     if (!session?.user?.id) return;
     setIsLoading(true);
 
     try {
+      const uniqueChargeId = generateUniqueId();
+      
       // Primeiro, cria a cobrança no banco
       const { data: charge, error: chargeError } = await supabase
         .from("charges")
@@ -60,19 +66,20 @@ export function ChargeForm() {
           company_id: session.user.id,
           customer_name: data.customer_name,
           customer_email: data.customer_email,
-          customer_document: data.customer_document.replace(/\D/g, ''), // Remove caracteres não numéricos
+          customer_document: data.customer_document.replace(/\D/g, ''),
           amount: parseFloat(data.amount),
           due_date: data.due_date,
           gateway_id: data.gateway_id || defaultGateway?.id,
           status: "pending",
-          payment_method: "pix"
+          payment_method: "pix",
+          mercadopago_id: uniqueChargeId
         })
         .select()
         .single();
 
       if (chargeError) throw chargeError;
 
-      console.log("Charge created:", charge); // Log para debug
+      console.log("Charge created:", charge);
 
       // Agora vamos gerar o link de pagamento baseado no gateway selecionado
       const selectedGateway = gateways?.find(g => g.id === (data.gateway_id || defaultGateway?.id));
@@ -91,14 +98,15 @@ export function ChargeForm() {
               customer_document: data.customer_document.replace(/\D/g, ''),
               amount: parseFloat(data.amount),
               due_date: data.due_date,
-              payment_method: "pix"
+              payment_method: "pix",
+              charge_id: uniqueChargeId
             },
             company_id: session.user.id
           }),
         });
 
         const mpResponse = await response.json();
-        console.log("Mercado Pago response:", mpResponse); // Log para debug
+        console.log("Mercado Pago response:", mpResponse);
         
         if (!response.ok) throw new Error(mpResponse.error);
 
