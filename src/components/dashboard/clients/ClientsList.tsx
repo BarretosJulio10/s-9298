@@ -7,6 +7,7 @@ import { useClients } from "./list/useClients";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientListHeader } from "./list/ClientListHeader";
 import { ClientsTable } from "./list/ClientsTable";
+import { callWhatsAppAPI } from "@/lib/whatsapp";
 
 export function ClientsList() {
   const [showForm, setShowForm] = useState(false);
