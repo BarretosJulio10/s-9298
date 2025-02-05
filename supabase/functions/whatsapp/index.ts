@@ -94,16 +94,31 @@ async function getQRCode(instance: string): Promise<Response> {
   const data: QRCodeResponse = await response.json();
   console.log("QR code gerado:", data.qrcode ? "Sucesso" : "Falha");
   
+  if (data.qrcode) {
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        data: {
+          QRCode: data.qrcode,
+          connectionKey: data.connectionKey
+        }
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   return new Response(
-    JSON.stringify({ success: true, data }),
+    JSON.stringify({ 
+      success: false, 
+      error: "Falha ao gerar QR code" 
+    }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }
 
-async function updateWebhookV3(instance: string): Promise<Response> {
-  console.log("Updating webhook to V3 for instance:", instance);
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/instance/updateWebhookV3?connectionKey=${instance}&value=enable`, {
-    method: "PUT",
+async function connectWhatsApp(instance: string): Promise<Response> {
+  console.log("Conectando WhatsApp para instância:", instance);
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/connect`, {
     headers: {
       "Authorization": `Bearer ${instance}`,
       "Content-Type": "application/json"
@@ -111,7 +126,51 @@ async function updateWebhookV3(instance: string): Promise<Response> {
   });
 
   const data = await response.json();
-  console.log("Webhook V3 update response:", data);
+  console.log("Resposta da conexão:", data);
+  return new Response(
+    JSON.stringify(data),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
+
+async function disconnectWhatsApp(instance: string): Promise<Response> {
+  console.log("Desconectando WhatsApp para instância:", instance);
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/logout`, {
+    headers: {
+      "Authorization": `Bearer ${instance}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  const data = await response.json();
+  console.log("Resposta da desconexão:", data);
+  return new Response(
+    JSON.stringify(data),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
+
+async function sendMessage(instance: string, params: any): Promise<Response> {
+  const { phone, message } = params;
+  console.log("Enviando mensagem para instância:", instance, "para telefone:", phone);
+  
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/messages/text`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${instance}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      number: phone,
+      message: message,
+      options: {
+        delay: 1200
+      }
+    })
+  });
+
+  const data = await response.json();
+  console.log("Resposta do envio de mensagem:", data);
   return new Response(
     JSON.stringify(data),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -119,10 +178,7 @@ async function updateWebhookV3(instance: string): Promise<Response> {
 }
 
 async function configureWebhook(instance: string, params: { webhookUrl: string }): Promise<Response> {
-  console.log("Configuring webhook for instance:", instance);
-  
-  // Primeiro ativa o webhook V3
-  await updateWebhookV3(instance);
+  console.log("Configurando webhook para instância:", instance);
   
   const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/webhook`, {
     method: "POST",
@@ -144,70 +200,7 @@ async function configureWebhook(instance: string, params: { webhookUrl: string }
   });
 
   const data = await response.json();
-  console.log("Webhook configuration response:", data);
-  return new Response(
-    JSON.stringify(data),
-    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-  );
-}
-
-async function connectWhatsApp(instance: string): Promise<Response> {
-  console.log("Connecting WhatsApp for instance:", instance);
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/connect`, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${instance}`,
-      "Content-Type": "application/json"
-    }
-  });
-
-  const data = await response.json();
-  console.log("Connect response:", data);
-  return new Response(
-    JSON.stringify(data),
-    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-  );
-}
-
-async function disconnectWhatsApp(instance: string): Promise<Response> {
-  console.log("Disconnecting WhatsApp for instance:", instance);
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/logout`, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${instance}`,
-      "Content-Type": "application/json"
-    }
-  });
-
-  const data = await response.json();
-  console.log("Disconnect response:", data);
-  return new Response(
-    JSON.stringify(data),
-    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-  );
-}
-
-async function sendMessage(instance: string, params: any): Promise<Response> {
-  const { phone, message } = params;
-  console.log("Sending message for instance:", instance, "to phone:", phone);
-  
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/messages/text`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${instance}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      number: phone,
-      message: message,
-      options: {
-        delay: 1200
-      }
-    })
-  });
-
-  const data = await response.json();
-  console.log("Send message response:", data);
+  console.log("Resposta da configuração do webhook:", data);
   return new Response(
     JSON.stringify(data),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
