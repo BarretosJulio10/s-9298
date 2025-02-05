@@ -20,18 +20,23 @@ export const CompanyCharges = ({ companyId }: CompanyChargesProps) => {
   const { data: charges = [], isLoading } = useQuery({
     queryKey: ["company-charges", companyId],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
-
+      console.log("Buscando cobranças para company_id:", companyId);
+      
       const { data, error } = await supabase
         .from("charges")
         .select("*")
-        .eq("company_id", user.id)
+        .eq("company_id", companyId)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro ao buscar cobranças:", error);
+        throw error;
+      }
+      
+      console.log("Cobranças encontradas:", data);
       return data || [];
     },
+    enabled: !!companyId,
   });
 
   if (isLoading) {

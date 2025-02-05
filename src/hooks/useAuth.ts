@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useAuth() {
   const [session, setSession] = useState<any>(null);
@@ -8,43 +8,27 @@ export function useAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Verifica se há uma sessão persistida
-    const checkSession = async () => {
-      try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        console.log("Sessão atual:", currentSession);
-        setSession(currentSession);
-        
-        if (!currentSession) {
-          console.log("Sem sessão, redirecionando para /auth");
-          navigate("/auth");
-        }
-      } catch (error) {
-        console.error("Erro ao verificar sessão:", error);
-        navigate("/auth");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSession();
-
-    // Escuta mudanças na autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Mudança no estado da autenticação:", event, currentSession);
-      setSession(currentSession);
-
-      if (!currentSession) {
-        console.log("Sessão terminada, redirecionando para /auth");
-        navigate("/auth");
-      }
+    // Busca a sessão inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
       setLoading(false);
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    // Configura o listener para mudanças na autenticação
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Mudança no estado da autenticação:", _event, session);
+      setSession(session);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
-  return { session, loading, setLoading };
+  return {
+    session,
+    loading,
+    setLoading,
+  };
 }
