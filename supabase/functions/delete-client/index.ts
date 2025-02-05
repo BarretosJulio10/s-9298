@@ -21,21 +21,35 @@ Deno.serve(async (req) => {
 
     console.log('Iniciando processo de exclusão do cliente:', clientId);
 
-    // 1. Primeiro, excluir as cobranças pendentes ou atrasadas
+    // 1. Primeiro, excluir as faturas pendentes
+    const { error: invoicesError } = await supabaseClient
+      .from('invoices')
+      .delete()
+      .eq('client_id', clientId)
+      .eq('status', 'pendente');
+
+    if (invoicesError) {
+      console.error('Erro ao excluir faturas:', invoicesError);
+      throw invoicesError;
+    }
+
+    console.log('Faturas pendentes excluídas com sucesso');
+
+    // 2. Excluir as cobranças pendentes
     const { error: chargesError } = await supabaseClient
       .from('client_charges')
       .delete()
       .eq('client_id', clientId)
-      .in('status', ['pending', 'overdue']);
+      .eq('status', 'pending');
 
     if (chargesError) {
       console.error('Erro ao excluir cobranças:', chargesError);
       throw chargesError;
     }
 
-    console.log('Cobranças pendentes e atrasadas excluídas com sucesso');
+    console.log('Cobranças pendentes excluídas com sucesso');
 
-    // 2. Finalmente, excluir o cliente
+    // 3. Finalmente, excluir o cliente
     const { error: clientError } = await supabaseClient
       .from('clients')
       .delete()
