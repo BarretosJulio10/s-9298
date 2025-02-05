@@ -1,8 +1,8 @@
 import { Input } from "@/components/ui/input";
 
-interface DateInputProps {
+export interface DateInputProps {
   inputDate: string;
-  handleDateInput: (value: string) => void;
+  handleDateInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   className?: string;
 }
@@ -11,7 +11,7 @@ export function DateInput({ inputDate, handleDateInput, placeholder, className }
   return (
     <Input
       value={inputDate}
-      onChange={(e) => handleDateInput(e.target.value)}
+      onChange={handleDateInput}
       placeholder={placeholder}
       className={className}
     />

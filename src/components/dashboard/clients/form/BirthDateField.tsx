@@ -1,12 +1,18 @@
 import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { DateInput } from "./date/DateInput";
 import { UseFormReturn } from "react-hook-form";
+import { useDateField } from "./date/useDateField";
+import type { Database } from "@/integrations/supabase/types";
+
+type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 interface BirthDateFieldProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<Client>;
 }
 
 export function BirthDateField({ form }: BirthDateFieldProps) {
+  const { inputDate, handleDateInput } = useDateField(form);
+
   return (
     <FormField
       control={form.control}
@@ -15,8 +21,8 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
         <FormItem>
           <FormControl>
             <DateInput
-              value={field.value}
-              onChange={field.onChange}
+              inputDate={inputDate}
+              handleDateInput={handleDateInput}
               placeholder="Data de Início da Cobrança"
             />
           </FormControl>
