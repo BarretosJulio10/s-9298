@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,6 +14,7 @@ interface EditInvoiceFormProps {
 
 export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [amount, setAmount] = useState(invoice?.amount || 0);
   const [status, setStatus] = useState<"pendente" | "atrasado" | "pago">(invoice?.status || "pendente");
   const [dueDate, setDueDate] = useState(invoice?.due_date || '');
@@ -47,6 +49,9 @@ export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
         .eq('id', invoice.id);
 
       if (error) throw error;
+
+      // Invalida o cache para forçar uma nova busca dos dados
+      await queryClient.invalidateQueries({ queryKey: ["invoices"] });
 
       toast({
         title: "Fatura atualizada",
