@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { callWhatsAppAPI } from "@/lib/whatsapp";
+import { Loader2 } from "lucide-react";
 
 export function WhatsAppStatus({ 
   isConnected, 
@@ -17,6 +18,9 @@ export function WhatsAppStatus({
   onConnect: () => void;
   onDisconnect: () => void;
 }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
   return (
     <Card>
       <CardHeader>
@@ -25,14 +29,34 @@ export function WhatsAppStatus({
       <CardContent className="space-y-4">
         <div className="flex items-center gap-4">
           {!isConnected && !qrCode && (
-            <Button onClick={onGenerateQR}>
-              Gerar QR Code
+            <Button 
+              onClick={onGenerateQR}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Gerando...
+                </>
+              ) : (
+                'Gerar QR Code'
+              )}
             </Button>
           )}
 
           {qrCode && !isConnected && (
-            <Button onClick={onConnect}>
-              Conectar WhatsApp
+            <Button 
+              onClick={onConnect}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Conectando...
+                </>
+              ) : (
+                'Conectar WhatsApp'
+              )}
             </Button>
           )}
 
@@ -40,8 +64,16 @@ export function WhatsAppStatus({
             <Button
               variant="destructive"
               onClick={onDisconnect}
+              disabled={isLoading}
             >
-              Desconectar
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Desconectando...
+                </>
+              ) : (
+                'Desconectar'
+              )}
             </Button>
           )}
         </div>
