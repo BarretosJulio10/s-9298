@@ -1,6 +1,8 @@
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Send, FileEdit, ExternalLink, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { ClientStatus } from "./ClientStatus";
 
 interface ClientTableRowProps {
   client: {
