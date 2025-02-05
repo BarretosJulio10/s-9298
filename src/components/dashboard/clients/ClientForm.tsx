@@ -36,29 +36,35 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
     });
   };
 
+  const handleClose = () => {
+    form.reset(); // Limpa todos os campos do formulário
+    setChargeType("recurring"); // Reseta o tipo de cobrança para o valor padrão
+    setSelectedPaymentMethods(["pix"]); // Reseta os métodos de pagamento para o valor padrão
+    onClose();
+  };
+
   function onSubmit(values: any) {
     const formData = {
       ...values,
       payment_methods: selectedPaymentMethods,
       charge_type: chargeType,
     };
-    // Remover o template_id antes de enviar
     delete formData.template_id;
     mutation.mutate(formData);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px] p-0 bg-white rounded-lg shadow-lg">
         <Button 
           variant="ghost" 
           size="icon" 
           className="absolute right-4 top-4"
-          onClick={onClose}
+          onClick={handleClose}
         >
           <X className="h-4 w-4" />
         </Button>
-        <FormHeader onClose={onClose} />
+        <FormHeader onClose={handleClose} />
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-6">
@@ -87,7 +93,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
               onToggle={handlePaymentMethodToggle}
             />
 
-            <FormFooter onClose={onClose} />
+            <FormFooter onClose={handleClose} />
           </form>
         </Form>
       </DialogContent>
