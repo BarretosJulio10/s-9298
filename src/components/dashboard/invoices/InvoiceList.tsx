@@ -47,11 +47,13 @@ export function InvoiceList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: invoices, isLoading } = useQuery({
+  const { data: invoices, isLoading, error } = useQuery({
     queryKey: ["invoices"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
+
+      console.log("Buscando faturas para o usuário:", user.id);
 
       const { data, error } = await supabase
         .from("invoices")
@@ -71,10 +73,19 @@ export function InvoiceList() {
         throw error;
       }
 
-      console.log("Dados das faturas:", data);
+      console.log("Faturas encontradas:", data);
       return data as Invoice[];
     },
   });
+
+  if (error) {
+    console.error("Erro na query:", error);
+    toast({
+      variant: "destructive",
+      title: "Erro ao carregar faturas",
+      description: "Não foi possível carregar as faturas. Tente novamente mais tarde.",
+    });
+  }
 
   const handleDelete = async () => {
     if (!deletingInvoice) return;
@@ -105,7 +116,6 @@ export function InvoiceList() {
   };
 
   const handleSendInvoice = async (invoice: Invoice) => {
-    // TODO: Implementar envio de fatura
     toast({
       title: "Enviar fatura",
       description: "Funcionalidade a ser implementada.",
