@@ -2,10 +2,11 @@ import { Form } from "@/components/ui/form";
 import { TemplateNameField } from "./template-form/TemplateNameField";
 import { TemplateFormActions } from "./template-form/TemplateFormActions";
 import { useTemplateForm } from "./hooks/useTemplateForm";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SubtemplateList } from "./template-form/SubtemplateList";
+import { subtemplateTypes } from "./constants/templateTypes";
 
 interface TemplateFormProps {
   template?: {
@@ -25,26 +26,75 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
   }));
   const { toast } = useToast();
 
+  useEffect(() => {
+    const fetchSubtemplates = async () => {
+      if (!template?.id) return;
+
+      const { data, error } = await supabase
+        .from('message_templates')
+        .select('*')
+        .eq('parent_id', template.id);
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar subtemplates",
+          description: error.message
+        });
+        return;
+      }
+
+      if (data) {
+        const updatedSubtemplates = subtemplateTypes.map((type, index) => {
+          const subtemplate = data.find(st => st.subtype === type.type);
+          return {
+            content: subtemplate?.content || "",
+            imageFile: null
+          };
+        });
+        setSubtemplates(updatedSubtemplates);
+      }
+    };
+
+    fetchSubtemplates();
+  }, [template?.id, toast]);
+
   const handleSubmitWithSubtemplates = async (values: any) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Criar template principal
-      const { data: mainTemplate, error: mainError } = await supabase
-        .from('message_templates')
-        .insert({
-          company_id: user.id,
-          name: values.name,
-          type: "main",
-          content: ""
-        })
-        .select()
-        .single();
+      // Criar ou atualizar template principal
+      const templateData = {
+        company_id: user.id,
+        name: values.name,
+        type: "main",
+        content: ""
+      };
 
-      if (mainError) throw mainError;
+      let mainTemplate;
+      if (template?.id) {
+        const { data, error } = await supabase
+          .from('message_templates')
+          .update(templateData)
+          .eq('id', template.id)
+          .select()
+          .single();
 
-      // Criar subtemplates
+        if (error) throw error;
+        mainTemplate = data;
+      } else {
+        const { data, error } = await supabase
+          .from('message_templates')
+          .insert(templateData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        mainTemplate = data;
+      }
+
+      // Criar ou atualizar subtemplates
       for (let i = 0; i < subtemplateTypes.length; i++) {
         const type = subtemplateTypes[i];
         const subtemplate = subtemplates[i];
@@ -67,23 +117,25 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
           imageUrl = publicUrl;
         }
 
+        const subtemplateData = {
+          company_id: user.id,
+          parent_id: mainTemplate.id,
+          content: subtemplate.content || "",
+          image_url: imageUrl || undefined,
+          subtype: type.type,
+          name: type.title,
+          description: type.description,
+          example_message: type.example,
+          type: "subtemplate"
+        };
+
         await supabase
           .from('message_templates')
-          .insert({
-            company_id: user.id,
-            parent_id: mainTemplate.id,
-            content: subtemplate.content || "",
-            image_url: imageUrl,
-            subtype: type.type,
-            name: type.title,
-            description: type.description,
-            example_message: type.example,
-            type: "subtemplate"
-          });
+          .upsert(subtemplateData);
       }
 
       toast({
-        title: "Template criado com sucesso",
+        title: template?.id ? "Template atualizado com sucesso" : "Template criado com sucesso",
         description: "Template e subtemplates foram salvos"
       });
 
@@ -111,8 +163,8 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmitWithSubtemplates)} className="space-y-6">
-        <div className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmitWithSubtemplates)} className="space-y-4">
+        <div className="space-y-2">
           <TemplateNameField form={form} />
         </div>
 

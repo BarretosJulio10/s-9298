@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Send } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { templateTypeTranslations } from "../constants/templateTypes";
 
@@ -19,7 +19,7 @@ interface TemplateCardProps {
 export function TemplateCard({ template, onEdit, onDelete }: TemplateCardProps) {
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="space-y-1">
+      <CardHeader className="space-y-1 p-4">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <h3 className="font-medium text-gray-900">{template.name}</h3>
@@ -29,18 +29,10 @@ export function TemplateCard({ template, onEdit, onDelete }: TemplateCardProps) 
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-500 line-clamp-3">{template.content}</p>
+      <CardContent className="p-4">
+        <p className="text-sm text-gray-500 line-clamp-2">{template.content}</p>
       </CardContent>
-      <CardFooter className="justify-end gap-2">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="text-primary"
-          title="Enviar mensagem"
-        >
-          <Send className="h-4 w-4" />
-        </Button>
+      <CardFooter className="justify-end gap-2 p-4">
         <Button 
           variant="ghost" 
           size="sm"

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ImagePlus } from "lucide-react";
 
 interface SubtemplateCardProps {
   title: string;
@@ -24,16 +25,17 @@ export function SubtemplateCard({
   onImageChange,
 }: SubtemplateCardProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
+    <Card className="mb-4">
+      <CardHeader className="p-4">
+        <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">{description}</p>
-        <p className="text-sm text-muted-foreground">Exemplo: {example}</p>
+      <CardContent className="space-y-4 p-4">
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-sm text-muted-foreground">Exemplo: {example}</p>
+        </div>
         
         <div className="space-y-2">
-          <label className="text-sm font-medium">Conteúdo da Mensagem</label>
           <Textarea
             value={content}
             onChange={(e) => onContentChange(index, e.target.value)}
@@ -42,30 +44,44 @@ export function SubtemplateCard({
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Imagem do Template</label>
-          <div className="flex items-center gap-4">
-            <Input
-              type="file"
-              accept="image/png"
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  onImageChange(index, e.target.files[0]);
-                }
-              }}
-              className="cursor-pointer"
-            />
-          </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="file"
+            accept="image/*"
+            id={`image-${index}`}
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                onImageChange(index, e.target.files[0]);
+              }
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => document.getElementById(`image-${index}`)?.click()}
+            className="flex items-center gap-2"
+          >
+            <ImagePlus className="h-4 w-4" />
+            {imageFile ? 'Trocar imagem' : 'Upload de imagem'}
+          </Button>
           {imageFile && (
-            <div className="mt-2">
-              <img
-                src={URL.createObjectURL(imageFile)}
-                alt="Preview"
-                className="max-w-[200px] rounded-md"
-              />
-            </div>
+            <span className="text-sm text-muted-foreground">
+              {imageFile.name}
+            </span>
           )}
         </div>
+
+        {imageFile && (
+          <div className="mt-2">
+            <img
+              src={URL.createObjectURL(imageFile)}
+              alt="Preview"
+              className="max-w-[200px] rounded-md"
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
