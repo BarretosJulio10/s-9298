@@ -48,6 +48,10 @@ export function BirthDateField({ form }: BirthDateFieldProps) {
                     "px-2 hover:bg-gray-100",
                     !field.value && "text-muted-foreground"
                   )}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                 >
                   <CalendarIcon className="h-4 w-4" />
                 </Button>

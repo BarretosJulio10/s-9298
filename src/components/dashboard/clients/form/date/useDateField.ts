@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
-import { fromZonedTime, toZonedTime } from 'date-fns-tz';
+import { format, parse } from "date-fns";
 import { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
-
-const timeZone = 'America/Sao_Paulo';
 
 export function useDateField(form: UseFormReturn<Client>) {
   const [inputDate, setInputDate] = useState("");
@@ -32,8 +29,7 @@ export function useDateField(form: UseFormReturn<Client>) {
       const date = new Date(year, month, day);
       
       if (!isNaN(date.getTime())) {
-        const zonedDate = toZonedTime(date, timeZone);
-        form.setValue('birth_date', zonedDate.toISOString().split('T')[0]);
+        form.setValue('birth_date', date.toISOString().split('T')[0]);
       }
     }
   };
@@ -41,9 +37,10 @@ export function useDateField(form: UseFormReturn<Client>) {
   useEffect(() => {
     const date = form.getValues('birth_date');
     if (date) {
-      const utcDate = new Date(date);
-      const zonedDate = toZonedTime(utcDate, timeZone);
-      setInputDate(format(zonedDate, 'dd/MM/yyyy'));
+      const parsedDate = new Date(date);
+      if (!isNaN(parsedDate.getTime())) {
+        setInputDate(format(parsedDate, 'dd/MM/yyyy'));
+      }
     }
   }, [form.getValues('birth_date')]);
 
