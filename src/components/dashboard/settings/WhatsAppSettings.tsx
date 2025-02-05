@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 export function WhatsAppSettings() {
   const [qrCode, setQrCode] = useState("");
   const [isConnected, setIsConnected] = useState(false);
+  const [webhookUrl, setWebhookUrl] = useState("");
   const { toast } = useToast();
 
   const { data: config } = useQuery({
@@ -46,6 +48,48 @@ export function WhatsAppSettings() {
     }
   };
 
+  const handleConfigureWebhook = async () => {
+    if (!webhookUrl) {
+      toast({
+        variant: "destructive",
+        title: "URL do Webhook necessária",
+        description: "Por favor, insira a URL do webhook",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/whatsapp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "configureWebhook",
+          instance: config?.whatsapp_instance_id,
+          params: { webhookUrl }
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: "Webhook configurado com sucesso",
+          description: "O webhook foi configurado e começará a receber eventos",
+        });
+      } else {
+        throw new Error(data.message || "Falha ao configurar webhook");
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao configurar webhook",
+        description: error instanceof Error ? error.message : "Não foi possível configurar o webhook",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -65,6 +109,21 @@ export function WhatsAppSettings() {
               Gerar QR Code
             </Button>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="webhook" className="text-sm font-medium">URL do Webhook</label>
+          <div className="flex gap-2">
+            <Input
+              id="webhook"
+              placeholder="https://seu-webhook.com/whatsapp"
+              value={webhookUrl}
+              onChange={(e) => setWebhookUrl(e.target.value)}
+            />
+            <Button onClick={handleConfigureWebhook}>
+              Configurar Webhook
+            </Button>
+          </div>
         </div>
 
         {qrCode && !isConnected && (

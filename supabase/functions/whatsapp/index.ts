@@ -29,6 +29,8 @@ async function handleRequest(req: Request): Promise<Response> {
         return await disconnectWhatsApp(instance);
       case "sendMessage":
         return await sendMessage(instance, params);
+      case "configureWebhook":
+        return await configureWebhook(instance, params);
       default:
         return new Response(
           JSON.stringify({ error: "Invalid action" }),
@@ -74,6 +76,35 @@ async function getQRCode(instance: string): Promise<Response> {
 
   const data = await response.json();
   console.log("QR code response:", data);
+  return new Response(
+    JSON.stringify(data),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
+
+async function configureWebhook(instance: string, params: { webhookUrl: string }): Promise<Response> {
+  console.log("Configuring webhook for instance:", instance);
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/api/instance/webhook`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${instance}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      url: params.webhookUrl,
+      events: {
+        qrCodeGenerated: true,
+        qrCodeScanned: true,
+        connectionStatus: true,
+        messages: true
+      },
+      webhook_by_events: true,
+      webhook_base64: true
+    })
+  });
+
+  const data = await response.json();
+  console.log("Webhook configuration response:", data);
   return new Response(
     JSON.stringify(data),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
