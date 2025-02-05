@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
+import { addDays } from 'date-fns';
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -68,12 +69,15 @@ export const useCreateClient = (onSuccess: () => void) => {
     // Gerar cobrança automática
     const uniqueChargeId = Math.floor(10000 + Math.random() * 90000).toString();
 
-    // Usar a data de vencimento escolhida no cadastro
+    // Usar a data de vencimento escolhida no cadastro e adicionar 1 dia
     const dueDate = values.birth_date;
     if (!dueDate) {
       console.error("Data de vencimento não fornecida");
       throw new Error("Data de vencimento é obrigatória");
     }
+
+    // Adiciona 1 dia à data escolhida
+    const adjustedDueDate = addDays(new Date(dueDate), 1).toISOString().split('T')[0];
 
     const { data: charge, error: chargeError } = await supabase
       .from("charges")
@@ -83,7 +87,7 @@ export const useCreateClient = (onSuccess: () => void) => {
         customer_email: client.email,
         customer_document: client.document,
         amount: client.charge_amount,
-        due_date: dueDate,
+        due_date: adjustedDueDate,
         status: "pending",
         payment_method: "pix",
         mercadopago_id: uniqueChargeId
@@ -108,7 +112,7 @@ export const useCreateClient = (onSuccess: () => void) => {
         .insert({
           client_id: client.id,
           amount: client.charge_amount,
-          due_date: dueDate,
+          due_date: adjustedDueDate,
           status: "pending",
           payment_method: "pix"
         });
