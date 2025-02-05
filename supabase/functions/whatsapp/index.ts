@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
-const WHATSAPP_API_ENDPOINT = "http://167.114.6.95/";
+const WHATSAPP_API_ENDPOINT = "http://167.114.6.95/api/v1";
 
 interface WhatsAppResponse {
   success: boolean;
@@ -11,7 +11,6 @@ interface WhatsAppResponse {
 }
 
 async function handleRequest(req: Request): Promise<Response> {
-  // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -45,11 +44,12 @@ async function handleRequest(req: Request): Promise<Response> {
 }
 
 async function checkStatus(instance: string): Promise<Response> {
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/session/status`, {
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/status`, {
     method: "GET",
     headers: {
       "Accept": "application/json",
-      "Token": instance
+      "Token": instance,
+      "Content-Type": "application/json"
     }
   });
 
@@ -61,11 +61,12 @@ async function checkStatus(instance: string): Promise<Response> {
 }
 
 async function getQRCode(instance: string): Promise<Response> {
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/session/qr`, {
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/qr`, {
     method: "GET",
     headers: {
       "Accept": "application/json",
-      "Token": instance
+      "Token": instance,
+      "Content-Type": "application/json"
     }
   });
 
@@ -77,7 +78,7 @@ async function getQRCode(instance: string): Promise<Response> {
 }
 
 async function connectWhatsApp(instance: string): Promise<Response> {
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/session/connect`, {
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/connect`, {
     method: "POST",
     headers: {
       "Accept": "application/json",
@@ -98,11 +99,12 @@ async function connectWhatsApp(instance: string): Promise<Response> {
 }
 
 async function disconnectWhatsApp(instance: string): Promise<Response> {
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/session/logout`, {
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/logout`, {
     method: "POST",
     headers: {
       "Accept": "application/json",
-      "Token": instance
+      "Token": instance,
+      "Content-Type": "application/json"
     }
   });
 
@@ -121,7 +123,7 @@ async function sendMessage(instance: string, params: any): Promise<Response> {
     Body: message
   };
 
-  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/chat/send/text`, {
+  const response = await fetch(`${WHATSAPP_API_ENDPOINT}/send/text`, {
     method: "POST",
     headers: {
       "Accept": "application/json",
