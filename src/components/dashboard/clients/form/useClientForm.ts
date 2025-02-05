@@ -1,23 +1,14 @@
 import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
+import { useWhatsAppValidation } from "./validation/useWhatsAppValidation";
+import { useCreateClient } from "./mutations/useCreateClient";
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 export const useClientForm = (onClose: () => void) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const validateWhatsApp = async (phone: string): Promise<boolean> => {
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length !== 11) return false;
-    if (cleanPhone[2] !== '9') return false;
-    const ddd = parseInt(cleanPhone.substring(0, 2));
-    if (ddd < 11 || ddd > 99) return false;
-    return true;
-  };
+  const { validateWhatsApp } = useWhatsAppValidation();
+  const { createClient, toast, queryClient } = useCreateClient(onClose);
 
   const form = useForm<Client>({
     defaultValues: {
@@ -34,70 +25,7 @@ export const useClientForm = (onClose: () => void) => {
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: Client) => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          throw new Error("Usuário não autenticado");
-        }
-
-        const charge_amount = typeof values.charge_amount === 'string' 
-          ? parseFloat(values.charge_amount) 
-          : values.charge_amount;
-
-        // Remover campos que não existem na tabela
-        const clientData = {
-          name: values.name,
-          email: values.email,
-          document: values.document,
-          phone: values.phone,
-          status: values.status,
-          charge_amount,
-          payment_methods: values.payment_methods,
-          charge_type: values.charge_type,
-          birth_date: values.birth_date,
-          company_id: user.id,
-        };
-
-        console.log("Dados a serem enviados:", clientData);
-
-        const { data: existingClients, error: checkError } = await supabase
-          .from("clients")
-          .select("id")
-          .eq("email", values.email)
-          .eq("company_id", user.id)
-          .maybeSingle();
-
-        if (checkError) {
-          console.error("Erro ao verificar email:", checkError);
-          throw new Error("Erro ao verificar email do cliente");
-        }
-
-        if (existingClients) {
-          throw new Error("Já existe um cliente cadastrado com este email");
-        }
-
-        const { data, error } = await supabase
-          .from("clients")
-          .insert([clientData])
-          .select()
-          .maybeSingle();
-
-        if (error) {
-          console.error("Erro ao inserir cliente:", error);
-          throw new Error("Erro ao cadastrar cliente. Por favor, tente novamente.");
-        }
-
-        if (!data) {
-          throw new Error("Erro ao cadastrar cliente: nenhum dado retornado");
-        }
-
-        return data;
-      } catch (error: any) {
-        console.error("Erro ao cadastrar cliente:", error);
-        throw new Error(error.message || "Erro ao cadastrar cliente. Tente novamente mais tarde.");
-      }
-    },
+    mutationFn: createClient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast({
