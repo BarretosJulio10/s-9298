@@ -21,12 +21,10 @@ export function TemplateCard({ template, onEdit, onDelete }: TemplateCardProps) 
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="space-y-1 p-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium text-sm text-gray-900">{template.name}</h3>
-            <Badge variant="secondary" className="text-xs">
-              Principal
-            </Badge>
-          </div>
+          <h3 className="font-medium text-sm text-gray-900">{template.name}</h3>
+          <Badge variant="secondary" className="text-xs">
+            Principal
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="p-3">
