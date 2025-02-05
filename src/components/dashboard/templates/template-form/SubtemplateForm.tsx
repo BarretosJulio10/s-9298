@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, Search } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -88,11 +88,15 @@ export function SubtemplateForm({ parentId, onComplete }: SubtemplateFormProps) 
 
   const handleSave = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
       const { error } = await supabase
         .from('message_templates')
         .insert({
+          company_id: user.id,
           parent_id: parentId,
-          content: content,
+          content: content || "",
           image_url: imageUrl,
           subtype: currentTemplate.type,
           name: currentTemplate.title,
