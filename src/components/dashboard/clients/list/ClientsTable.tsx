@@ -27,7 +27,7 @@ export function ClientsTable({ clients, onSelectClient, onEdit }: ClientsTablePr
       await queryClient.invalidateQueries({ queryKey: ["clients-with-charges"] });
 
       toast({
-        description: "Cliente e cobranças excluídos com sucesso!",
+        description: "Cliente excluído com sucesso!",
       });
     } catch (error) {
       console.error('Erro ao excluir:', error);
@@ -55,7 +55,7 @@ export function ClientsTable({ clients, onSelectClient, onEdit }: ClientsTablePr
           ))}
           {clients.length === 0 && (
             <tr>
-              <td colSpan={7} className="text-center py-4">
+              <td colSpan={8} className="text-center py-4">
                 Nenhum cliente encontrado
               </td>
             </tr>

@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Send, FileEdit, ExternalLink, Trash2 } from "lucide-react";
 import { ClientStatus } from "./ClientStatus";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface ClientTableRowProps {
   client: {
@@ -13,6 +15,7 @@ interface ClientTableRowProps {
     phone: string;
     code: string;
     charge_amount: number;
+    birth_date: string | null;
     paymentStatus?: string;
     paymentLink?: string;
   };
@@ -70,6 +73,9 @@ export function ClientTableRow({ client, onSelect, onEdit, onDelete }: ClientTab
           style: 'currency',
           currency: 'BRL'
         }).format(client.charge_amount)}
+      </TableCell>
+      <TableCell className="text-center">
+        {client.birth_date ? format(new Date(client.birth_date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
       </TableCell>
       <TableCell className="text-center">
         <ClientStatus status={client.paymentStatus || 'pending'} />
