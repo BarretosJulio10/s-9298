@@ -60,7 +60,7 @@ export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
           status: status === 'pago' ? 'active' : status === 'atrasado' ? 'overdue' : 'pending',
           updated_at: new Date().toISOString(),
         })
-        .eq('id', invoice.client_id);
+        .eq('id', invoice.client.id);
 
       if (clientError) throw clientError;
 
