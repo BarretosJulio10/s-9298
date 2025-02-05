@@ -29,8 +29,6 @@ export function ChargesList({ companyId }: ChargesListProps) {
         throw error;
       }
       
-      // Adiciona log para debug
-      console.log("Charges data:", data);
       return data;
     },
   });
