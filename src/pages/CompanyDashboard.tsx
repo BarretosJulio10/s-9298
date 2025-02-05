@@ -5,15 +5,15 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import DashboardHome from "./dashboard/DashboardHome";
-import { CompanyCharges } from "@/components/dashboard/charges/CompanyCharges";
-import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 import { DashboardSidebarMenu } from "@/components/dashboard/sidebar/DashboardSidebarMenu";
 import { DashboardSidebarFooter } from "@/components/dashboard/sidebar/DashboardSidebarFooter";
 import { ClientsList } from "@/components/dashboard/clients/ClientsList";
 import { WalletContent } from "@/components/dashboard/wallet/WalletContent";
 import { TemplatesList } from "@/components/dashboard/templates/TemplatesList";
+import { InvoiceList } from "@/components/dashboard/invoices/InvoiceList";
+import { CompanySettingsForm } from "@/components/dashboard/settings/CompanySettingsForm";
 
-type ActiveSection = "home" | "clients" | "plans" | "wallet" | "charges" | "templates" | "settings";
+type ActiveSection = "home" | "clients" | "invoices" | "wallet" | "templates" | "settings";
 
 const CompanyDashboard = () => {
   const { session } = useAuth();
@@ -74,10 +74,10 @@ const CompanyDashboard = () => {
         return <DashboardHome />;
       case "clients":
         return <ClientsList />;
+      case "invoices":
+        return <InvoiceList />;
       case "wallet":
         return <WalletContent />;
-      case "charges":
-        return <CompanyCharges companyId={session?.user?.id || ""} />;
       case "templates":
         return <TemplatesList />;
       case "settings":

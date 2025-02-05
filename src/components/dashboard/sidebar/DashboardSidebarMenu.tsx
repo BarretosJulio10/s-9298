@@ -1,5 +1,5 @@
 
-import { Home, User, Wallet, MessageSquare, Settings } from "lucide-react";
+import { Home, User, Wallet, MessageSquare, Settings, Receipt } from "lucide-react";
 
 interface DashboardSidebarMenuProps {
   activeSection: string;
@@ -9,6 +9,7 @@ interface DashboardSidebarMenuProps {
 const menuItems = [
   { icon: Home, label: "Início", section: "home" },
   { icon: User, label: "Clientes", section: "clients" },
+  { icon: Receipt, label: "Faturas", section: "invoices" },
   { icon: Wallet, label: "Carteira", section: "wallet" },
   { icon: MessageSquare, label: "Templates", section: "templates" },
   { icon: Settings, label: "Configurações", section: "settings" },

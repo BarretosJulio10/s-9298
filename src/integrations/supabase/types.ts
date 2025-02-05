@@ -331,6 +331,57 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount: number
+          client_id: string
+          company_id: string
+          created_at: string
+          due_date: string
+          id: string
+          payment_date: string | null
+          status: Database["public"]["Enums"]["fatura_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          company_id: string
+          created_at?: string
+          due_date: string
+          id?: string
+          payment_date?: string | null
+          status?: Database["public"]["Enums"]["fatura_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          company_id?: string
+          created_at?: string
+          due_date?: string
+          id?: string
+          payment_date?: string | null
+          status?: Database["public"]["Enums"]["fatura_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_templates: {
         Row: {
           company_id: string
@@ -782,6 +833,7 @@ export type Database = {
     Enums: {
       charge_status: "pending" | "paid" | "overdue" | "cancelled"
       company_status: "active" | "inactive" | "pending"
+      fatura_status: "pendente" | "atrasado" | "pago"
       payment_gateway_type:
         | "mercadopago"
         | "asaas"
