@@ -1,5 +1,7 @@
 
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
+import { DeleteInvoiceHeader } from "./delete/DeleteInvoiceHeader";
+import { DeleteInvoiceActions } from "./delete/DeleteInvoiceActions";
 
 interface DeleteInvoiceDialogProps {
   open: boolean;
@@ -11,21 +13,8 @@ export function DeleteInvoiceDialog({ open, onOpenChange, onConfirm }: DeleteInv
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Excluir Fatura</AlertDialogTitle>
-          <AlertDialogDescription>
-            Tem certeza que deseja excluir esta fatura? Esta ação não pode ser desfeita.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={onConfirm}
-          >
-            Excluir
-          </AlertDialogAction>
-        </AlertDialogFooter>
+        <DeleteInvoiceHeader />
+        <DeleteInvoiceActions onConfirm={onConfirm} />
       </AlertDialogContent>
     </AlertDialog>
   );
