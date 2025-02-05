@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { FormField, FormItem } from "@/components/ui/form";
 import { templateTypeTranslations } from "../../templates/constants/templateTypes";
 
 export function TemplateField({ form }: { form: any }) {
@@ -33,9 +33,8 @@ export function TemplateField({ form }: { form: any }) {
       name="template_id"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Template de Mensagem</FormLabel>
           <Select onValueChange={field.onChange} value={field.value}>
-            <SelectTrigger>
+            <SelectTrigger className="text-muted-foreground">
               <SelectValue placeholder="Selecione um template" />
             </SelectTrigger>
             <SelectContent>
