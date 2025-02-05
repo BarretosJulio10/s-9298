@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
-const WHATSAPP_API_ENDPOINT = "https://api.w-api.app";
+const WHATSAPP_API_ENDPOINT = "https://api.wapi.com.br";
 
 async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
