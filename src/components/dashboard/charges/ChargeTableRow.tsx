@@ -1,5 +1,8 @@
 import { TableRow } from "@/components/ui/table";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { CancelChargeDialog } from "./CancelChargeDialog";
 import { EditChargeDialog } from "./charge-list/EditChargeDialog";
 import { ChargeCustomerCell } from "./charge-row/ChargeCustomerCell";
@@ -26,6 +29,8 @@ interface ChargeTableRowProps {
 export function ChargeTableRow({ charge }: ChargeTableRowProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const handleDelete = async () => {
     try {
