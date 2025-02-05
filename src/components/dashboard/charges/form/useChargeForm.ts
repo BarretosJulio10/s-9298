@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +17,7 @@ interface ChargeFormData {
 export function useChargeForm() {
   const { toast } = useToast();
   const { session } = useAuth();
+  const queryClient = useQueryClient();
   const form = useForm<ChargeFormData>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -66,7 +67,12 @@ export function useChargeForm() {
 
       if (chargeError) throw chargeError;
 
-      console.log("Charge created:", charge);
+      // Invalidar múltiplas queries relacionadas
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["charges"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] }),
+        queryClient.invalidateQueries({ queryKey: ["company-charges"] })
+      ]);
 
       const selectedGateway = gateways?.find(g => g.id === (data.gateway_id || defaultGateway?.id));
       
@@ -105,6 +111,9 @@ export function useChargeForm() {
           .eq("id", charge.id);
 
         if (updateError) throw updateError;
+
+        // Invalidar novamente após atualização do status
+        await queryClient.invalidateQueries({ queryKey: ["charges"] });
 
         if (mpResponse.payment_link) {
           await navigator.clipboard.writeText(mpResponse.payment_link);

@@ -1,4 +1,3 @@
-
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,7 +39,12 @@ export function ChargeTableRow({ charge, onDelete }: ChargeTableRowProps) {
 
       if (error) throw error;
 
-      queryClient.invalidateQueries({ queryKey: ["charges"] });
+      // Invalidar múltiplas queries relacionadas
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["charges"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] }),
+        queryClient.invalidateQueries({ queryKey: ["company-charges"] })
+      ]);
 
       toast({
         description: "Cobrança excluída com sucesso!",
