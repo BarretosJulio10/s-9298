@@ -1,22 +1,10 @@
-import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormControl } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import type { Database } from "@/integrations/supabase/types";
-
-type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
 interface ChargeFrequencyFieldProps {
-  form: UseFormReturn<Client>;
+  form: UseFormReturn<any>;
 }
-
-const frequencies = [
-  { value: "weekly", label: "Semanal" },
-  { value: "biweekly", label: "Quinzenal" },
-  { value: "monthly", label: "Mensal" },
-  { value: "quarterly", label: "Trimestral" },
-  { value: "semiannual", label: "Semestral" },
-  { value: "yearly", label: "Anual" },
-];
 
 export function ChargeFrequencyField({ form }: ChargeFrequencyFieldProps) {
   return (
@@ -25,24 +13,21 @@ export function ChargeFrequencyField({ form }: ChargeFrequencyFieldProps) {
       name="charge_frequency"
       render={({ field }) => (
         <FormItem>
-          <Select 
-            onValueChange={field.onChange} 
-            defaultValue={field.value as string}
-          >
-            <FormControl>
+          <FormControl>
+            <Select onValueChange={field.onChange} value={field.value}>
               <SelectTrigger className="text-muted-foreground">
                 <SelectValue placeholder="Frequência" />
               </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {frequencies.map((frequency) => (
-                <SelectItem key={frequency.value} value={frequency.value}>
-                  {frequency.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
+              <SelectContent>
+                <SelectItem value="weekly">Semanal</SelectItem>
+                <SelectItem value="biweekly">Quinzenal</SelectItem>
+                <SelectItem value="monthly">Mensal</SelectItem>
+                <SelectItem value="quarterly">Trimestral</SelectItem>
+                <SelectItem value="semiannual">Semestral</SelectItem>
+                <SelectItem value="yearly">Anual</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormControl>
         </FormItem>
       )}
     />

@@ -93,9 +93,7 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
                 )}
               </div>
 
-              {chargeType === "recurring" && (
-                <BirthDateField form={form} />
-              )}
+              <BirthDateField form={form} />
               
               <TemplateField form={form} />
             </div>
