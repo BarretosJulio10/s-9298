@@ -25,11 +25,14 @@ export function ChargeFrequencyField({ form }: ChargeFrequencyFieldProps) {
       name="charge_frequency"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Frequência da Cobrança</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <FormLabel>Frequência</FormLabel>
+          <Select 
+            onValueChange={field.onChange} 
+            defaultValue={field.value as string}
+          >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a frequência" />
+                <SelectValue placeholder="Selecione" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>

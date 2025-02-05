@@ -78,19 +78,25 @@ export function ClientForm({ open, onClose }: ClientFormProps) {
 
             <div className="grid grid-cols-1 gap-4">
               <EmailField form={form} />
-              <PhoneField form={form} validateWhatsApp={validateWhatsApp} />
+              
               <div className="grid grid-cols-2 gap-4">
                 <DocumentField form={form} />
                 <div className="flex justify-end">
                   <AmountField form={form} />
                 </div>
               </div>
-              {chargeType === "recurring" && (
-                <>
+
+              <div className="grid grid-cols-2 gap-4">
+                <PhoneField form={form} validateWhatsApp={validateWhatsApp} />
+                {chargeType === "recurring" && (
                   <ChargeFrequencyField form={form} />
-                  <BirthDateField form={form} />
-                </>
+                )}
+              </div>
+
+              {chargeType === "recurring" && (
+                <BirthDateField form={form} />
               )}
+              
               <TemplateField form={form} />
             </div>
 
