@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Invoice } from "./types/Invoice";
+import { EditInvoiceAmount } from "./edit/EditInvoiceAmount";
+import { EditInvoiceStatus } from "./edit/EditInvoiceStatus";
+import { EditInvoiceDate } from "./edit/EditInvoiceDate";
+import { EditInvoiceActions } from "./edit/EditInvoiceActions";
 
 interface EditInvoiceFormProps {
   invoice: Invoice | null;
@@ -71,49 +72,10 @@ export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="text-sm font-medium">Valor</label>
-        <Input
-          type="number"
-          step="0.01"
-          value={amount}
-          onChange={(e) => setAmount(Number(e.target.value))}
-          required
-        />
-      </div>
-
-      <div>
-        <label className="text-sm font-medium">Status</label>
-        <Select value={status} onValueChange={(value: "pendente" | "atrasado" | "pago") => setStatus(value)}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="pendente">Pendente</SelectItem>
-            <SelectItem value="atrasado">Atrasado</SelectItem>
-            <SelectItem value="pago">Pago</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <label className="text-sm font-medium">Data de Vencimento</label>
-        <Input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" type="button" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button type="submit">
-          Salvar
-        </Button>
-      </div>
+      <EditInvoiceAmount amount={amount} onChange={setAmount} />
+      <EditInvoiceStatus status={status} onChange={setStatus} />
+      <EditInvoiceDate dueDate={dueDate} onChange={setDueDate} />
+      <EditInvoiceActions onClose={onClose} />
     </form>
   );
 }
