@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 
 type Client = Database["public"]["Tables"]["clients"]["Insert"];
 
@@ -76,8 +76,9 @@ export const useCreateClient = (onSuccess: () => void) => {
       throw new Error("Data de vencimento é obrigatória");
     }
 
-    // Adiciona 1 dia à data escolhida
-    const adjustedDueDate = addDays(new Date(dueDate), 1).toISOString().split('T')[0];
+    // Adiciona 1 dia à data escolhida e formata corretamente
+    const adjustedDate = addDays(new Date(dueDate), 1);
+    const adjustedDueDate = format(adjustedDate, 'yyyy-MM-dd');
 
     const { data: charge, error: chargeError } = await supabase
       .from("charges")
@@ -97,7 +98,6 @@ export const useCreateClient = (onSuccess: () => void) => {
 
     if (chargeError) {
       console.error("Erro ao criar cobrança:", chargeError);
-      // Não vamos lançar erro aqui para não impedir o cadastro do cliente
       toast({
         variant: "destructive",
         title: "Aviso",
