@@ -39,7 +39,7 @@ serve(async (req) => {
             status: 'paid',
             payment_date: new Date().toISOString()
           })
-          .eq('payment_link', payment.transaction_details.external_reference)
+          .eq('payment_link', payment.external_reference)
 
         if (updateError) {
           console.error('Error updating charge:', updateError)
@@ -50,7 +50,7 @@ serve(async (req) => {
         const { data: charge } = await supabaseClient
           .from('charges')
           .select('*')
-          .eq('payment_link', payment.transaction_details.external_reference)
+          .eq('payment_link', payment.external_reference)
           .single()
 
         if (charge) {
