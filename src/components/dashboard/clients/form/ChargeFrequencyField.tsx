@@ -1,4 +1,4 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import type { Database } from "@/integrations/supabase/types";
@@ -25,14 +25,13 @@ export function ChargeFrequencyField({ form }: ChargeFrequencyFieldProps) {
       name="charge_frequency"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Frequência</FormLabel>
           <Select 
             onValueChange={field.onChange} 
             defaultValue={field.value as string}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
+                <SelectValue placeholder="Frequência" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
