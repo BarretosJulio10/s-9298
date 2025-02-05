@@ -101,9 +101,9 @@ export function ClientActions({ onSend, onEdit, paymentLink, client }: ClientAct
     try {
       // Primeiro, excluímos apenas as cobranças pendentes relacionadas ao cliente
       const { error: chargesError } = await supabase
-        .from('charges')
+        .from('client_charges')
         .delete()
-        .eq('customer_document', client.document)
+        .eq('client_id', client.id)
         .eq('status', 'pending');
 
       if (chargesError) throw chargesError;
