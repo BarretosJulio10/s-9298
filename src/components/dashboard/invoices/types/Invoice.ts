@@ -2,7 +2,7 @@ export interface Invoice {
   id: string;
   code: string;
   amount: number;
-  status: string;
+  status: "pendente" | "atrasado" | "pago";
   due_date: string;
   payment_date: string | null;
   client: {

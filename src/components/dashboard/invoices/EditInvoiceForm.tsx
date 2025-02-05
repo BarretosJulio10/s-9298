@@ -12,13 +12,11 @@ interface EditInvoiceFormProps {
 }
 
 export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
-  // Usar valores padrão caso invoice seja nulo
   const [amount, setAmount] = useState(invoice?.amount || 0);
-  const [status, setStatus] = useState(invoice?.status || 'pendente');
+  const [status, setStatus] = useState<"pendente" | "atrasado" | "pago">(invoice?.status || "pendente");
   const [dueDate, setDueDate] = useState(invoice?.due_date || '');
   const { toast } = useToast();
 
-  // Se não houver fatura, mostrar mensagem e fechar
   if (!invoice) {
     toast({
       variant: "destructive",
@@ -76,7 +74,7 @@ export function EditInvoiceForm({ invoice, onClose }: EditInvoiceFormProps) {
 
       <div>
         <label className="text-sm font-medium">Status</label>
-        <Select value={status} onValueChange={setStatus}>
+        <Select value={status} onValueChange={(value: "pendente" | "atrasado" | "pago") => setStatus(value)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
