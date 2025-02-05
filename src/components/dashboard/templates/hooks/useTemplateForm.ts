@@ -44,7 +44,12 @@ export function useTemplateForm({ template, onCancel }: UseTemplateFormProps) {
       toast({
         title: template ? "Template atualizado" : "Template criado",
       });
-      queryClient.invalidateQueries(["templates"]);
+      
+      // Atualizado para usar a sintaxe correta do React Query v5
+      queryClient.invalidateQueries({
+        queryKey: ["templates"]
+      });
+      
       onCancel();
     } catch (error) {
       toast({
