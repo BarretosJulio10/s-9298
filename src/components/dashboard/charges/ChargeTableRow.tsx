@@ -1,3 +1,4 @@
+
 import { TableRow } from "@/components/ui/table";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,9 +22,10 @@ interface ChargeTableRowProps {
     payment_method: string;
     payment_date?: string | null;
   };
+  onDelete: () => void;
 }
 
-export function ChargeTableRow({ charge }: ChargeTableRowProps) {
+export function ChargeTableRow({ charge, onDelete }: ChargeTableRowProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
