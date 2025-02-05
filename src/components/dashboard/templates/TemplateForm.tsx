@@ -2,13 +2,10 @@ import { Form } from "@/components/ui/form";
 import { TemplateNameField } from "./template-form/TemplateNameField";
 import { TemplateFormActions } from "./template-form/TemplateFormActions";
 import { useTemplateForm } from "./hooks/useTemplateForm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { SubtemplateList } from "./template-form/SubtemplateList";
 
 interface TemplateFormProps {
   template?: {
@@ -20,34 +17,12 @@ interface TemplateFormProps {
   onCancel: () => void;
 }
 
-const subtemplateTypes = [
-  {
-    type: "notification" as const,
-    title: "Template de Notificação",
-    description: "Enviado quando uma nova cobrança é gerada",
-    example: "Olá {nome}, sua fatura no valor de {valor} vence em {vencimento}."
-  },
-  {
-    type: "delayed" as const,
-    title: "Template de Atraso",
-    description: "Enviado quando uma cobrança está atrasada",
-    example: "Olá {nome}, sua fatura no valor de {valor} está vencida desde {vencimento}."
-  },
-  {
-    type: "paid" as const,
-    title: "Template de Pagamento",
-    description: "Enviado quando um pagamento é confirmado",
-    example: "Olá {nome}, confirmamos o pagamento da sua fatura no valor de {valor}."
-  }
-] as const;
-
 export function TemplateForm({ template, onCancel }: TemplateFormProps) {
   const { form, onSubmit, isSubmitting } = useTemplateForm({ template, onCancel });
-  const [subtemplates, setSubtemplates] = useState(subtemplateTypes.map(() => ({
+  const [subtemplates, setSubtemplates] = useState(Array(3).fill({
     content: "",
     imageFile: null as File | null,
-    uploading: false
-  })));
+  }));
   const { toast } = useToast();
 
   const handleSubmitWithSubtemplates = async (values: any) => {
@@ -122,6 +97,18 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
     }
   };
 
+  const handleContentChange = (index: number, content: string) => {
+    setSubtemplates(prev => prev.map((st, i) => 
+      i === index ? { ...st, content } : st
+    ));
+  };
+
+  const handleImageChange = (index: number, file: File) => {
+    setSubtemplates(prev => prev.map((st, i) => 
+      i === index ? { ...st, imageFile: file } : st
+    ));
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmitWithSubtemplates)} className="space-y-6">
@@ -129,62 +116,11 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
           <TemplateNameField form={form} />
         </div>
 
-        <Separator className="my-6" />
-
-        <div className="space-y-6">
-          <h3 className="text-lg font-semibold">Subtemplates</h3>
-          
-          {subtemplateTypes.map((type, index) => (
-            <Card key={type.type}>
-              <CardHeader>
-                <CardTitle>{type.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{type.description}</p>
-                <p className="text-sm text-muted-foreground">Exemplo: {type.example}</p>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Conteúdo da Mensagem</label>
-                  <Textarea
-                    value={subtemplates[index].content}
-                    onChange={(e) => setSubtemplates(prev => prev.map((st, i) => 
-                      i === index ? { ...st, content: e.target.value } : st
-                    ))}
-                    placeholder="Digite o conteúdo do template..."
-                    className="min-h-[100px]"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Imagem do Template</label>
-                  <div className="flex items-center gap-4">
-                    <Input
-                      type="file"
-                      accept="image/png"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setSubtemplates(prev => prev.map((st, i) => 
-                            i === index ? { ...st, imageFile: e.target.files![0] } : st
-                          ));
-                        }
-                      }}
-                      className="cursor-pointer"
-                    />
-                  </div>
-                  {subtemplates[index].imageFile && (
-                    <div className="mt-2">
-                      <img
-                        src={URL.createObjectURL(subtemplates[index].imageFile)}
-                        alt="Preview"
-                        className="max-w-[200px] rounded-md"
-                      />
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <SubtemplateList
+          subtemplates={subtemplates}
+          onContentChange={handleContentChange}
+          onImageChange={handleImageChange}
+        />
 
         <TemplateFormActions 
           onCancel={onCancel}
