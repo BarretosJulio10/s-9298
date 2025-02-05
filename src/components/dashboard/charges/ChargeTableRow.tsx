@@ -6,6 +6,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { CancelChargeDialog } from "./CancelChargeDialog";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface ChargeTableRowProps {
   charge: {
@@ -50,27 +53,65 @@ export function ChargeTableRow({ charge }: ChargeTableRowProps) {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "success";
+      case "pending":
+        return "warning";
+      case "overdue":
+        return "destructive";
+      default:
+        return "secondary";
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "Pago";
+      case "pending":
+        return "Pendente";
+      case "overdue":
+        return "Vencido";
+      case "cancelled":
+        return "Cancelado";
+      default:
+        return status;
+    }
+  };
+
   return (
     <>
       <TableRow>
         <TableCell>{charge.customer_name}</TableCell>
         <TableCell className="text-center">
-          {new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
+          {new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
           }).format(charge.amount)}
         </TableCell>
         <TableCell className="text-center">
-          {new Date(charge.due_date).toLocaleDateString('pt-BR')}
-        </TableCell>
-        <TableCell className="text-center">{charge.status}</TableCell>
-        <TableCell className="text-center">{charge.payment_method}</TableCell>
-        <TableCell className="text-center">
-          {charge.payment_date 
-            ? new Date(charge.payment_date).toLocaleDateString('pt-BR')
-            : '-'}
+          {format(new Date(charge.due_date), "dd/MM/yyyy", {
+            locale: ptBR,
+          })}
         </TableCell>
         <TableCell className="text-center">
+          <Badge variant={getStatusColor(charge.status)}>
+            {formatStatus(charge.status)}
+          </Badge>
+        </TableCell>
+        <TableCell className="text-center capitalize">
+          {charge.payment_method === "pix" ? "PIX" : charge.payment_method}
+        </TableCell>
+        <TableCell className="text-center">
+          {charge.payment_date
+            ? format(new Date(charge.payment_date), "dd/MM/yyyy", {
+                locale: ptBR,
+              })
+            : "-"}
+        </TableCell>
+        <TableCell className="text-right pr-4">
           <Button
             variant="ghost"
             size="icon"
