@@ -3,6 +3,7 @@ import { Send, Edit, Trash, Link2, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ClientActionsProps {
   onSend: () => void;
@@ -18,9 +19,10 @@ interface ClientActionsProps {
   };
 }
 
-export function ClientActions({ onSend, onEdit, onDelete, paymentLink, client }: ClientActionsProps) {
+export function ClientActions({ onSend, onEdit, paymentLink, client }: ClientActionsProps) {
   const { toast } = useToast();
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const handleGenerateCharge = async () => {
     if (!session?.user?.id) return;
@@ -96,6 +98,40 @@ export function ClientActions({ onSend, onEdit, onDelete, paymentLink, client }:
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      // Primeiro, excluímos as cobranças relacionadas ao cliente
+      const { error: chargesError } = await supabase
+        .from('client_charges')
+        .delete()
+        .eq('client_id', client.id);
+
+      if (chargesError) throw chargesError;
+
+      // Depois, excluímos o cliente
+      const { error: clientError } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', client.id);
+
+      if (clientError) throw clientError;
+
+      // Atualiza a lista de clientes
+      queryClient.invalidateQueries({ queryKey: ['clients-with-charges'] });
+
+      toast({
+        description: "Cliente excluído com sucesso!",
+      });
+    } catch (error: any) {
+      console.error('Erro ao excluir cliente:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir cliente",
+        description: error.message,
+      });
+    }
+  };
+
   return (
     <div className="flex items-center justify-center gap-1">
       <Button
@@ -141,7 +177,7 @@ export function ClientActions({ onSend, onEdit, onDelete, paymentLink, client }:
         size="icon"
         className="text-red-600 hover:text-red-700 hover:bg-red-50"
         title="Excluir cliente"
-        onClick={onDelete}
+        onClick={handleDelete}
       >
         <Trash className="h-4 w-4" />
       </Button>
