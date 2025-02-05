@@ -188,6 +188,7 @@ export type Database = {
           charge_day: number | null
           charge_start_date: string | null
           charge_type: string | null
+          code: string | null
           company_id: string
           created_at: string
           document: string
@@ -214,6 +215,7 @@ export type Database = {
           charge_day?: number | null
           charge_start_date?: string | null
           charge_type?: string | null
+          code?: string | null
           company_id: string
           created_at?: string
           document: string
@@ -240,6 +242,7 @@ export type Database = {
           charge_day?: number | null
           charge_start_date?: string | null
           charge_type?: string | null
+          code?: string | null
           company_id?: string
           created_at?: string
           document?: string
@@ -335,6 +338,7 @@ export type Database = {
         Row: {
           amount: number
           client_id: string
+          code: string | null
           company_id: string
           created_at: string
           due_date: string
@@ -346,6 +350,7 @@ export type Database = {
         Insert: {
           amount: number
           client_id: string
+          code?: string | null
           company_id: string
           created_at?: string
           due_date: string
@@ -357,6 +362,7 @@ export type Database = {
         Update: {
           amount?: number
           client_id?: string
+          code?: string | null
           company_id?: string
           created_at?: string
           due_date?: string

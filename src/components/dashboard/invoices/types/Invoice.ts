@@ -1,6 +1,6 @@
-
 export interface Invoice {
   id: string;
+  code: string;
   amount: number;
   status: string;
   due_date: string;

@@ -1,4 +1,3 @@
-
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +30,7 @@ export function InvoiceTableRow({
 
   return (
     <TableRow>
+      <TableCell className="font-medium">{invoice.code}</TableCell>
       <TableCell>{invoice.client?.name || 'N/A'}</TableCell>
       <TableCell>{invoice.client?.email || 'N/A'}</TableCell>
       <TableCell>{invoice.client?.document || 'N/A'}</TableCell>
