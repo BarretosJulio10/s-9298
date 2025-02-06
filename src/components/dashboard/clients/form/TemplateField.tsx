@@ -44,12 +44,16 @@ export function TemplateField({ form }: { form: any }) {
       render={({ field }) => (
         <FormItem>
           <Select onValueChange={handleTemplateChange} value={field.value}>
-            <SelectTrigger className="text-muted-foreground">
+            <SelectTrigger className="bg-white text-primary border-gray-300 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20">
               <SelectValue placeholder="Selecione um template" />
             </SelectTrigger>
             <SelectContent>
               {templates?.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
+                <SelectItem 
+                  key={template.id} 
+                  value={template.id}
+                  className="hover:bg-primary/10 focus:bg-primary/10"
+                >
                   {template.name} ({templateTypeTranslations[template.type as keyof typeof templateTypeTranslations]})
                 </SelectItem>
               ))}
