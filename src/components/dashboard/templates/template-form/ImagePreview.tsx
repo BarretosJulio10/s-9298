@@ -17,8 +17,8 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <div className="w-[70%] space-y-4">
+    <div className="w-full flex flex-col items-center mt-0">
+      <div className="w-[70%]">
         <div className="flex justify-start gap-2 mb-4">
           <input
             type="file"
