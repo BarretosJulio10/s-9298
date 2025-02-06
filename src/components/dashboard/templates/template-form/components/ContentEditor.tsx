@@ -60,6 +60,13 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Atualiza a posição do cursor quando o componente é focado
+  const handleFocus = () => {
+    if (textareaRef.current) {
+      setCursorPosition(textareaRef.current.selectionStart);
+    }
+  };
+
   // Agrupar campos por categoria
   const groupedFields = templateFields.reduce((acc, field) => {
     if (!acc[field.category]) {
@@ -88,22 +95,27 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
           value={content}
           onChange={handleContentChange}
           onKeyDown={(e) => {
-            // Mostra sugestões tanto ao pressionar { quanto ao digitar
             if (e.key === '{') {
-              e.preventDefault(); // Previne a digitação do { até a seleção
-              setShowFieldSuggestions(true);
+              e.preventDefault();
               const newContent = content.slice(0, cursorPosition) + '{' + content.slice(cursorPosition);
               onChange(newContent);
               setCursorPosition(cursorPosition + 1);
+              setShowFieldSuggestions(true);
             } else if (e.key === 'Escape') {
               setShowFieldSuggestions(false);
+            }
+          }}
+          onFocus={handleFocus}
+          onClick={() => {
+            if (textareaRef.current) {
+              setCursorPosition(textareaRef.current.selectionStart);
             }
           }}
           placeholder="Digite o conteúdo do template... Use { para ver os campos disponíveis"
           className="min-h-[150px]"
         />
         {showFieldSuggestions && (
-          <div className="absolute z-10 w-72 max-h-80 overflow-y-auto bg-white border rounded-md shadow-lg mt-1">
+          <div className="absolute z-10 w-72 max-h-80 overflow-y-auto bg-white border rounded-md shadow-lg mt-1 left-0">
             {Object.entries(groupedFields).map(([category, fields]) => (
               <div key={category} className="p-2">
                 <h3 className="text-sm font-semibold text-gray-600 capitalize mb-2 px-2">
