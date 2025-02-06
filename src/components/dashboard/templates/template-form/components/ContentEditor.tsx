@@ -141,21 +141,21 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
             <div className="bg-gray-50 p-3 rounded-lg">
               <p className="text-sm font-medium text-gray-700 mb-2">Exemplo de Notificação:</p>
               <p className="text-sm text-gray-600">
-                "Olá {nome}, sua fatura no valor de {valor} vence em {vencimento}. Para pagar, acesse: {link_pagamento}"
+                "Olá {'nome'}, sua fatura no valor de {'valor'} vence em {'vencimento'}. Para pagar, acesse: {'link_pagamento'}"
               </p>
             </div>
             
             <div className="bg-gray-50 p-3 rounded-lg">
               <p className="text-sm font-medium text-gray-700 mb-2">Exemplo de Atraso:</p>
               <p className="text-sm text-gray-600">
-                "Prezado(a) {nome}, identificamos que sua fatura de {valor} está vencida desde {vencimento}."
+                "Prezado(a) {'nome'}, identificamos que sua fatura de {'valor'} está vencida desde {'vencimento'}."
               </p>
             </div>
 
             <div className="bg-gray-50 p-3 rounded-lg">
               <p className="text-sm font-medium text-gray-700 mb-2">Exemplo de Confirmação:</p>
               <p className="text-sm text-gray-600">
-                "Confirmamos o pagamento da sua fatura, {nome}! Valor: {valor}"
+                "Confirmamos o pagamento da sua fatura, {'nome'}! Valor: {'valor'}"
               </p>
             </div>
           </div>
@@ -185,3 +185,4 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
     </div>
   );
 }
+
