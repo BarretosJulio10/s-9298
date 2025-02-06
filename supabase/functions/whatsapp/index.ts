@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
@@ -58,14 +57,7 @@ async function createInstance(headers: HeadersInit): Promise<Response> {
       headers,
       body: JSON.stringify({
         connectionKey,
-        webhook: {
-          connectionWebhook: "",
-          messageWebhook: "",
-          messageStatusWebhook: "",
-          groupWebhook: "",
-          presenceWebhook: "",
-          labelsWebhook: ""
-        }
+        webhook: null
       })
     });
 
