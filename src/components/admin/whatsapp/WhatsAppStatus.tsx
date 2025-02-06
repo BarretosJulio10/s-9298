@@ -80,12 +80,11 @@ export function WhatsAppStatus() {
       if (response.success && response.data?.instance?.key) {
         setStatus({ status: 'connecting', instanceKey: response.data.instance.key });
         await refetchConnection();
+        toast({
+          title: "Instância criada",
+          description: "Instância criada com sucesso! Agora você pode gerar o QR Code.",
+        });
       }
-      
-      toast({
-        title: "Instância criada",
-        description: "Instância criada com sucesso",
-      });
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -117,12 +116,12 @@ export function WhatsAppStatus() {
         setQrCode(qrResponse.data.qrcode);
         checkConnectionStatus(connection.instance_key);
         await refetchConnection();
+        
+        toast({
+          title: "QR Code gerado",
+          description: "Escaneie o QR Code para conectar seu WhatsApp",
+        });
       }
-      
-      toast({
-        title: "QR Code gerado",
-        description: "Escaneie o QR Code para conectar seu WhatsApp",
-      });
     } catch (error: any) {
       toast({
         variant: "destructive",
