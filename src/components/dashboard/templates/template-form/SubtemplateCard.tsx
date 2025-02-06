@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ImagePlus } from "lucide-react";
+import { ImagePlus, Trash2 } from "lucide-react";
 
 interface SubtemplateCardProps {
   title: string;
@@ -26,6 +26,12 @@ export function SubtemplateCard({
   onContentChange,
   onImageChange,
 }: SubtemplateCardProps) {
+  const handleDeleteImage = () => {
+    onImageChange(index, null as any);
+  };
+
+  const hasImage = imageFile || imageUrl;
+
   return (
     <Card className="mb-4">
       <CardHeader className="p-4">
@@ -67,8 +73,22 @@ export function SubtemplateCard({
               className="flex items-center gap-2"
             >
               <ImagePlus className="h-4 w-4" />
-              {imageFile || imageUrl ? 'Trocar imagem' : 'Upload de imagem'}
+              {hasImage ? 'Trocar imagem' : 'Upload de imagem'}
             </Button>
+
+            {hasImage && (
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteImage}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Excluir imagem
+              </Button>
+            )}
+
             {imageFile && (
               <span className="text-sm text-muted-foreground">
                 {imageFile.name}
@@ -77,7 +97,7 @@ export function SubtemplateCard({
           </div>
 
           {/* Exibe a imagem existente ou a preview do novo arquivo */}
-          {(imageFile || imageUrl) && (
+          {hasImage && (
             <div className="mt-2 flex items-center gap-4">
               <img
                 src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
