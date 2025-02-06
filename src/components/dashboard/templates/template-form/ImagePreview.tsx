@@ -56,7 +56,7 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
           )}
         </div>
 
-        <div className="aspect-w-4 aspect-h-3 w-full">
+        <div className="aspect-w-4 aspect-h-3 w-[70%] mx-auto">
           {hasImage ? (
             <div className="relative">
               <img
