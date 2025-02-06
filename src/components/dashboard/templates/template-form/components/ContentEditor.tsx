@@ -88,8 +88,13 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
           value={content}
           onChange={handleContentChange}
           onKeyDown={(e) => {
+            // Mostra sugestões tanto ao pressionar { quanto ao digitar
             if (e.key === '{') {
+              e.preventDefault(); // Previne a digitação do { até a seleção
               setShowFieldSuggestions(true);
+              const newContent = content.slice(0, cursorPosition) + '{' + content.slice(cursorPosition);
+              onChange(newContent);
+              setCursorPosition(cursorPosition + 1);
             } else if (e.key === 'Escape') {
               setShowFieldSuggestions(false);
             }
@@ -98,7 +103,7 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
           className="min-h-[150px]"
         />
         {showFieldSuggestions && (
-          <div className="absolute z-10 w-72 max-h-80 overflow-y-auto bg-white border rounded-md shadow-lg mt-1 right-0">
+          <div className="absolute z-10 w-72 max-h-80 overflow-y-auto bg-white border rounded-md shadow-lg mt-1">
             {Object.entries(groupedFields).map(([category, fields]) => (
               <div key={category} className="p-2">
                 <h3 className="text-sm font-semibold text-gray-600 capitalize mb-2 px-2">
