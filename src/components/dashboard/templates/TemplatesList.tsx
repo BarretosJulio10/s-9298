@@ -88,7 +88,7 @@ export function TemplatesList() {
       {showForm ? (
         <TemplateForm onCancel={handleFormClose} template={selectedTemplate} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-5xl mx-auto">
+        <div className="grid grid-cols-4 gap-3 max-w-7xl mx-auto">
           {templates?.map((template) => (
             <TemplateCard
               key={template.id}
