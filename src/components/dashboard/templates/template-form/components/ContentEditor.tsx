@@ -22,7 +22,7 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
     onChange(newContent);
     setCursorPosition(newPosition);
 
-    // Mostra sugestões quando digita "{"
+    // Mostra sugestões quando o último caractere digitado é "{"
     if (newContent[newPosition - 1] === '{') {
       setShowFieldSuggestions(true);
     }
@@ -60,13 +60,6 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Atualiza a posição do cursor quando o componente é focado
-  const handleFocus = () => {
-    if (textareaRef.current) {
-      setCursorPosition(textareaRef.current.selectionStart);
-    }
-  };
-
   // Agrupar campos por categoria
   const groupedFields = templateFields.reduce((acc, field) => {
     if (!acc[field.category]) {
@@ -75,6 +68,12 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
     acc[field.category].push(field);
     return acc;
   }, {} as Record<string, TemplateField[]>);
+
+  const updateCursorPosition = () => {
+    if (textareaRef.current) {
+      setCursorPosition(textareaRef.current.selectionStart);
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -95,22 +94,13 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
           value={content}
           onChange={handleContentChange}
           onKeyDown={(e) => {
-            if (e.key === '{') {
-              e.preventDefault();
-              const newContent = content.slice(0, cursorPosition) + '{' + content.slice(cursorPosition);
-              onChange(newContent);
-              setCursorPosition(cursorPosition + 1);
-              setShowFieldSuggestions(true);
-            } else if (e.key === 'Escape') {
+            if (e.key === 'Escape') {
               setShowFieldSuggestions(false);
             }
           }}
-          onFocus={handleFocus}
-          onClick={() => {
-            if (textareaRef.current) {
-              setCursorPosition(textareaRef.current.selectionStart);
-            }
-          }}
+          onSelect={updateCursorPosition}
+          onClick={updateCursorPosition}
+          onFocus={updateCursorPosition}
           placeholder="Digite o conteúdo do template... Use { para ver os campos disponíveis"
           className="min-h-[150px]"
         />
