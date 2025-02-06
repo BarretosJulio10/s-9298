@@ -1,8 +1,18 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
 const WAPI_ENDPOINT = "https://painel.w-api.app";
 const DEFAULT_TOKEN = '1716319589869x721327290780988000'; // Token W-API
+
+interface WebhookConfig {
+  connectionWebhook?: string;
+  messageWebhook?: string;
+  messageStatusWebhook?: string;
+  groupWebhook?: string;
+  presenceWebhook?: string;
+  labelsWebhook?: string;
+}
 
 async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
@@ -50,25 +60,40 @@ async function createInstance(headers: HeadersInit): Promise<Response> {
     const connectionKey = `instance_${Date.now()}`; // Chave única
     const createInstanceUrl = `${WAPI_ENDPOINT}/manager/create?adm_key=${DEFAULT_TOKEN}`;
     
+    // Configuração inicial sem webhooks
+    const requestBody = {
+      connectionKey,
+      webhook: null // Mantendo null por enquanto, podemos expandir depois
+    };
+    
     console.log("URL de criação:", createInstanceUrl);
+    console.log("Corpo da requisição:", requestBody);
     
     const response = await fetch(createInstanceUrl, {
       method: "POST",
       headers,
-      body: JSON.stringify({
-        connectionKey,
-        webhook: null
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.text();
       console.error("Erro na resposta da API:", errorData);
-      throw new Error(`Erro ao criar instância: ${response.status}`);
+      try {
+        const parsedError = JSON.parse(errorData);
+        throw new Error(`Erro ao criar instância: ${parsedError.message || response.status}`);
+      } catch {
+        throw new Error(`Erro ao criar instância: ${errorData || response.status}`);
+      }
     }
 
-    const data = await response.json();
-    console.log("Instância criada com sucesso:", data);
+    let data;
+    try {
+      data = await response.json();
+      console.log("Instância criada com sucesso:", data);
+    } catch (error) {
+      console.error("Erro ao processar resposta JSON:", error);
+      throw new Error("Resposta inválida do servidor");
+    }
 
     return new Response(
       JSON.stringify({ success: true, data }),
@@ -178,3 +203,4 @@ async function sendMessage(headers: HeadersInit, params: any): Promise<Response>
 }
 
 serve(handleRequest);
+
