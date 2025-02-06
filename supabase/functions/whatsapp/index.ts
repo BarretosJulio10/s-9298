@@ -49,15 +49,20 @@ async function createInstance(headers: HeadersInit): Promise<Response> {
   try {
     console.log("Iniciando criação de instância...");
     
-    const response = await fetch(`${WAPI_ENDPOINT}/api/instance/create`, {
+    const connectionKey = `instance_${Date.now()}`; // Gerando uma chave única
+    
+    const response = await fetch(`${WAPI_ENDPOINT}/manager/create?adm_key=${DEFAULT_TOKEN}`, {
       method: "POST",
       headers,
       body: JSON.stringify({
-        name: "WhatsApp Instance",
-        qrcode: true, // Indica que queremos gerar QR code
+        connectionKey,
         webhook: {
-          url: "", // URL para receber notificações (opcional)
-          events: ["message", "status", "qrcode"] // Eventos que queremos receber
+          connectionWebhook: "",
+          messageWebhook: "",
+          messageStatusWebhook: "",
+          groupWebhook: "",
+          presenceWebhook: "",
+          labelsWebhook: ""
         }
       })
     });
