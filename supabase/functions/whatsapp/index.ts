@@ -1,10 +1,9 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
-import { WHATSAPP_CONFIG } from "../../src/config/whatsapp.ts";
 
 const WAPI_ENDPOINT = "https://api.wapi.com.br";
-const DEFAULT_TOKEN = WHATSAPP_CONFIG.TOKEN;
+const DEFAULT_TOKEN = '1716319589869x721327290780988000'; // Token default do W-API
 
 async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
