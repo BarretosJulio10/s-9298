@@ -108,27 +108,33 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
               className="min-h-[150px]"
             />
             {showFieldSuggestions && (
-              <div className="absolute z-10 w-72 max-h-80 overflow-y-auto bg-white border rounded-md shadow-lg mt-1 left-0">
-                {Object.entries(groupedFields).map(([category, fields]) => (
-                  <div key={category} className="p-2">
-                    <h3 className="text-sm font-semibold text-gray-600 capitalize mb-2 px-2">
-                      {category}
-                    </h3>
-                    {fields.map((field) => (
-                      <button
-                        key={field.id}
-                        className="w-full text-left hover:bg-gray-100 focus:outline-none rounded-md p-2"
-                        onClick={() => insertField(field.name)}
-                      >
-                        <span className="font-medium">{field.display_name}</span>
-                        {field.description && (
-                          <span className="block text-sm text-gray-500">{field.description}</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                ))}
-              </div>
+              <Card className="absolute z-10 w-96 max-h-80 overflow-y-auto bg-white border rounded-md shadow-lg mt-1 left-0">
+                <div className="p-4 space-y-4">
+                  {Object.entries(groupedFields).map(([category, fields]) => (
+                    <div key={category} className="space-y-2">
+                      <h3 className="text-sm font-semibold text-gray-600 capitalize">
+                        {category}
+                      </h3>
+                      <div className="space-y-1">
+                        {fields.map((field) => (
+                          <button
+                            key={field.id}
+                            className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md transition-colors flex flex-col"
+                            onClick={() => insertField(field.name)}
+                          >
+                            <span className="font-medium text-sm">
+                              {'{' + field.name + '}'} - {field.display_name}
+                            </span>
+                            {field.description && (
+                              <span className="text-xs text-gray-500">{field.description}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
             )}
           </div>
         </div>
@@ -185,4 +191,3 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
     </div>
   );
 }
-
