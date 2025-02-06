@@ -47,18 +47,24 @@ async function handleRequest(req: Request): Promise<Response> {
 
 async function createInstance(headers: HeadersInit): Promise<Response> {
   try {
+    console.log("Iniciando criação de instância...");
+    
     const response = await fetch(`${WAPI_ENDPOINT}/api/instance/create`, {
       method: "POST",
       headers,
       body: JSON.stringify({
         name: "WhatsApp Instance",
-        qrcode: true,
+        qrcode: true, // Indica que queremos gerar QR code
         webhook: {
-          url: "",
-          events: ["message", "status"]
+          url: "", // URL para receber notificações (opcional)
+          events: ["message", "status", "qrcode"] // Eventos que queremos receber
         }
       })
     });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao criar instância: ${response.status}`);
+    }
 
     const data = await response.json();
     console.log("Resposta da criação de instância:", data);
@@ -75,9 +81,16 @@ async function createInstance(headers: HeadersInit): Promise<Response> {
 
 async function getInstanceStatus(headers: HeadersInit, instanceKey: string): Promise<Response> {
   try {
+    console.log("Verificando status da instância:", instanceKey);
+
     const response = await fetch(`${WAPI_ENDPOINT}/api/instance/status/${instanceKey}`, {
+      method: "GET",
       headers
     });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao buscar status: ${response.status}`);
+    }
 
     const data = await response.json();
     console.log("Status da instância:", data);
@@ -94,18 +107,24 @@ async function getInstanceStatus(headers: HeadersInit, instanceKey: string): Pro
 
 async function generateQRCode(headers: HeadersInit, instanceKey: string): Promise<Response> {
   try {
-    // Usando o método GET com os parâmetros na URL
-    const url = `${WAPI_ENDPOINT}/instance/getQrcode?connectionKey=${instanceKey}`;
     console.log("Gerando QR Code para instância:", instanceKey);
-    console.log("URL da requisição:", url);
-
-    const response = await fetch(url, {
-      method: "GET",
+    
+    // De acordo com a documentação, o QR code é gerado durante a criação da instância
+    // ou podemos solicitar um novo QR code usando este endpoint
+    const response = await fetch(`${WAPI_ENDPOINT}/api/instance/qrcode/${instanceKey}`, {
+      method: "POST",
       headers,
+      body: JSON.stringify({
+        image: true // Solicita o QR code em formato de imagem
+      })
     });
 
+    if (!response.ok) {
+      throw new Error(`Erro ao gerar QR code: ${response.status}`);
+    }
+
     const data = await response.json();
-    console.log("Resposta do QR Code:", data);
+    console.log("QR Code gerado com sucesso");
 
     return new Response(
       JSON.stringify({ success: true, data }),
@@ -121,6 +140,8 @@ async function sendMessage(headers: HeadersInit, params: any): Promise<Response>
   const { instanceKey, phone, message } = params;
   
   try {
+    console.log("Enviando mensagem para:", phone);
+
     const response = await fetch(`${WAPI_ENDPOINT}/api/messages/text/${instanceKey}`, {
       method: "POST",
       headers,
@@ -128,13 +149,17 @@ async function sendMessage(headers: HeadersInit, params: any): Promise<Response>
         number: phone,
         message,
         options: {
-          delay: 1200
+          delay: 1200 // Delay entre mensagens para evitar bloqueio
         }
       })
     });
 
+    if (!response.ok) {
+      throw new Error(`Erro ao enviar mensagem: ${response.status}`);
+    }
+
     const data = await response.json();
-    console.log("Mensagem enviada:", data);
+    console.log("Mensagem enviada com sucesso:", data);
 
     return new Response(
       JSON.stringify({ success: true, data }),
@@ -147,3 +172,4 @@ async function sendMessage(headers: HeadersInit, params: any): Promise<Response>
 }
 
 serve(handleRequest);
+
