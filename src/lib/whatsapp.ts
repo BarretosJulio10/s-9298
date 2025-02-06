@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { getAppropriateTemplate } from "./templateSelection";
 
 export async function callWhatsAppAPI(action: string, params?: any) {
   const { data: config, error } = await supabase
@@ -15,24 +14,6 @@ export async function callWhatsAppAPI(action: string, params?: any) {
 
   if (!config?.whatsapp_instance_id) {
     throw new Error("WhatsApp instance ID não configurado. Configure-o na seção de configurações.");
-  }
-
-  // Se estamos enviando uma mensagem e temos um template principal
-  if (action === "sendMessage" && params?.parent_template_id) {
-    const appropriateTemplate = await getAppropriateTemplate(
-      params.parent_template_id,
-      params.due_date,
-      params.status,
-      params.invoice_id
-    );
-
-    if (appropriateTemplate) {
-      // Atualiza a mensagem e a imagem com base no template selecionado
-      params.message = appropriateTemplate.content;
-      if (appropriateTemplate.image_url) {
-        params.image_url = appropriateTemplate.image_url;
-      }
-    }
   }
 
   try {
