@@ -17,7 +17,7 @@ export function TemplateContent({
   onContentChange,
 }: TemplateContentProps) {
   return (
-    <div className="w-full lg:w-2/3 space-y-2">
+    <div className="space-y-2 w-full">
       <div>
         <p className="text-sm text-muted-foreground">{description}</p>
         <p className="text-sm text-muted-foreground">Exemplo: {example}</p>
@@ -27,7 +27,7 @@ export function TemplateContent({
         value={content}
         onChange={(e) => onContentChange(index, e.target.value)}
         placeholder="Digite o conteúdo do template..."
-        className="min-h-[120px]"
+        className="min-h-[120px] w-full"
       />
     </div>
   );

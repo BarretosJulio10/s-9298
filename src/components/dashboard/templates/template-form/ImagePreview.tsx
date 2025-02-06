@@ -17,9 +17,9 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
   };
 
   return (
-    <div className="w-full lg:w-1/3">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
+    <div className="w-full">
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-2">
           <input
             type="file"
             accept="image/*"
@@ -56,24 +56,26 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
           )}
         </div>
 
-        {hasImage ? (
-          <div className="relative">
-            <img
-              src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
-              alt="Preview"
-              className="w-full h-auto rounded-md object-cover"
-            />
-            {imageFile && (
-              <span className="text-sm text-muted-foreground block mt-2">
-                {imageFile.name}
-              </span>
-            )}
-          </div>
-        ) : (
-          <div className="aspect-[4/3] bg-gray-100 rounded-md flex items-center justify-center">
-            <ImagePlus className="h-8 w-8 text-gray-400" />
-          </div>
-        )}
+        <div className="aspect-w-4 aspect-h-3 w-full">
+          {hasImage ? (
+            <div className="relative">
+              <img
+                src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
+                alt="Preview"
+                className="w-full h-full object-cover rounded-md"
+              />
+              {imageFile && (
+                <span className="text-sm text-muted-foreground block mt-2">
+                  {imageFile.name}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="w-full h-full bg-gray-100 rounded-md flex items-center justify-center">
+              <ImagePlus className="h-8 w-8 text-gray-400" />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
