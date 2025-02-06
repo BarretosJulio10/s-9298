@@ -1,142 +1,22 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-interface SubtemplateFormProps {
-  parentId: string;
-  onComplete: () => void;
-}
-
-interface TemplateField {
-  name: string;
-  display_name: string;
-  category: string;
-  description: string;
-}
-
-const subtemplateTypes = [
-  {
-    type: "notification" as const,
-    title: "Template de Notificação",
-    description: "Enviado quando uma nova cobrança é gerada",
-    example: "Olá {nome}, sua fatura no valor de {valor} vence em {vencimento}."
-  },
-  {
-    type: "delayed" as const,
-    title: "Template de Atraso",
-    description: "Enviado quando uma cobrança está atrasada",
-    example: "Olá {nome}, sua fatura no valor de {valor} está vencida desde {vencimento}."
-  },
-  {
-    type: "paid" as const,
-    title: "Template de Pagamento",
-    description: "Enviado quando um pagamento é confirmado",
-    example: "Olá {nome}, confirmamos o pagamento da sua fatura no valor de {valor}."
-  }
-];
+import { ContentEditor } from "./components/ContentEditor";
+import { ImageUploader } from "./components/ImageUploader";
+import { useTemplateFields } from "./hooks/useTemplateFields";
+import { subtemplateTypes, type SubtemplateFormProps } from "./types";
 
 export function SubtemplateForm({ parentId, onComplete }: SubtemplateFormProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [showFieldSuggestions, setShowFieldSuggestions] = useState(false);
-  const [cursorPosition, setCursorPosition] = useState(0);
-  const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
+  const { templateFields } = useTemplateFields();
   const { toast } = useToast();
 
   const currentTemplate = subtemplateTypes[currentIndex];
-
-  useEffect(() => {
-    fetchTemplateFields();
-  }, []);
-
-  const fetchTemplateFields = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('template_fields')
-        .select('*')
-        .order('category', { ascending: true });
-
-      if (error) throw error;
-      setTemplateFields(data);
-    } catch (error) {
-      console.error('Erro ao carregar campos:', error);
-    }
-  };
-
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newContent = e.target.value;
-    const newPosition = e.target.selectionStart;
-    
-    setContent(newContent);
-    setCursorPosition(newPosition);
-
-    // Mostrar sugestões quando digitar '{'
-    if (newContent[newPosition - 1] === '{') {
-      setShowFieldSuggestions(true);
-    } else {
-      setShowFieldSuggestions(false);
-    }
-  };
-
-  const insertField = (fieldName: string) => {
-    const beforeCursor = content.slice(0, cursorPosition);
-    const afterCursor = content.slice(cursorPosition);
-    
-    setContent(`${beforeCursor}${fieldName}}${afterCursor}`);
-    setShowFieldSuggestions(false);
-  };
-
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      if (!event.target.files || event.target.files.length === 0) return;
-
-      const file = event.target.files[0];
-      if (!file.type.includes('image/png')) {
-        toast({
-          variant: "destructive",
-          title: "Erro no upload",
-          description: "Por favor, selecione apenas arquivos PNG."
-        });
-        return;
-      }
-
-      setUploading(true);
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('template_images')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('template_images')
-        .getPublicUrl(filePath);
-
-      setImageUrl(publicUrl);
-      toast({
-        title: "Imagem carregada com sucesso",
-      });
-    } catch (error) {
-      console.error('Erro ao fazer upload:', error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao fazer upload da imagem",
-        description: error.message,
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleSave = async () => {
     try {
@@ -192,78 +72,16 @@ export function SubtemplateForm({ parentId, onComplete }: SubtemplateFormProps) 
             <p className="mt-2">Exemplo: {currentTemplate.example}</p>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Conteúdo da Mensagem</label>
-            <div className="relative">
-              <Textarea
-                value={content}
-                onChange={handleContentChange}
-                onKeyDown={(e) => {
-                  if (e.key === '{') {
-                    setShowFieldSuggestions(true);
-                  }
-                }}
-                placeholder="Digite o conteúdo do template... Use { para ver os campos disponíveis"
-                className="min-h-[150px]"
-              />
-              {showFieldSuggestions && (
-                <div className="absolute z-10 w-64 max-h-48 overflow-y-auto bg-white border rounded-md shadow-lg mt-1">
-                  {templateFields.map((field) => (
-                    <button
-                      key={field.name}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:outline-none"
-                      onClick={() => insertField(field.name)}
-                    >
-                      <span className="font-medium">{field.display_name}</span>
-                      <br />
-                      <span className="text-sm text-gray-500">{field.description}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <ContentEditor
+            content={content}
+            onChange={setContent}
+            templateFields={templateFields}
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Imagem do Template</label>
-            <div className="flex items-center gap-4">
-              <Input
-                type="text"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="URL da imagem"
-                className="flex-1"
-                readOnly
-              />
-              <div className="relative">
-                <Input
-                  type="file"
-                  accept="image/png"
-                  onChange={handleImageUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                  disabled={uploading}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="relative"
-                  disabled={uploading}
-                >
-                  <ImagePlus className="h-4 w-4 mr-2" />
-                  {uploading ? "Carregando..." : "Upload"}
-                </Button>
-              </div>
-            </div>
-            {imageUrl && (
-              <div className="mt-2">
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  className="max-w-[200px] rounded-md"
-                />
-              </div>
-            )}
-          </div>
+          <ImageUploader
+            imageUrl={imageUrl}
+            onImageChange={setImageUrl}
+          />
 
           <div className="flex justify-end gap-2">
             <Button onClick={handleSave}>
