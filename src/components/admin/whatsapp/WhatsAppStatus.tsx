@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { callWhatsAppAPI } from "@/lib/whatsapp";
 import { Loader2 } from "lucide-react";
@@ -13,6 +14,7 @@ export function WhatsAppStatus() {
   const [isLoading, setIsLoading] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [status, setStatus] = useState<IWhatsAppStatus>({ status: 'disconnected' });
+  const [connectionName, setConnectionName] = useState('');
   const { toast } = useToast();
 
   // Buscar o profile do usuário logado
@@ -59,33 +61,72 @@ export function WhatsAppStatus() {
       return;
     }
 
+    if (!connectionName.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Digite um nome para a conexão",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       const response = await callWhatsAppAPI("createInstance", {
-        companyId: profile.id
+        companyId: profile.id,
+        name: connectionName
       });
       
       if (response.success && response.data?.instance?.key) {
         setStatus({ status: 'connecting', instanceKey: response.data.instance.key });
-        const qrResponse = await callWhatsAppAPI("generateQRCode", {
-          instanceKey: response.data.instance.key
-        });
-        
-        if (qrResponse.success && qrResponse.data?.qrcode) {
-          setQrCode(qrResponse.data.qrcode);
-          checkConnectionStatus(response.data.instance.key);
-          await refetchConnection();
-        }
+        await refetchConnection();
       }
       
       toast({
         title: "Instância criada",
-        description: "Escaneie o QR Code para conectar seu WhatsApp",
+        description: "Instância criada com sucesso",
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Erro ao criar instância",
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateQR = async () => {
+    if (!connection?.instance_key) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Nenhuma instância encontrada",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const qrResponse = await callWhatsAppAPI("generateQRCode", {
+        instanceKey: connection.instance_key
+      });
+      
+      if (qrResponse.success && qrResponse.data?.qrcode) {
+        setQrCode(qrResponse.data.qrcode);
+        checkConnectionStatus(connection.instance_key);
+        await refetchConnection();
+      }
+      
+      toast({
+        title: "QR Code gerado",
+        description: "Escaneie o QR Code para conectar seu WhatsApp",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao gerar QR Code",
         description: error.message,
       });
     } finally {
@@ -125,6 +166,9 @@ export function WhatsAppStatus() {
       if (connection.last_qr_code) {
         setQrCode(connection.last_qr_code);
       }
+      if (connection.name) {
+        setConnectionName(connection.name);
+      }
     }
   }, [connection]);
 
@@ -134,11 +178,18 @@ export function WhatsAppStatus() {
         <CardTitle>Conexão do WhatsApp</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-4">
-          {status.status === 'disconnected' && (
+        {!connection?.instance_key && (
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Input
+                placeholder="Nome da conexão"
+                value={connectionName}
+                onChange={(e) => setConnectionName(e.target.value)}
+              />
+            </div>
             <Button 
               onClick={createInstance}
-              disabled={isLoading}
+              disabled={isLoading || !connectionName.trim()}
             >
               {isLoading ? (
                 <>
@@ -146,24 +197,53 @@ export function WhatsAppStatus() {
                   Criando instância...
                 </>
               ) : (
-                'Conectar WhatsApp'
+                'Criar nova conexão'
               )}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${
-            status.status === 'connected' ? 'bg-green-500' : 
-            status.status === 'connecting' ? 'bg-yellow-500' : 
-            'bg-red-500'
-          }`} />
-          <span className="text-sm">
-            {status.status === 'connected' ? 'Conectado' : 
-             status.status === 'connecting' ? 'Conectando...' : 
-             'Desconectado'}
-          </span>
-        </div>
+        {connection?.instance_key && (
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <div className="text-sm font-medium">Nome da conexão</div>
+              <div className="text-sm">{connection.name}</div>
+              <div className="text-sm font-medium">ID da instância</div>
+              <div className="text-sm font-mono bg-muted p-2 rounded-md">
+                {connection.instance_key}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`h-2 w-2 rounded-full ${
+                status.status === 'connected' ? 'bg-green-500' : 
+                status.status === 'connecting' ? 'bg-yellow-500' : 
+                'bg-red-500'
+              }`} />
+              <span className="text-sm">
+                {status.status === 'connected' ? 'Conectado' : 
+                 status.status === 'connecting' ? 'Conectando...' : 
+                 'Desconectado'}
+              </span>
+            </div>
+
+            {status.status !== 'connected' && (
+              <Button 
+                onClick={generateQR}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Gerando QR Code...
+                  </>
+                ) : (
+                  'Gerar QR Code'
+                )}
+              </Button>
+            )}
+          </div>
+        )}
 
         {qrCode && status.status === 'connecting' && (
           <div className="mt-4">
@@ -182,3 +262,4 @@ export function WhatsAppStatus() {
     </Card>
   );
 }
+

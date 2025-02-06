@@ -844,6 +844,7 @@ export type Database = {
           is_connected: boolean | null
           last_connection_date: string | null
           last_qr_code: string | null
+          name: string
           updated_at: string
         }
         Insert: {
@@ -854,6 +855,7 @@ export type Database = {
           is_connected?: boolean | null
           last_connection_date?: string | null
           last_qr_code?: string | null
+          name: string
           updated_at?: string
         }
         Update: {
@@ -864,6 +866,7 @@ export type Database = {
           is_connected?: boolean | null
           last_connection_date?: string | null
           last_qr_code?: string | null
+          name?: string
           updated_at?: string
         }
         Relationships: [

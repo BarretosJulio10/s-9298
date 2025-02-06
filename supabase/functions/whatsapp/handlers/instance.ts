@@ -38,6 +38,7 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
       .upsert({
         company_id: companyId,
         instance_key: connectionKey,
+        name: requestBody.name || `Conexão ${connectionKey.substring(0, 8)}`,
         is_connected: false,
         last_connection_date: new Date().toISOString()
       });

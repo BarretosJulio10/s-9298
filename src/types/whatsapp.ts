@@ -14,6 +14,7 @@ export interface WhatsAppProps {
 export interface WhatsAppConnection {
   id: string;
   company_id: string;
+  name: string;
   instance_key: string | null;
   is_connected: boolean;
   last_qr_code?: string | null;
@@ -21,3 +22,4 @@ export interface WhatsAppConnection {
   created_at: string;
   updated_at: string;
 }
+
