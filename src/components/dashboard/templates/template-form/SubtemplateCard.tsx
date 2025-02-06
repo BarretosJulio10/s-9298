@@ -76,38 +76,36 @@ export function SubtemplateCard({
       <CardContent className="space-y-4 p-4">
         <div className="flex gap-6">
           {/* Coluna da esquerda - Descrição e Textarea */}
-          <div className="flex-1 space-y-2">
-            <div className="flex gap-6">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">{description}</p>
-                <p className="text-sm text-muted-foreground">Exemplo: {example}</p>
-              </div>
-              
-              {/* Preview da imagem alinhado com a descrição */}
-              <div className="w-[225px]">
-                {hasImage && (
-                  <div>
-                    <img
-                      src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
-                      alt="Preview"
-                      className="w-full h-auto rounded-md"
-                    />
-                    {imageFile && (
-                      <span className="text-sm text-muted-foreground block mt-2">
-                        {imageFile.name}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
+          <div className="w-2/3 space-y-2">
+            <div>
+              <p className="text-sm text-muted-foreground">{description}</p>
+              <p className="text-sm text-muted-foreground">Exemplo: {example}</p>
             </div>
 
             <Textarea
               value={content}
               onChange={(e) => onContentChange(index, e.target.value)}
               placeholder="Digite o conteúdo do template..."
-              className="min-h-[120px]" // Reduzido de 200px para 120px
+              className="min-h-[120px]"
             />
+          </div>
+          
+          {/* Coluna da direita - Preview da imagem */}
+          <div className="w-1/3">
+            {hasImage && (
+              <div>
+                <img
+                  src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
+                  alt="Preview"
+                  className="w-full h-auto rounded-md"
+                />
+                {imageFile && (
+                  <span className="text-sm text-muted-foreground block mt-2">
+                    {imageFile.name}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
