@@ -186,6 +186,7 @@ export type Database = {
           birth_date: string | null
           charge_amount: number
           charge_day: number | null
+          charge_frequency: string | null
           charge_start_date: string | null
           charge_type: string | null
           code: string | null
@@ -213,6 +214,7 @@ export type Database = {
           birth_date?: string | null
           charge_amount?: number
           charge_day?: number | null
+          charge_frequency?: string | null
           charge_start_date?: string | null
           charge_type?: string | null
           code?: string | null
@@ -240,6 +242,7 @@ export type Database = {
           birth_date?: string | null
           charge_amount?: number
           charge_day?: number | null
+          charge_frequency?: string | null
           charge_start_date?: string | null
           charge_type?: string | null
           code?: string | null

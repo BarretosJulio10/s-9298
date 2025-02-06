@@ -123,6 +123,8 @@ export const useCreateClient = (onSuccess: () => void) => {
       console.error("Erro ao vincular cobrança ao cliente:", clientChargeError);
     }
 
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
+    onSuccess();
     return client;
   };
 
