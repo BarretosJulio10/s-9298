@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { callWhatsAppAPI } from "@/lib/whatsapp";
 import { Loader2 } from "lucide-react";
+import { WhatsAppStatus as IWhatsAppStatus } from "@/types/whatsapp";
 
 export function WhatsAppStatus() {
   const [isLoading, setIsLoading] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
-  const [instanceKey, setInstanceKey] = useState<string | null>(null);
-  const [status, setStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const [status, setStatus] = useState<IWhatsAppStatus>({ status: 'disconnected' });
   const { toast } = useToast();
 
   const createInstance = async () => {
@@ -19,16 +19,13 @@ export function WhatsAppStatus() {
       const response = await callWhatsAppAPI("createInstance");
       
       if (response.success && response.data?.instance?.key) {
-        setInstanceKey(response.data.instance.key);
+        setStatus({ status: 'connecting', instanceKey: response.data.instance.key });
         const qrResponse = await callWhatsAppAPI("generateQRCode", {
           instanceKey: response.data.instance.key
         });
         
         if (qrResponse.success && qrResponse.data?.qrcode) {
           setQrCode(qrResponse.data.qrcode);
-          setStatus('connecting');
-          
-          // Iniciar verificação de status
           checkConnectionStatus(response.data.instance.key);
         }
       }
@@ -54,14 +51,13 @@ export function WhatsAppStatus() {
       
       if (response.success) {
         if (response.data?.status === 'connected') {
-          setStatus('connected');
+          setStatus({ status: 'connected', instanceKey: key });
           setQrCode(null);
           toast({
             title: "WhatsApp conectado",
             description: "Seu WhatsApp foi conectado com sucesso!",
           });
-        } else if (status === 'connecting') {
-          // Continuar verificando o status a cada 5 segundos
+        } else if (status.status === 'connecting') {
           setTimeout(() => checkConnectionStatus(key), 5000);
         }
       }
@@ -77,7 +73,7 @@ export function WhatsAppStatus() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-4">
-          {status === 'disconnected' && (
+          {status.status === 'disconnected' && (
             <Button 
               onClick={createInstance}
               disabled={isLoading}
@@ -95,13 +91,19 @@ export function WhatsAppStatus() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${status === 'connected' ? 'bg-green-500' : status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}`} />
+          <span className={`h-2 w-2 rounded-full ${
+            status.status === 'connected' ? 'bg-green-500' : 
+            status.status === 'connecting' ? 'bg-yellow-500' : 
+            'bg-red-500'
+          }`} />
           <span className="text-sm">
-            {status === 'connected' ? 'Conectado' : status === 'connecting' ? 'Conectando...' : 'Desconectado'}
+            {status.status === 'connected' ? 'Conectado' : 
+             status.status === 'connecting' ? 'Conectando...' : 
+             'Desconectado'}
           </span>
         </div>
 
-        {qrCode && status === 'connecting' && (
+        {qrCode && status.status === 'connecting' && (
           <div className="mt-4">
             <h3 className="text-lg font-semibold mb-2">QR Code</h3>
             <p className="text-sm text-muted-foreground mb-4">

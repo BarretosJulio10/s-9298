@@ -7,14 +7,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const AdminWhatsApp = () => {
-  // Verificar se o token da W-API está configurado
   const { data: config } = useQuery({
     queryKey: ["configurations"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("configurations")
         .select("wapi_token")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;

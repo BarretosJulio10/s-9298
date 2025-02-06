@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { callWhatsAppAPI } from "@/lib/whatsapp";
 
-export function WhatsAppMessage({ isConnected }: { isConnected: boolean }) {
+export function WhatsAppMessage() {
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -55,7 +56,6 @@ export function WhatsAppMessage({ isConnected }: { isConnected: boolean }) {
             placeholder="Ex: 5511999999999"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            disabled={!isConnected}
           />
         </div>
 
@@ -66,13 +66,12 @@ export function WhatsAppMessage({ isConnected }: { isConnected: boolean }) {
             placeholder="Digite sua mensagem..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            disabled={!isConnected}
           />
         </div>
 
         <Button 
           onClick={handleSendMessage} 
-          disabled={!isConnected || sending}
+          disabled={sending}
         >
           {sending ? "Enviando..." : "Enviar Mensagem"}
         </Button>
