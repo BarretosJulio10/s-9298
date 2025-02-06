@@ -14,11 +14,11 @@ export function useTemplateFields() {
     try {
       const { data, error } = await supabase
         .from('template_fields')
-        .select('name, display_name, category, description')
+        .select('id, name, display_name, category, description')
         .order('category', { ascending: true });
 
       if (error) throw error;
-      setTemplateFields(data as TemplateField[]);
+      setTemplateFields(data);
     } catch (error) {
       console.error('Erro ao carregar campos:', error);
     }

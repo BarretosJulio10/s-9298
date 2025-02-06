@@ -77,7 +77,7 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
                 </h3>
                 {fields.map((field) => (
                   <button
-                    key={field.name}
+                    key={field.id}
                     className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:outline-none rounded-md"
                     onClick={() => insertField(field.name)}
                   >

@@ -5,10 +5,11 @@ export interface SubtemplateFormProps {
 }
 
 export interface TemplateField {
+  id: string;
   name: string;
   display_name: string;
   category: string;
-  description: string;
+  description: string | null;
 }
 
 export const subtemplateTypes = [
