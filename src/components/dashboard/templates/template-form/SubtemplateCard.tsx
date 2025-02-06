@@ -91,14 +91,7 @@ export function SubtemplateCard({
           </div>
 
           {/* Coluna da direita - Preview da imagem */}
-          <div className="w-[225px]">
-            {/* Nome do arquivo */}
-            {imageFile && (
-              <span className="text-sm text-muted-foreground block">
-                {imageFile.name}
-              </span>
-            )}
-
+          <div className="w-[225px] flex flex-col">
             {/* Preview da imagem */}
             {hasImage && (
               <div className="mt-2">
@@ -108,6 +101,13 @@ export function SubtemplateCard({
                   className="w-full h-auto rounded-md"
                 />
               </div>
+            )}
+
+            {/* Nome do arquivo */}
+            {imageFile && (
+              <span className="text-sm text-muted-foreground block mt-2">
+                {imageFile.name}
+              </span>
             )}
           </div>
         </div>
