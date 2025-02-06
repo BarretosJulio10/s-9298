@@ -10,3 +10,14 @@ export interface WhatsAppProps {
   isLoading: boolean;
   onAction: () => void;
 }
+
+export interface WhatsAppConnection {
+  id: string;
+  company_id: string;
+  instance_key: string | null;
+  is_connected: boolean;
+  last_qr_code?: string | null;
+  last_connection_date?: string | null;
+  created_at: string;
+  updated_at: string;
+}
