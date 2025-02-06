@@ -876,6 +876,88 @@ export type Database = {
           },
         ]
       }
+      whatsapp_logs: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          event_type: string
+          id: string
+          instance_key: string
+          message: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          event_type: string
+          id?: string
+          instance_key: string
+          message?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          instance_key?: string
+          message?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_webhooks: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          event_type: string
+          id: string
+          instance_key: string
+          payload: Json | null
+          processed: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          event_type: string
+          id?: string
+          instance_key: string
+          payload?: Json | null
+          processed?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          instance_key?: string
+          payload?: Json | null
+          processed?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_webhooks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
