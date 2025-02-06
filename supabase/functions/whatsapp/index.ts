@@ -1,8 +1,10 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
+import { WHATSAPP_CONFIG } from "../../src/config/whatsapp.ts";
 
 const WAPI_ENDPOINT = "https://api.wapi.com.br";
+const DEFAULT_TOKEN = WHATSAPP_CONFIG.TOKEN;
 
 async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
@@ -10,12 +12,12 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 
   try {
-    const { action, token, params } = await req.json();
+    const { action, params } = await req.json();
     console.log(`Processando ação ${action} com token W-API`);
 
     // Headers padrão para todas as requisições
     const headers = {
-      "Authorization": `Bearer ${token}`,
+      "Authorization": `Bearer ${DEFAULT_TOKEN}`,
       "Content-Type": "application/json",
       ...corsHeaders
     };
@@ -144,4 +146,3 @@ async function sendMessage(headers: HeadersInit, params: any): Promise<Response>
 }
 
 serve(handleRequest);
-
