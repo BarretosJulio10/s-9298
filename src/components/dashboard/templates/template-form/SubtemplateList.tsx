@@ -6,6 +6,7 @@ interface SubtemplateListProps {
   subtemplates: Array<{
     content: string;
     imageFile: File | null;
+    imageUrl: string;
   }>;
   onContentChange: (index: number, content: string) => void;
   onImageChange: (index: number, file: File) => void;
@@ -30,6 +31,7 @@ export function SubtemplateList({
           index={index}
           content={subtemplates[index].content}
           imageFile={subtemplates[index].imageFile}
+          imageUrl={subtemplates[index].imageUrl}
           onContentChange={onContentChange}
           onImageChange={onImageChange}
         />

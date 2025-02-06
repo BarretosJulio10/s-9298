@@ -10,7 +10,7 @@ interface SubtemplateCardProps {
   index: number;
   content: string;
   imageFile: File | null;
-  imageUrl?: string; // Adicionada propriedade para URL da imagem existente
+  imageUrl: string;
   onContentChange: (index: number, content: string) => void;
   onImageChange: (index: number, file: File) => void;
 }
@@ -46,45 +46,47 @@ export function SubtemplateCard({
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            type="file"
-            accept="image/*"
-            id={`image-${index}`}
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files?.[0]) {
-                onImageChange(index, e.target.files[0]);
-              }
-            }}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => document.getElementById(`image-${index}`)?.click()}
-            className="flex items-center gap-2"
-          >
-            <ImagePlus className="h-4 w-4" />
-            {imageFile || imageUrl ? 'Trocar imagem' : 'Upload de imagem'}
-          </Button>
-          {imageFile && (
-            <span className="text-sm text-muted-foreground">
-              {imageFile.name}
-            </span>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              accept="image/*"
+              id={`image-${index}`}
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  onImageChange(index, e.target.files[0]);
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => document.getElementById(`image-${index}`)?.click()}
+              className="flex items-center gap-2"
+            >
+              <ImagePlus className="h-4 w-4" />
+              {imageFile || imageUrl ? 'Trocar imagem' : 'Upload de imagem'}
+            </Button>
+            {imageFile && (
+              <span className="text-sm text-muted-foreground">
+                {imageFile.name}
+              </span>
+            )}
+          </div>
+
+          {/* Exibe a imagem existente ou a preview do novo arquivo */}
+          {(imageFile || imageUrl) && (
+            <div className="mt-2 flex items-center gap-4">
+              <img
+                src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
+                alt="Preview"
+                className="max-w-[200px] h-auto rounded-md"
+              />
+            </div>
           )}
         </div>
-
-        {/* Exibe a imagem existente ou a preview do novo arquivo */}
-        {(imageFile || imageUrl) && (
-          <div className="mt-2">
-            <img
-              src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
-              alt="Preview"
-              className="max-w-[200px] rounded-md"
-            />
-          </div>
-        )}
       </CardContent>
     </Card>
   );
