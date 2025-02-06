@@ -23,6 +23,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
   const [subtemplates, setSubtemplates] = useState(Array(3).fill({
     content: "",
     imageFile: null as File | null,
+    imageUrl: "" // Adicionado para armazenar URLs de imagens existentes
   }));
   const { toast } = useToast();
 
@@ -49,7 +50,8 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
           const subtemplate = data.find(st => st.subtype === type.type);
           return {
             content: subtemplate?.content || "",
-            imageFile: null
+            imageFile: null,
+            imageUrl: subtemplate?.image_url || "" // Carrega a URL da imagem existente
           };
         });
         setSubtemplates(updatedSubtemplates);
@@ -98,7 +100,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
       for (let i = 0; i < subtemplateTypes.length; i++) {
         const type = subtemplateTypes[i];
         const subtemplate = subtemplates[i];
-        let imageUrl = "";
+        let imageUrl = subtemplate.imageUrl; // Mantém a URL existente se não houver novo arquivo
 
         if (subtemplate.imageFile) {
           const fileExt = subtemplate.imageFile.name.split('.').pop();
@@ -121,7 +123,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
           company_id: user.id,
           parent_id: mainTemplate.id,
           content: subtemplate.content || "",
-          image_url: imageUrl || undefined,
+          image_url: imageUrl,
           subtype: type.type,
           name: type.title,
           description: type.description,
@@ -157,7 +159,7 @@ export function TemplateForm({ template, onCancel }: TemplateFormProps) {
 
   const handleImageChange = (index: number, file: File) => {
     setSubtemplates(prev => prev.map((st, i) => 
-      i === index ? { ...st, imageFile: file } : st
+      i === index ? { ...st, imageFile: file, imageUrl: "" } : st
     ));
   };
 

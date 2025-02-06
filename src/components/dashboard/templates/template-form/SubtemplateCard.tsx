@@ -10,6 +10,7 @@ interface SubtemplateCardProps {
   index: number;
   content: string;
   imageFile: File | null;
+  imageUrl?: string; // Adicionada propriedade para URL da imagem existente
   onContentChange: (index: number, content: string) => void;
   onImageChange: (index: number, file: File) => void;
 }
@@ -21,6 +22,7 @@ export function SubtemplateCard({
   index,
   content,
   imageFile,
+  imageUrl,
   onContentChange,
   onImageChange,
 }: SubtemplateCardProps) {
@@ -64,7 +66,7 @@ export function SubtemplateCard({
             className="flex items-center gap-2"
           >
             <ImagePlus className="h-4 w-4" />
-            {imageFile ? 'Trocar imagem' : 'Upload de imagem'}
+            {imageFile || imageUrl ? 'Trocar imagem' : 'Upload de imagem'}
           </Button>
           {imageFile && (
             <span className="text-sm text-muted-foreground">
@@ -73,10 +75,11 @@ export function SubtemplateCard({
           )}
         </div>
 
-        {imageFile && (
+        {/* Exibe a imagem existente ou a preview do novo arquivo */}
+        {(imageFile || imageUrl) && (
           <div className="mt-2">
             <img
-              src={URL.createObjectURL(imageFile)}
+              src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
               alt="Preview"
               className="max-w-[200px] rounded-md"
             />
