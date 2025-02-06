@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
 const WAPI_ENDPOINT = "https://api.wapi.com.br";
-const DEFAULT_TOKEN = '1716319589869x721327290780988000'; // Token default do W-API
+const DEFAULT_TOKEN = '1716319589869x721327290780988000'; // Token W-API
 
 async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
@@ -12,9 +12,8 @@ async function handleRequest(req: Request): Promise<Response> {
 
   try {
     const { action, params } = await req.json();
-    console.log(`Processando ação ${action} com token W-API`);
+    console.log(`Processando ação ${action} com params:`, params);
 
-    // Headers padrão para todas as requisições
     const headers = {
       "Authorization": `Bearer ${DEFAULT_TOKEN}`,
       "Content-Type": "application/json",
@@ -49,9 +48,12 @@ async function createInstance(headers: HeadersInit): Promise<Response> {
   try {
     console.log("Iniciando criação de instância...");
     
-    const connectionKey = `instance_${Date.now()}`; // Gerando uma chave única
+    const connectionKey = `instance_${Date.now()}`; // Chave única
+    const createInstanceUrl = `${WAPI_ENDPOINT}/manager/create?adm_key=${DEFAULT_TOKEN}`;
     
-    const response = await fetch(`${WAPI_ENDPOINT}/manager/create?adm_key=${DEFAULT_TOKEN}`, {
+    console.log("URL de criação:", createInstanceUrl);
+    
+    const response = await fetch(createInstanceUrl, {
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -68,11 +70,13 @@ async function createInstance(headers: HeadersInit): Promise<Response> {
     });
 
     if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Erro na resposta da API:", errorData);
       throw new Error(`Erro ao criar instância: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("Resposta da criação de instância:", data);
+    console.log("Instância criada com sucesso:", data);
 
     return new Response(
       JSON.stringify({ success: true, data }),
@@ -118,7 +122,7 @@ async function generateQRCode(headers: HeadersInit, instanceKey: string): Promis
       method: "POST",
       headers,
       body: JSON.stringify({
-        image: true // Solicita o QR code em formato de imagem
+        image: true
       })
     });
 
@@ -152,7 +156,7 @@ async function sendMessage(headers: HeadersInit, params: any): Promise<Response>
         number: phone,
         message,
         options: {
-          delay: 1200 // Delay entre mensagens para evitar bloqueio
+          delay: 1200
         }
       })
     });
@@ -175,4 +179,3 @@ async function sendMessage(headers: HeadersInit, params: any): Promise<Response>
 }
 
 serve(handleRequest);
-
