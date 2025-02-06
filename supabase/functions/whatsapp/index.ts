@@ -1,9 +1,16 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 
 const WAPI_ENDPOINT = "https://painel.w-api.app";
 const DEFAULT_TOKEN = '1716319589869x721327290780988000'; // Token W-API
+
+// Inicializa o cliente Supabase
+const supabaseClient = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
 
 interface WebhookConfig {
   connectionWebhook?: string;
@@ -31,7 +38,7 @@ async function handleRequest(req: Request): Promise<Response> {
 
     switch (action) {
       case "createInstance":
-        return await createInstance(headers);
+        return await createInstance(headers, params.companyId);
       case "getInstanceStatus":
         return await getInstanceStatus(headers, params.instanceKey);
       case "generateQRCode":
@@ -53,14 +60,13 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 }
 
-async function createInstance(headers: HeadersInit): Promise<Response> {
+async function createInstance(headers: HeadersInit, companyId: string): Promise<Response> {
   try {
-    console.log("Iniciando criação de instância...");
+    console.log("Iniciando criação de instância para empresa:", companyId);
     
-    const connectionKey = `instance_${Date.now()}`; // Chave única
+    const connectionKey = `instance_${companyId}_${Date.now()}`; // Chave única por empresa
     const createInstanceUrl = `${WAPI_ENDPOINT}/manager/create?adm_key=${DEFAULT_TOKEN}`;
     
-    // Configuração inicial sem webhooks
     const requestBody = {
       connectionKey,
       webhook: null // Mantendo null por enquanto, podemos expandir depois
@@ -78,21 +84,25 @@ async function createInstance(headers: HeadersInit): Promise<Response> {
     if (!response.ok) {
       const errorData = await response.text();
       console.error("Erro na resposta da API:", errorData);
-      try {
-        const parsedError = JSON.parse(errorData);
-        throw new Error(`Erro ao criar instância: ${parsedError.message || response.status}`);
-      } catch {
-        throw new Error(`Erro ao criar instância: ${errorData || response.status}`);
-      }
+      throw new Error(`Erro ao criar instância: ${errorData || response.status}`);
     }
 
-    let data;
-    try {
-      data = await response.json();
-      console.log("Instância criada com sucesso:", data);
-    } catch (error) {
-      console.error("Erro ao processar resposta JSON:", error);
-      throw new Error("Resposta inválida do servidor");
+    const data = await response.json();
+    console.log("Instância criada com sucesso:", data);
+
+    // Salvar a conexão no banco de dados
+    const { error: dbError } = await supabaseClient
+      .from('whatsapp_connections')
+      .upsert({
+        company_id: companyId,
+        instance_key: connectionKey,
+        is_connected: false,
+        last_connection_date: new Date().toISOString()
+      });
+
+    if (dbError) {
+      console.error("Erro ao salvar conexão no banco:", dbError);
+      throw new Error("Erro ao salvar conexão no banco de dados");
     }
 
     return new Response(
@@ -121,6 +131,21 @@ async function getInstanceStatus(headers: HeadersInit, instanceKey: string): Pro
     const data = await response.json();
     console.log("Status da instância:", data);
 
+    // Atualizar status no banco
+    if (data.status === 'connected' || data.status === 'disconnected') {
+      const { error: dbError } = await supabaseClient
+        .from('whatsapp_connections')
+        .update({
+          is_connected: data.status === 'connected',
+          last_connection_date: new Date().toISOString()
+        })
+        .eq('instance_key', instanceKey);
+
+      if (dbError) {
+        console.error("Erro ao atualizar status no banco:", dbError);
+      }
+    }
+
     return new Response(
       JSON.stringify({ success: true, data }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -146,15 +171,21 @@ async function generateQRCode(headers: HeadersInit, instanceKey: string): Promis
       throw new Error(`Erro ao gerar QR code: ${response.status}`);
     }
 
-    let data;
-    try {
-      data = await response.json();
-      console.log("QR Code gerado com sucesso");
-    } catch (error) {
-      console.error("Erro ao processar resposta JSON:", error);
-      const text = await response.text();
-      console.error("Resposta raw:", text);
-      throw new Error("Resposta inválida do servidor");
+    const data = await response.json();
+    console.log("QR Code gerado com sucesso");
+
+    // Salvar QR code no banco
+    if (data.qrcode) {
+      const { error: dbError } = await supabaseClient
+        .from('whatsapp_connections')
+        .update({
+          last_qr_code: data.qrcode
+        })
+        .eq('instance_key', instanceKey);
+
+      if (dbError) {
+        console.error("Erro ao salvar QR code no banco:", dbError);
+      }
     }
 
     return new Response(
@@ -203,4 +234,3 @@ async function sendMessage(headers: HeadersInit, params: any): Promise<Response>
 }
 
 serve(handleRequest);
-
