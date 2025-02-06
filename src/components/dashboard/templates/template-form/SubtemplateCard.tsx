@@ -43,69 +43,75 @@ export function SubtemplateCard({
           <p className="text-sm text-muted-foreground">Exemplo: {example}</p>
         </div>
         
-        <div className="space-y-2">
-          <Textarea
-            value={content}
-            onChange={(e) => onContentChange(index, e.target.value)}
-            placeholder="Digite o conteúdo do template..."
-            className="min-h-[100px]"
-          />
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <input
-              type="file"
-              accept="image/*"
-              id={`image-${index}`}
-              className="hidden"
-              onChange={(e) => {
-                if (e.target.files?.[0]) {
-                  onImageChange(index, e.target.files[0]);
-                }
-              }}
+        <div className="flex gap-6">
+          {/* Coluna da esquerda - Textarea */}
+          <div className="flex-1 space-y-2">
+            <Textarea
+              value={content}
+              onChange={(e) => onContentChange(index, e.target.value)}
+              placeholder="Digite o conteúdo do template..."
+              className="min-h-[200px]"
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => document.getElementById(`image-${index}`)?.click()}
-              className="flex items-center gap-2"
-            >
-              <ImagePlus className="h-4 w-4" />
-              {hasImage ? 'Trocar imagem' : 'Upload de imagem'}
-            </Button>
+          </div>
 
-            {hasImage && (
+          {/* Coluna da direita - Upload e preview da imagem */}
+          <div className="w-[300px] space-y-4">
+            {/* Botões de ação */}
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                id={`image-${index}`}
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    onImageChange(index, e.target.files[0]);
+                  }
+                }}
+              />
               <Button
                 type="button"
-                variant="destructive"
+                variant="outline"
                 size="sm"
-                onClick={handleDeleteImage}
+                onClick={() => document.getElementById(`image-${index}`)?.click()}
                 className="flex items-center gap-2"
               >
-                <Trash2 className="h-4 w-4" />
-                Excluir imagem
+                <ImagePlus className="h-4 w-4" />
+                {hasImage ? 'Trocar imagem' : 'Upload de imagem'}
               </Button>
-            )}
 
+              {hasImage && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteImage}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Excluir imagem
+                </Button>
+              )}
+            </div>
+
+            {/* Nome do arquivo */}
             {imageFile && (
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground block">
                 {imageFile.name}
               </span>
             )}
-          </div>
 
-          {/* Exibe a imagem existente ou a preview do novo arquivo */}
-          {hasImage && (
-            <div className="mt-2 flex items-center gap-4">
-              <img
-                src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
-                alt="Preview"
-                className="max-w-[200px] h-auto rounded-md"
-              />
-            </div>
-          )}
+            {/* Preview da imagem */}
+            {hasImage && (
+              <div className="mt-2">
+                <img
+                  src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
+                  alt="Preview"
+                  className="w-full h-auto rounded-md"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
