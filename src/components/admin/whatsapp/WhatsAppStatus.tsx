@@ -121,6 +121,43 @@ export function WhatsAppStatus() {
     }
   };
 
+  const disconnect = async () => {
+    if (!connection?.instance_key) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Nenhuma instância encontrada",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await callWhatsAppAPI("disconnectInstance", {
+        instanceKey: connection.instance_key
+      });
+      
+      if (response.success) {
+        setStatus({ status: 'disconnected' });
+        setQrCode(null);
+        await refetchConnection();
+        
+        toast({
+          title: "WhatsApp desconectado",
+          description: "Seu WhatsApp foi desconectado com sucesso!",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao desconectar WhatsApp",
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const checkConnectionStatus = async (key: string) => {
     try {
       const response = await callWhatsAppAPI("getInstanceStatus", { instanceKey: key });
@@ -173,6 +210,7 @@ export function WhatsAppStatus() {
             connection={connection}
             status={status}
             onGenerateQR={generateQR}
+            onDisconnect={disconnect}
             isLoading={isLoading}
           />
         )}
@@ -184,3 +222,4 @@ export function WhatsAppStatus() {
     </Card>
   );
 }
+

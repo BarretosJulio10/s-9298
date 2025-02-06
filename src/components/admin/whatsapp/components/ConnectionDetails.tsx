@@ -8,13 +8,15 @@ interface ConnectionDetailsProps {
   connection: WhatsAppConnection;
   status: IWhatsAppStatus;
   onGenerateQR: () => Promise<void>;
+  onDisconnect: () => Promise<void>;
   isLoading: boolean;
 }
 
 export function ConnectionDetails({ 
   connection, 
   status, 
-  onGenerateQR, 
+  onGenerateQR,
+  onDisconnect,
   isLoading 
 }: ConnectionDetailsProps) {
   return (
@@ -41,21 +43,39 @@ export function ConnectionDetails({
         </span>
       </div>
 
-      {status.status !== 'connected' && (
-        <Button 
-          onClick={onGenerateQR}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Gerando QR Code...
-            </>
-          ) : (
-            'Gerar QR Code'
-          )}
-        </Button>
-      )}
+      <div className="flex gap-2">
+        {status.status === 'connected' ? (
+          <Button 
+            onClick={onDisconnect}
+            disabled={isLoading}
+            variant="destructive"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Desconectando...
+              </>
+            ) : (
+              'Desconectar'
+            )}
+          </Button>
+        ) : (
+          <Button 
+            onClick={onGenerateQR}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Gerando QR Code...
+              </>
+            ) : (
+              'Gerar QR Code'
+            )}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
+

@@ -1,4 +1,3 @@
-
 import { supabaseClient } from "../db.ts";
 import { WAPI_ENDPOINT, headers } from "../config.ts";
 import { WhatsAppConnection } from "../types.ts";
@@ -139,3 +138,42 @@ export async function generateQRCode(headers: HeadersInit, instanceKey: string):
   }
 }
 
+export async function disconnectInstance(headers: HeadersInit, instanceKey: string): Promise<Response> {
+  try {
+    console.log("Desconectando instância:", instanceKey);
+    
+    const response = await fetch(`${WAPI_ENDPOINT}/api/instance/logout/${instanceKey}`, {
+      method: "DELETE",
+      headers
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Erro na resposta da API:", errorText);
+      throw new Error(`Erro ao desconectar instância: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Instância desconectada com sucesso");
+
+    const { error: dbError } = await supabaseClient
+      .from('whatsapp_connections')
+      .update({
+        is_connected: false,
+        last_connection_date: new Date().toISOString()
+      })
+      .eq('instance_key', instanceKey);
+
+    if (dbError) {
+      console.error("Erro ao atualizar status no banco:", dbError);
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, data }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Erro ao desconectar instância:", error);
+    throw new Error("Falha ao desconectar instância do WhatsApp");
+  }
+}

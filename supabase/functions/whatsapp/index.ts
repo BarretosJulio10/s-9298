@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { headers as defaultHeaders } from "./config.ts";
-import { createInstance, getInstanceStatus, generateQRCode } from "./handlers/instance.ts";
+import { createInstance, getInstanceStatus, generateQRCode, disconnectInstance } from "./handlers/instance.ts";
 import { sendMessage } from "./handlers/message.ts";
 
 async function handleRequest(req: Request): Promise<Response> {
@@ -26,6 +26,8 @@ async function handleRequest(req: Request): Promise<Response> {
         return await getInstanceStatus(headers, params.instanceKey);
       case "generateQRCode":
         return await generateQRCode(headers, params.instanceKey);
+      case "disconnectInstance":
+        return await disconnectInstance(headers, params.instanceKey);
       case "sendMessage":
         return await sendMessage(headers, params);
       default:
