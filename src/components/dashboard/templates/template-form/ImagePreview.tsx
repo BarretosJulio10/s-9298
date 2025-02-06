@@ -41,6 +41,19 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
             <ImagePlus className="h-4 w-4" />
             {hasImage ? 'Trocar imagem' : 'Upload de imagem'}
           </Button>
+
+          {hasImage && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteImage}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              Excluir imagem
+            </Button>
+          )}
         </div>
 
         <div className="aspect-w-4 aspect-h-3">
@@ -63,20 +76,8 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
             </div>
           )}
         </div>
-
-        {hasImage && (
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={handleDeleteImage}
-            className="flex items-center gap-2 mt-4"
-          >
-            <Trash2 className="h-4 w-4" />
-            Excluir imagem
-          </Button>
-        )}
       </div>
     </div>
   );
 }
+
