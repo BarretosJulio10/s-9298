@@ -840,6 +840,7 @@ export type Database = {
           company_id: string
           created_at: string
           id: string
+          instance_key: string | null
           is_connected: boolean | null
           last_connection_date: string | null
           last_qr_code: string | null
@@ -849,6 +850,7 @@ export type Database = {
           company_id: string
           created_at?: string
           id?: string
+          instance_key?: string | null
           is_connected?: boolean | null
           last_connection_date?: string | null
           last_qr_code?: string | null
@@ -858,6 +860,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           id?: string
+          instance_key?: string | null
           is_connected?: boolean | null
           last_connection_date?: string | null
           last_qr_code?: string | null
