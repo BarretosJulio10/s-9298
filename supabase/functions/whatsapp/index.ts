@@ -94,16 +94,18 @@ async function getInstanceStatus(headers: HeadersInit, instanceKey: string): Pro
 
 async function generateQRCode(headers: HeadersInit, instanceKey: string): Promise<Response> {
   try {
-    const response = await fetch(`${WAPI_ENDPOINT}/api/instance/qrcode/${instanceKey}`, {
-      method: "POST",
+    // Usando o método GET com os parâmetros na URL
+    const url = `${WAPI_ENDPOINT}/instance/getQrcode?connectionKey=${instanceKey}`;
+    console.log("Gerando QR Code para instância:", instanceKey);
+    console.log("URL da requisição:", url);
+
+    const response = await fetch(url, {
+      method: "GET",
       headers,
-      body: JSON.stringify({
-        image: true
-      })
     });
 
     const data = await response.json();
-    console.log("QR Code gerado");
+    console.log("Resposta do QR Code:", data);
 
     return new Response(
       JSON.stringify({ success: true, data }),
