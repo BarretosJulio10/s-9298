@@ -114,8 +114,6 @@ async function generateQRCode(headers: HeadersInit, instanceKey: string): Promis
   try {
     console.log("Gerando QR Code para instância:", instanceKey);
     
-    // De acordo com a documentação, o QR code é gerado durante a criação da instância
-    // ou podemos solicitar um novo QR code usando este endpoint
     const response = await fetch(`${WAPI_ENDPOINT}/api/instance/qrcode/${instanceKey}`, {
       method: "POST",
       headers,
