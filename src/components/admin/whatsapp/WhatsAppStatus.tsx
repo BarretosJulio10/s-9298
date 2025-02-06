@@ -116,8 +116,8 @@ export function WhatsAppStatus() {
   };
 
   // Se já existe uma conexão, verificar o status
-  React.useEffect(() => {
-    if (connection?.instance_key && connection?.is_connected) {
+  useEffect(() => {
+    if (connection && connection.instance_key) {
       setStatus({ 
         status: connection.is_connected ? 'connected' : 'disconnected',
         instanceKey: connection.instance_key 
@@ -182,3 +182,4 @@ export function WhatsAppStatus() {
     </Card>
   );
 }
+
