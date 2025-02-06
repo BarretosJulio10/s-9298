@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import type { TemplateField } from "../types";
@@ -13,6 +13,7 @@ interface ContentEditorProps {
 export function ContentEditor({ content, onChange, templateFields }: ContentEditorProps) {
   const [showFieldSuggestions, setShowFieldSuggestions] = useState(false);
   const [cursorPosition, setCursorPosition] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
@@ -21,18 +22,43 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
     onChange(newContent);
     setCursorPosition(newPosition);
 
+    // Mostra sugestões quando digita "{"
     if (newContent[newPosition - 1] === '{') {
       setShowFieldSuggestions(true);
     }
   };
 
   const insertField = (fieldName: string) => {
+    if (!textareaRef.current) return;
+
     const beforeCursor = content.slice(0, cursorPosition);
     const afterCursor = content.slice(cursorPosition);
+    const newContent = `${beforeCursor}${fieldName}}${afterCursor}`;
     
-    onChange(`${beforeCursor}${fieldName}}${afterCursor}`);
+    onChange(newContent);
     setShowFieldSuggestions(false);
+
+    // Reposiciona o cursor após o campo inserido
+    const newCursorPosition = cursorPosition + fieldName.length + 1;
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
+      }
+    }, 0);
   };
+
+  // Fecha as sugestões quando clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (textareaRef.current && !textareaRef.current.contains(event.target as Node)) {
+        setShowFieldSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Agrupar campos por categoria
   const groupedFields = templateFields.reduce((acc, field) => {
@@ -58,11 +84,14 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
       </div>
       <div className="relative">
         <Textarea
+          ref={textareaRef}
           value={content}
           onChange={handleContentChange}
           onKeyDown={(e) => {
             if (e.key === '{') {
               setShowFieldSuggestions(true);
+            } else if (e.key === 'Escape') {
+              setShowFieldSuggestions(false);
             }
           }}
           placeholder="Digite o conteúdo do template... Use { para ver os campos disponíveis"
@@ -78,12 +107,13 @@ export function ContentEditor({ content, onChange, templateFields }: ContentEdit
                 {fields.map((field) => (
                   <button
                     key={field.id}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:outline-none rounded-md"
+                    className="w-full text-left hover:bg-gray-100 focus:outline-none rounded-md p-2"
                     onClick={() => insertField(field.name)}
                   >
                     <span className="font-medium">{field.display_name}</span>
-                    <br />
-                    <span className="text-sm text-gray-500">{field.description}</span>
+                    {field.description && (
+                      <span className="block text-sm text-gray-500">{field.description}</span>
+                    )}
                   </button>
                 ))}
               </div>
