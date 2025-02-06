@@ -17,7 +17,7 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
   };
 
   return (
-    <div className="w-1/3">
+    <div className="w-full lg:w-1/3">
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <input
@@ -57,11 +57,11 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
         </div>
 
         {hasImage ? (
-          <div>
+          <div className="relative">
             <img
               src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
               alt="Preview"
-              className="w-full h-auto rounded-md"
+              className="w-full h-auto rounded-md object-cover"
             />
             {imageFile && (
               <span className="text-sm text-muted-foreground block mt-2">

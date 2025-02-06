@@ -32,7 +32,7 @@ export function SubtemplateCard({
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-4">
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           <TemplateContent
             description={description}
             example={example}

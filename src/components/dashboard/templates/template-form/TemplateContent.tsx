@@ -17,7 +17,7 @@ export function TemplateContent({
   onContentChange,
 }: TemplateContentProps) {
   return (
-    <div className="w-2/3 space-y-2">
+    <div className="w-full lg:w-2/3 space-y-2">
       <div>
         <p className="text-sm text-muted-foreground">{description}</p>
         <p className="text-sm text-muted-foreground">Exemplo: {example}</p>
