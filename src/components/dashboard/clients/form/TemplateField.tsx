@@ -18,7 +18,6 @@ export function TemplateField({ form }: { form: any }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Busca apenas os templates principais (sem parent_id)
       const { data: parentTemplates, error: parentError } = await supabase
         .from("message_templates")
         .select("*")
@@ -32,8 +31,6 @@ export function TemplateField({ form }: { form: any }) {
 
   const handleTemplateChange = async (templateId: string) => {
     form.setValue("template_id", templateId);
-
-    // Quando um template é selecionado, salvamos também o template principal para referência
     form.setValue("parent_template_id", templateId);
   };
 
@@ -44,7 +41,13 @@ export function TemplateField({ form }: { form: any }) {
       render={({ field }) => (
         <FormItem>
           <Select onValueChange={handleTemplateChange} value={field.value}>
-            <SelectTrigger className="bg-white text-primary border-gray-300 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20">
+            <SelectTrigger 
+              className={`border border-gray-300 ${
+                field.value 
+                  ? "bg-primary text-white hover:bg-primary/90" 
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+              }`}
+            >
               <SelectValue placeholder="Selecione um template" />
             </SelectTrigger>
             <SelectContent>

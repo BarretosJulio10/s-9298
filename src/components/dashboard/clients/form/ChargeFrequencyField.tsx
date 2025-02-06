@@ -1,3 +1,4 @@
+
 import { FormField, FormItem, FormControl } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
@@ -15,7 +16,13 @@ export function ChargeFrequencyField({ form }: ChargeFrequencyFieldProps) {
         <FormItem>
           <FormControl>
             <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger className="text-muted-foreground">
+              <SelectTrigger 
+                className={`${
+                  field.value 
+                    ? "bg-primary text-white hover:bg-primary/90" 
+                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                }`}
+              >
                 <SelectValue placeholder="Frequência" />
               </SelectTrigger>
               <SelectContent>
