@@ -1,10 +1,16 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export async function callWhatsAppAPI(action: string, params?: any) {
+interface WAPIResponse {
+  success: boolean;
+  message?: string;
+  data?: any;
+}
+
+export async function callWhatsAppAPI(action: string, params?: any): Promise<WAPIResponse> {
   const { data: config, error } = await supabase
     .from("configurations")
-    .select("whatsapp_instance_id")
+    .select("wapi_token")
     .maybeSingle();
 
   if (error) {
@@ -12,8 +18,8 @@ export async function callWhatsAppAPI(action: string, params?: any) {
     throw new Error("Erro ao buscar configurações do WhatsApp");
   }
 
-  if (!config?.whatsapp_instance_id) {
-    throw new Error("WhatsApp instance ID não configurado. Configure-o na seção de configurações.");
+  if (!config?.wapi_token) {
+    throw new Error("Token da W-API não configurado. Configure-o na seção de configurações.");
   }
 
   try {
@@ -24,7 +30,7 @@ export async function callWhatsAppAPI(action: string, params?: any) {
       },
       body: JSON.stringify({
         action,
-        instance: config.whatsapp_instance_id,
+        token: config.wapi_token,
         params
       })
     });
@@ -35,14 +41,7 @@ export async function callWhatsAppAPI(action: string, params?: any) {
       throw new Error(error.message || "Erro ao enviar mensagem");
     }
 
-    const data = await response.json();
-    
-    if (!data.success) {
-      console.error("Erro nos dados da API:", data);
-      throw new Error(data.message || "Erro ao processar requisição do WhatsApp");
-    }
-
-    return data;
+    return await response.json();
   } catch (error: any) {
     console.error("Erro na chamada da API do WhatsApp:", error);
     throw new Error(error.message || "Erro ao se comunicar com o serviço do WhatsApp");
