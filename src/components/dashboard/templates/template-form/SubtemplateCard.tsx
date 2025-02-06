@@ -92,7 +92,7 @@ export function SubtemplateCard({
           
           {/* Coluna da direita - Preview da imagem */}
           <div className="w-1/3">
-            {hasImage && (
+            {hasImage ? (
               <div>
                 <img
                   src={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
@@ -104,6 +104,10 @@ export function SubtemplateCard({
                     {imageFile.name}
                   </span>
                 )}
+              </div>
+            ) : (
+              <div className="aspect-[4/3] bg-gray-100 rounded-md flex items-center justify-center">
+                <ImagePlus className="h-8 w-8 text-gray-400" />
               </div>
             )}
           </div>
