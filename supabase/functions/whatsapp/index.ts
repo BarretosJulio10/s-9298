@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
-const WAPI_ENDPOINT = "https://api.wapi.com.br";
+const WAPI_ENDPOINT = "https://painel.w-api.app";
 const DEFAULT_TOKEN = '1716319589869x721327290780988000'; // Token W-API
 
 async function handleRequest(req: Request): Promise<Response> {
@@ -118,20 +118,27 @@ async function generateQRCode(headers: HeadersInit, instanceKey: string): Promis
   try {
     console.log("Gerando QR Code para instância:", instanceKey);
     
-    const response = await fetch(`${WAPI_ENDPOINT}/api/instance/qrcode/${instanceKey}`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        image: true
-      })
+    const response = await fetch(`${WAPI_ENDPOINT}/instance/getQrcode?connectionKey=${instanceKey}&syncContacts=enable&returnQrcode=enable`, {
+      method: "GET",
+      headers
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Erro na resposta da API:", errorText);
       throw new Error(`Erro ao gerar QR code: ${response.status}`);
     }
 
-    const data = await response.json();
-    console.log("QR Code gerado com sucesso");
+    let data;
+    try {
+      data = await response.json();
+      console.log("QR Code gerado com sucesso");
+    } catch (error) {
+      console.error("Erro ao processar resposta JSON:", error);
+      const text = await response.text();
+      console.error("Resposta raw:", text);
+      throw new Error("Resposta inválida do servidor");
+    }
 
     return new Response(
       JSON.stringify({ success: true, data }),
