@@ -17,9 +17,9 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
   };
 
   return (
-    <div className="w-full">
-      <div className="space-y-4">
-        <div className="flex flex-wrap gap-2">
+    <div className="w-full flex flex-col items-center">
+      <div className="w-[70%] space-y-4">
+        <div className="flex justify-start gap-2 mb-4">
           <input
             type="file"
             accept="image/*"
@@ -56,7 +56,7 @@ export function ImagePreview({ imageFile, imageUrl, index, onImageChange }: Imag
           )}
         </div>
 
-        <div className="aspect-w-4 aspect-h-3 w-[70%] mx-auto">
+        <div className="aspect-w-4 aspect-h-3">
           {hasImage ? (
             <div className="relative">
               <img
