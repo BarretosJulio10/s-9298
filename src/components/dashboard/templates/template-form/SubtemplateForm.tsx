@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,13 @@ import { supabase } from "@/integrations/supabase/client";
 interface SubtemplateFormProps {
   parentId: string;
   onComplete: () => void;
+}
+
+interface TemplateField {
+  name: string;
+  display_name: string;
+  category: string;
+  description: string;
 }
 
 const subtemplateTypes = [
@@ -38,9 +46,53 @@ export function SubtemplateForm({ parentId, onComplete }: SubtemplateFormProps) 
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [showFieldSuggestions, setShowFieldSuggestions] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const [templateFields, setTemplateFields] = useState<TemplateField[]>([]);
   const { toast } = useToast();
 
   const currentTemplate = subtemplateTypes[currentIndex];
+
+  useEffect(() => {
+    fetchTemplateFields();
+  }, []);
+
+  const fetchTemplateFields = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('template_fields')
+        .select('*')
+        .order('category', { ascending: true });
+
+      if (error) throw error;
+      setTemplateFields(data);
+    } catch (error) {
+      console.error('Erro ao carregar campos:', error);
+    }
+  };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = e.target.value;
+    const newPosition = e.target.selectionStart;
+    
+    setContent(newContent);
+    setCursorPosition(newPosition);
+
+    // Mostrar sugestões quando digitar '{'
+    if (newContent[newPosition - 1] === '{') {
+      setShowFieldSuggestions(true);
+    } else {
+      setShowFieldSuggestions(false);
+    }
+  };
+
+  const insertField = (fieldName: string) => {
+    const beforeCursor = content.slice(0, cursorPosition);
+    const afterCursor = content.slice(cursorPosition);
+    
+    setContent(`${beforeCursor}${fieldName}}${afterCursor}`);
+    setShowFieldSuggestions(false);
+  };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -142,12 +194,34 @@ export function SubtemplateForm({ parentId, onComplete }: SubtemplateFormProps) 
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Conteúdo da Mensagem</label>
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Digite o conteúdo do template..."
-              className="min-h-[150px]"
-            />
+            <div className="relative">
+              <Textarea
+                value={content}
+                onChange={handleContentChange}
+                onKeyDown={(e) => {
+                  if (e.key === '{') {
+                    setShowFieldSuggestions(true);
+                  }
+                }}
+                placeholder="Digite o conteúdo do template... Use { para ver os campos disponíveis"
+                className="min-h-[150px]"
+              />
+              {showFieldSuggestions && (
+                <div className="absolute z-10 w-64 max-h-48 overflow-y-auto bg-white border rounded-md shadow-lg mt-1">
+                  {templateFields.map((field) => (
+                    <button
+                      key={field.name}
+                      className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:outline-none"
+                      onClick={() => insertField(field.name)}
+                    >
+                      <span className="font-medium">{field.display_name}</span>
+                      <br />
+                      <span className="text-sm text-gray-500">{field.description}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
