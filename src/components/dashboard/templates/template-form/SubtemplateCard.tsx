@@ -106,7 +106,7 @@ export function SubtemplateCard({
               value={content}
               onChange={(e) => onContentChange(index, e.target.value)}
               placeholder="Digite o conteúdo do template..."
-              className="min-h-[200px]"
+              className="min-h-[120px]" // Reduzido de 200px para 120px
             />
           </div>
         </div>
