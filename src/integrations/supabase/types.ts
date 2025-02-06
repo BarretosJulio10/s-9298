@@ -313,6 +313,7 @@ export type Database = {
           stripe_price_id: string | null
           stripe_product_id: string | null
           updated_at: string
+          wapi_token: string | null
           whatsapp_instance_id: string | null
         }
         Insert: {
@@ -323,6 +324,7 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
+          wapi_token?: string | null
           whatsapp_instance_id?: string | null
         }
         Update: {
@@ -333,6 +335,7 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
+          wapi_token?: string | null
           whatsapp_instance_id?: string | null
         }
         Relationships: []
