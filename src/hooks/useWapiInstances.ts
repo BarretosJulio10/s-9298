@@ -72,7 +72,8 @@ export function useWapiInstances() {
 
   const getQRCodeMutation = useMutation({
     mutationFn: async (instanceId: string) => {
-      return await getQRCode(instanceId);
+      const qrCode = await getQRCode(instanceId);
+      return qrCode;
     }
   });
 
@@ -82,7 +83,7 @@ export function useWapiInstances() {
     createInstance: createInstanceMutation.mutate,
     disconnectInstance: disconnectInstanceMutation.mutate,
     refreshStatus: refreshStatusMutation.mutate,
-    getQRCode: getQRCodeMutation.mutate,
+    getQRCode: getQRCodeMutation.mutateAsync, // Mudamos para mutateAsync para retornar a Promise
     isCreating: createInstanceMutation.isPending,
     isDisconnecting: disconnectInstanceMutation.isPending,
     isRefreshing: refreshStatusMutation.isPending,
