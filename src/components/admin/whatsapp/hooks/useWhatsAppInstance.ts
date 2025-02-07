@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { callWhatsAppAPI } from "@/lib/whatsapp";
 import { WhatsAppStatus } from "@/types/whatsapp";
 
-export function useWhatsAppInstance(onConnectionChange: () => Promise<void>) {
+export function useWhatsAppInstance(onConnectionChange: () => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [status, setStatus] = useState<WhatsAppStatus>({ status: 'disconnected' });

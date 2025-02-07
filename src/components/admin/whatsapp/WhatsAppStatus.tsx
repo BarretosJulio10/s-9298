@@ -21,7 +21,9 @@ export function WhatsAppStatus() {
     createInstance,
     generateQR,
     disconnect,
-  } = useWhatsAppInstance(refetchConnection);
+  } = useWhatsAppInstance(() => {
+    void refetchConnection();
+  });
 
   const handleCreateInstance = async (connectionName: string) => {
     if (profile?.id) {

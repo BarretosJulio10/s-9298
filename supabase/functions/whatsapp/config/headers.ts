@@ -1,5 +1,5 @@
 
-export const WAPI_ENDPOINT = "https://api.wapi.com.br";
+import { supabaseClient } from "../db.ts";
 
 export const getHeaders = async (supabase: any, companyId: string) => {
   const { data: settings, error } = await supabase
@@ -21,12 +21,4 @@ export const getHeaders = async (supabase: any, companyId: string) => {
     "Authorization": `Bearer ${settings.wapi_token}`,
     "Content-Type": "application/json"
   };
-};
-
-export const endpoints = {
-  createInstance: `${WAPI_ENDPOINT}/manager/create`,
-  deleteInstance: `${WAPI_ENDPOINT}/api/instance/logout`,
-  getQRCode: `${WAPI_ENDPOINT}/manager/qrcode`,
-  getStatus: `${WAPI_ENDPOINT}/api/instance/status`,
-  sendMessage: `${WAPI_ENDPOINT}/messages/text`
 };
