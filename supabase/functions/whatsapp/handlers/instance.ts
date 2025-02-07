@@ -1,6 +1,7 @@
+
 import { supabaseClient } from "../db.ts";
-import { WAPI_ENDPOINT, headers } from "../config.ts";
-import { WhatsAppConnection } from "../types.ts";
+import { WAPI_ENDPOINT } from "../config.ts";
+import { corsHeaders } from "../../_shared/cors.ts";
 
 export async function createInstance(headers: HeadersInit, companyId: string): Promise<Response> {
   try {
@@ -37,7 +38,7 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
       .upsert({
         company_id: companyId,
         instance_key: connectionKey,
-        name: requestBody.name || `Conexão ${connectionKey.substring(0, 8)}`,
+        name: `Conexão ${connectionKey.substring(0, 8)}`,
         is_connected: false,
         last_connection_date: new Date().toISOString()
       });
@@ -53,7 +54,10 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     );
   } catch (error) {
     console.error("Erro ao criar instância:", error);
-    throw new Error("Falha ao criar instância do WhatsApp");
+    return new Response(
+      JSON.stringify({ success: false, message: error.message }),
+      { status: 500, headers: corsHeaders }
+    );
   }
 }
 
@@ -93,7 +97,10 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
     );
   } catch (error) {
     console.error("Erro ao buscar status da instância:", error);
-    throw new Error("Falha ao buscar status da instância");
+    return new Response(
+      JSON.stringify({ success: false, message: error.message }),
+      { status: 500, headers: corsHeaders }
+    );
   }
 }
 
@@ -134,7 +141,10 @@ export async function generateQRCode(headers: HeadersInit, instanceKey: string):
     );
   } catch (error) {
     console.error("Erro ao gerar QR Code:", error);
-    throw new Error("Falha ao gerar QR Code");
+    return new Response(
+      JSON.stringify({ success: false, message: error.message }),
+      { status: 500, headers: corsHeaders }
+    );
   }
 }
 
@@ -174,6 +184,9 @@ export async function disconnectInstance(headers: HeadersInit, instanceKey: stri
     );
   } catch (error) {
     console.error("Erro ao desconectar instância:", error);
-    throw new Error("Falha ao desconectar instância do WhatsApp");
+    return new Response(
+      JSON.stringify({ success: false, message: error.message }),
+      { status: 500, headers: corsHeaders }
+    );
   }
 }

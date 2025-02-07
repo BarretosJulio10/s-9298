@@ -15,4 +15,3 @@ export interface WhatsAppConnection {
   last_qr_code?: string;
   last_connection_date?: string;
 }
-
