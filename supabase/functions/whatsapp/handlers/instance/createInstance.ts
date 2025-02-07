@@ -11,9 +11,16 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     const wapiHeaders = await getHeaders(supabaseClient, companyId);
     const createInstanceUrl = `${endpoints.createInstance}`;
     
+    // Gerar webhook_url e secret
+    const webhookUrl = `${Deno.env.get('SUPABASE_URL')}/functions/whatsapp-webhook`;
+    const webhookSecret = crypto.randomUUID();
+    
     const requestBody = {
       connectionKey,
-      webhook: null
+      webhook: {
+        url: webhookUrl,
+        secret: webhookSecret
+      }
     };
     
     console.log("URL de criação:", createInstanceUrl);
@@ -49,6 +56,8 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
         instance_key: connectionKey,
         name: `Conexão ${connectionKey.substring(0, 8)}`,
         is_connected: false,
+        webhook_url: webhookUrl,
+        webhook_secret: webhookSecret,
         last_connection_date: new Date().toISOString()
       });
 
@@ -62,4 +71,3 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     return createErrorResponse(error);
   }
 }
-
