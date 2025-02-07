@@ -1,10 +1,26 @@
 
 export const WAPI_ENDPOINT = "https://api.wapi.com.br";
-export const DEFAULT_TOKEN = '1716319589869x721327290780988000'; // Token W-API
 
-export const headers = {
-  "Authorization": `Bearer ${DEFAULT_TOKEN}`,
-  "Content-Type": "application/json"
+export const getHeaders = async (supabase: any, companyId: string) => {
+  const { data: settings, error } = await supabase
+    .from('whatsapp_api_settings')
+    .select('wapi_token')
+    .eq('company_id', companyId)
+    .single();
+
+  if (error) {
+    console.error("Erro ao buscar configurações da W-API:", error);
+    throw new Error("Erro ao buscar configurações do WhatsApp");
+  }
+
+  if (!settings?.wapi_token) {
+    throw new Error("Token W-API não configurado");
+  }
+
+  return {
+    "Authorization": `Bearer ${settings.wapi_token}`,
+    "Content-Type": "application/json"
+  };
 };
 
 export const endpoints = {

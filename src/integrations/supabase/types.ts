@@ -835,6 +835,30 @@ export type Database = {
           },
         ]
       }
+      whatsapp_api_settings: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          wapi_token: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          wapi_token: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          wapi_token?: string
+        }
+        Relationships: []
+      }
       whatsapp_connections: {
         Row: {
           company_id: string

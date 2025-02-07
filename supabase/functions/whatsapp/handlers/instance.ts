@@ -1,6 +1,6 @@
 
 import { supabaseClient } from "../db.ts";
-import { endpoints } from "../config.ts";
+import { endpoints, getHeaders } from "../config.ts";
 import { corsHeaders } from "../../_shared/cors.ts";
 
 export async function createInstance(headers: HeadersInit, companyId: string): Promise<Response> {
@@ -8,8 +8,8 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     console.log("Iniciando criação de instância para empresa:", companyId);
     
     const connectionKey = `instance_${companyId}_${Date.now()}`; // Chave única por empresa
-    const admKey = headers.Authorization?.toString().split(' ')[1];
-    const createInstanceUrl = `${endpoints.createInstance}?adm_key=${admKey}`;
+    const wapiHeaders = await getHeaders(supabaseClient, companyId);
+    const createInstanceUrl = `${endpoints.createInstance}`;
     
     const requestBody = {
       connectionKey,
@@ -21,9 +21,7 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     
     const response = await fetch(createInstanceUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: wapiHeaders,
       body: JSON.stringify(requestBody)
     });
 
@@ -83,12 +81,22 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
   try {
     console.log("Verificando status da instância:", instanceKey);
 
+    // Buscar company_id baseado no instance_key
+    const { data: connection } = await supabaseClient
+      .from('whatsapp_connections')
+      .select('company_id')
+      .eq('instance_key', instanceKey)
+      .single();
+
+    if (!connection) {
+      throw new Error("Conexão não encontrada");
+    }
+
+    const wapiHeaders = await getHeaders(supabaseClient, connection.company_id);
+
     const response = await fetch(`${endpoints.getStatus}/${instanceKey}`, {
       method: "GET",
-      headers: {
-        ...headers,
-        'Accept': 'application/json'
-      }
+      headers: wapiHeaders
     });
 
     if (!response.ok) {
@@ -115,7 +123,7 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
       const { error: logError } = await supabaseClient
         .from('whatsapp_logs')
         .insert({
-          company_id: (await supabaseClient.from('whatsapp_connections').select('company_id').eq('instance_key', instanceKey).single()).data?.company_id,
+          company_id: connection.company_id,
           instance_key: instanceKey,
           event_type: 'check_status',
           status: data.status,
@@ -143,13 +151,23 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
 export async function generateQRCode(headers: HeadersInit, instanceKey: string): Promise<Response> {
   try {
     console.log("Gerando QR Code para instância:", instanceKey);
-    const admKey = headers.Authorization?.toString().split(' ')[1];
+
+    // Buscar company_id baseado no instance_key
+    const { data: connection } = await supabaseClient
+      .from('whatsapp_connections')
+      .select('company_id')
+      .eq('instance_key', instanceKey)
+      .single();
+
+    if (!connection) {
+      throw new Error("Conexão não encontrada");
+    }
+
+    const wapiHeaders = await getHeaders(supabaseClient, connection.company_id);
     
-    const response = await fetch(`${endpoints.getQRCode}?connectionKey=${instanceKey}&adm_key=${admKey}`, {
+    const response = await fetch(`${endpoints.getQRCode}?connectionKey=${instanceKey}`, {
       method: "GET",
-      headers: {
-        'Accept': 'application/json'
-      }
+      headers: wapiHeaders
     });
 
     if (!response.ok) {
@@ -177,7 +195,7 @@ export async function generateQRCode(headers: HeadersInit, instanceKey: string):
       const { error: logError } = await supabaseClient
         .from('whatsapp_logs')
         .insert({
-          company_id: (await supabaseClient.from('whatsapp_connections').select('company_id').eq('instance_key', instanceKey).single()).data?.company_id,
+          company_id: connection.company_id,
           instance_key: instanceKey,
           event_type: 'generate_qrcode',
           status: 'success',
@@ -205,13 +223,23 @@ export async function generateQRCode(headers: HeadersInit, instanceKey: string):
 export async function disconnectInstance(headers: HeadersInit, instanceKey: string): Promise<Response> {
   try {
     console.log("Desconectando instância:", instanceKey);
+
+    // Buscar company_id baseado no instance_key
+    const { data: connection } = await supabaseClient
+      .from('whatsapp_connections')
+      .select('company_id')
+      .eq('instance_key', instanceKey)
+      .single();
+
+    if (!connection) {
+      throw new Error("Conexão não encontrada");
+    }
+
+    const wapiHeaders = await getHeaders(supabaseClient, connection.company_id);
     
     const response = await fetch(`${endpoints.deleteInstance}/${instanceKey}`, {
       method: "DELETE",
-      headers: {
-        ...headers,
-        'Accept': 'application/json'
-      }
+      headers: wapiHeaders
     });
 
     if (!response.ok) {
@@ -239,7 +267,7 @@ export async function disconnectInstance(headers: HeadersInit, instanceKey: stri
     const { error: logError } = await supabaseClient
       .from('whatsapp_logs')
       .insert({
-        company_id: (await supabaseClient.from('whatsapp_connections').select('company_id').eq('instance_key', instanceKey).single()).data?.company_id,
+        company_id: connection.company_id,
         instance_key: instanceKey,
         event_type: 'disconnect',
         status: 'success',

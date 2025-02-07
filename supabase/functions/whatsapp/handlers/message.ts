@@ -1,5 +1,5 @@
 
-import { endpoints } from "../config.ts";
+import { endpoints, getHeaders } from "../config.ts";
 import { corsHeaders } from "../../_shared/cors.ts";
 import { supabaseClient } from "../db.ts";
 
@@ -9,6 +9,19 @@ export async function sendMessage(headers: HeadersInit, params: any): Promise<Re
   try {
     console.log("Enviando mensagem para:", phone);
     console.log("Conteúdo da mensagem:", message);
+
+    // Buscar company_id baseado no instance_key
+    const { data: connection } = await supabaseClient
+      .from('whatsapp_connections')
+      .select('company_id')
+      .eq('instance_key', instanceKey)
+      .single();
+
+    if (!connection) {
+      throw new Error("Conexão não encontrada");
+    }
+
+    const wapiHeaders = await getHeaders(supabaseClient, connection.company_id);
 
     const body = {
       number: phone.replace(/\D/g, ''), // Remove caracteres não numéricos
@@ -20,10 +33,7 @@ export async function sendMessage(headers: HeadersInit, params: any): Promise<Re
 
     const response = await fetch(`${endpoints.sendMessage}`, {
       method: "POST",
-      headers: {
-        ...headers,
-        'Accept': 'application/json'
-      },
+      headers: wapiHeaders,
       body: JSON.stringify(body)
     });
 
@@ -46,7 +56,7 @@ export async function sendMessage(headers: HeadersInit, params: any): Promise<Re
     const { error: logError } = await supabaseClient
       .from('whatsapp_logs')
       .insert({
-        company_id: (await supabaseClient.from('whatsapp_connections').select('company_id').eq('instance_key', instanceKey).single()).data?.company_id,
+        company_id: connection.company_id,
         instance_key: instanceKey,
         event_type: 'send_message',
         status: 'success',
