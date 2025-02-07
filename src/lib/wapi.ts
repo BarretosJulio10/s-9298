@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface WapiInstance {
@@ -16,7 +17,6 @@ const WAPI_ID_ADM = "1716319589869x721327290780988000";
 
 export async function createInstance(name: string): Promise<WapiInstance> {
   try {
-    // Primeiro, precisamos obter o ID da empresa do usuário autenticado
     const {
       data: { user },
       error: authError,

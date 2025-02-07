@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, QrCode, Plus, RefreshCw, LogOut } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 export function WhatsAppSettings() {
   const [instanceName, setInstanceName] = useState("");
   const [showQRDialog, setShowQRDialog] = useState(false);
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const { toast } = useToast();
   const {
     instances,
     isLoading,
@@ -36,11 +38,23 @@ export function WhatsAppSettings() {
     try {
       setSelectedInstanceId(instanceId);
       setShowQRDialog(true);
+      setQrCode(null); // Reset QR code while loading
       const qrCodeData = await getQRCode(instanceId);
+      
+      if (!qrCodeData) {
+        throw new Error("Não foi possível gerar o QR code");
+      }
+      
       setQrCode(qrCodeData);
     } catch (error) {
       console.error("Erro ao obter QR code:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível gerar o QR code. Tente novamente.",
+      });
       setQrCode(null);
+      setShowQRDialog(false);
     }
   };
 
