@@ -1,6 +1,6 @@
 
 import { supabaseClient } from "../../db.ts";
-import { endpoints, getHeaders } from "../../config.ts";
+import { endpoints, getHeaders } from "../../config/index.ts";
 import { createSuccessResponse, createErrorResponse, logWhatsAppEvent, getCompanyIdFromInstanceKey } from "../../utils/handlers.ts";
 
 export async function getInstanceStatus(headers: HeadersInit, instanceKey: string): Promise<Response> {
@@ -49,4 +49,3 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
     return createErrorResponse(error);
   }
 }
-
