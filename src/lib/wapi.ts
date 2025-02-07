@@ -73,6 +73,7 @@ export async function getInstanceStatus(instanceId: string): Promise<boolean> {
 
     if (error) throw error;
     if (!instance.host || !instance.connection_key || !instance.token) {
+      console.log('Instância não configurada corretamente');
       return false;
     }
 
@@ -86,6 +87,7 @@ export async function getInstanceStatus(instanceId: string): Promise<boolean> {
     );
 
     const data = await response.json();
+    console.log('Status da instância:', data);
     
     if (data.error || !data.connection_data?.phone_connected) {
       return false;
@@ -114,8 +116,11 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
 
     if (error) throw error;
     if (!instance.host || !instance.connection_key || !instance.token) {
-      return null;
+      console.error('Instância não configurada corretamente');
+      throw new Error('Instância não configurada corretamente');
     }
+
+    console.log('Obtendo QR code para instância:', instance);
 
     const response = await fetch(
       `https://${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
@@ -127,9 +132,16 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     );
 
     const data = await response.json();
+    console.log('Resposta da API de QR code:', data);
     
-    if (data.error || !data.qrcode) {
-      return null;
+    if (data.error) {
+      console.error('Erro na resposta da API:', data.error);
+      throw new Error('Erro ao gerar QR code: ' + data.error);
+    }
+
+    if (!data.qrcode) {
+      console.error('QR code não recebido da API');
+      throw new Error('QR code não disponível no momento');
     }
 
     await supabase
@@ -141,7 +153,7 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
 
   } catch (error) {
     console.error('Erro ao obter QR code:', error);
-    return null;
+    throw error;
   }
 }
 

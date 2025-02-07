@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, QrCode, Plus, RefreshCw, LogOut } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 export function WhatsAppSettings() {
@@ -42,7 +42,7 @@ export function WhatsAppSettings() {
       const qrCodeData = await getQRCode(instanceId);
       
       if (!qrCodeData) {
-        throw new Error("Não foi possível gerar o QR code");
+        throw new Error("Não foi possível gerar o QR code. Verifique se a instância está conectada ao WhatsApp.");
       }
       
       setQrCode(qrCodeData);
@@ -51,9 +51,8 @@ export function WhatsAppSettings() {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Não foi possível gerar o QR code. Tente novamente.",
+        description: error instanceof Error ? error.message : "Não foi possível gerar o QR code. Tente novamente.",
       });
-      setQrCode(null);
       setShowQRDialog(false);
     }
   };
@@ -155,6 +154,9 @@ export function WhatsAppSettings() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Conectar WhatsApp</DialogTitle>
+              <DialogDescription>
+                Escaneie o QR Code abaixo com seu WhatsApp para conectar
+              </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col items-center justify-center p-4">
               {qrCode ? (
