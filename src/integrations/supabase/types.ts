@@ -313,8 +313,6 @@ export type Database = {
           stripe_price_id: string | null
           stripe_product_id: string | null
           updated_at: string
-          wapi_token: string | null
-          whatsapp_instance_id: string | null
         }
         Insert: {
           asaas_api_key?: string | null
@@ -324,8 +322,6 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
-          wapi_token?: string | null
-          whatsapp_instance_id?: string | null
         }
         Update: {
           asaas_api_key?: string | null
@@ -335,8 +331,6 @@ export type Database = {
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
-          wapi_token?: string | null
-          whatsapp_instance_id?: string | null
         }
         Relationships: []
       }
@@ -644,7 +638,6 @@ export type Database = {
           subscription_id: string | null
           subscription_status: string | null
           updated_at: string
-          whatsapp: string | null
         }
         Insert: {
           cnpj?: string | null
@@ -660,7 +653,6 @@ export type Database = {
           subscription_id?: string | null
           subscription_status?: string | null
           updated_at?: string
-          whatsapp?: string | null
         }
         Update: {
           cnpj?: string | null
@@ -676,7 +668,6 @@ export type Database = {
           subscription_id?: string | null
           subscription_status?: string | null
           updated_at?: string
-          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -828,162 +819,6 @@ export type Database = {
           },
           {
             foreignKeyName: "wallet_transactions_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      whatsapp_api_settings: {
-        Row: {
-          company_id: string
-          created_at: string
-          id: string
-          updated_at: string
-          wapi_token: string
-        }
-        Insert: {
-          company_id: string
-          created_at?: string
-          id?: string
-          updated_at?: string
-          wapi_token: string
-        }
-        Update: {
-          company_id?: string
-          created_at?: string
-          id?: string
-          updated_at?: string
-          wapi_token?: string
-        }
-        Relationships: []
-      }
-      whatsapp_connections: {
-        Row: {
-          company_id: string
-          created_at: string
-          id: string
-          instance_key: string | null
-          is_connected: boolean | null
-          last_connection_date: string | null
-          last_qr_code: string | null
-          name: string
-          updated_at: string
-          webhook_secret: string | null
-          webhook_url: string | null
-        }
-        Insert: {
-          company_id: string
-          created_at?: string
-          id?: string
-          instance_key?: string | null
-          is_connected?: boolean | null
-          last_connection_date?: string | null
-          last_qr_code?: string | null
-          name: string
-          updated_at?: string
-          webhook_secret?: string | null
-          webhook_url?: string | null
-        }
-        Update: {
-          company_id?: string
-          created_at?: string
-          id?: string
-          instance_key?: string | null
-          is_connected?: boolean | null
-          last_connection_date?: string | null
-          last_qr_code?: string | null
-          name?: string
-          updated_at?: string
-          webhook_secret?: string | null
-          webhook_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "whatsapp_connections_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      whatsapp_logs: {
-        Row: {
-          company_id: string
-          created_at: string | null
-          event_type: string
-          id: string
-          instance_key: string
-          message: string | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          company_id: string
-          created_at?: string | null
-          event_type: string
-          id?: string
-          instance_key: string
-          message?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          company_id?: string
-          created_at?: string | null
-          event_type?: string
-          id?: string
-          instance_key?: string
-          message?: string | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "whatsapp_logs_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      whatsapp_webhooks: {
-        Row: {
-          company_id: string
-          created_at: string | null
-          event_type: string
-          id: string
-          instance_key: string
-          payload: Json | null
-          processed: boolean | null
-          updated_at: string | null
-        }
-        Insert: {
-          company_id: string
-          created_at?: string | null
-          event_type: string
-          id?: string
-          instance_key: string
-          payload?: Json | null
-          processed?: boolean | null
-          updated_at?: string | null
-        }
-        Update: {
-          company_id?: string
-          created_at?: string | null
-          event_type?: string
-          id?: string
-          instance_key?: string
-          payload?: Json | null
-          processed?: boolean | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "whatsapp_webhooks_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "profiles"

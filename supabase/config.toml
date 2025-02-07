@@ -1,12 +1,5 @@
 
-# project configuration
 project_id = "pikxpmhpcsrstmikkpvg"
-
-[functions.whatsapp]
-verify_jwt = true
-
-[functions.whatsapp-webhook]
-verify_jwt = false
 
 [functions.mercadopago]
 verify_jwt = false
@@ -28,4 +21,3 @@ verify_jwt = true
 
 [functions.delete-client]
 verify_jwt = true
-
