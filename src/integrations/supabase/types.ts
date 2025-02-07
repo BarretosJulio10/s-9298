@@ -826,6 +826,60 @@ export type Database = {
           },
         ]
       }
+      whatsapp_instances: {
+        Row: {
+          company_id: string
+          connection_key: string | null
+          created_at: string
+          etiqueta: string | null
+          host: string | null
+          id: string
+          name: string
+          qr_code: string | null
+          status: Database["public"]["Enums"]["whatsapp_instance_status"] | null
+          token: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          connection_key?: string | null
+          created_at?: string
+          etiqueta?: string | null
+          host?: string | null
+          id?: string
+          name: string
+          qr_code?: string | null
+          status?:
+            | Database["public"]["Enums"]["whatsapp_instance_status"]
+            | null
+          token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          connection_key?: string | null
+          created_at?: string
+          etiqueta?: string | null
+          host?: string | null
+          id?: string
+          name?: string
+          qr_code?: string | null
+          status?:
+            | Database["public"]["Enums"]["whatsapp_instance_status"]
+            | null
+          token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_instances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -859,6 +913,7 @@ export type Database = {
       payment_method_type: "pix" | "credit_card" | "boleto"
       template_subtype: "notification" | "delayed" | "paid"
       user_role: "admin" | "company"
+      whatsapp_instance_status: "disconnected" | "connected" | "pending"
     }
     CompositeTypes: {
       [_ in never]: never
