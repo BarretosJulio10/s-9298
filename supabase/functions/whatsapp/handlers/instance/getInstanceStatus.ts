@@ -1,24 +1,14 @@
 
 import { supabaseClient } from "../../db.ts";
 import { endpoints, getHeaders } from "../../config.ts";
-import { corsHeaders } from "../../../_shared/cors.ts";
+import { createSuccessResponse, createErrorResponse, logWhatsAppEvent, getCompanyIdFromInstanceKey } from "../../utils/handlers.ts";
 
 export async function getInstanceStatus(headers: HeadersInit, instanceKey: string): Promise<Response> {
   try {
     console.log("Verificando status da instância:", instanceKey);
 
-    // Buscar company_id baseado no instance_key
-    const { data: connection } = await supabaseClient
-      .from('whatsapp_connections')
-      .select('company_id')
-      .eq('instance_key', instanceKey)
-      .single();
-
-    if (!connection) {
-      throw new Error("Conexão não encontrada");
-    }
-
-    const wapiHeaders = await getHeaders(supabaseClient, connection.company_id);
+    const companyId = await getCompanyIdFromInstanceKey(instanceKey);
+    const wapiHeaders = await getHeaders(supabaseClient, companyId);
 
     const response = await fetch(`${endpoints.getStatus}/${instanceKey}`, {
       method: "GET",
@@ -45,31 +35,18 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
         console.error("Erro ao atualizar status no banco:", dbError);
       }
 
-      // Registrar o log
-      const { error: logError } = await supabaseClient
-        .from('whatsapp_logs')
-        .insert({
-          company_id: connection.company_id,
-          instance_key: instanceKey,
-          event_type: 'check_status',
-          status: data.status,
-          message: `Status da instância: ${data.status}`
-        });
-
-      if (logError) {
-        console.error("Erro ao salvar log:", logError);
-      }
+      await logWhatsAppEvent({
+        companyId,
+        instanceKey,
+        eventType: 'check_status',
+        status: data.status,
+        message: `Status da instância: ${data.status}`
+      });
     }
 
-    return new Response(
-      JSON.stringify({ success: true, data }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return createSuccessResponse(data);
   } catch (error) {
-    console.error("Erro ao buscar status da instância:", error);
-    return new Response(
-      JSON.stringify({ success: false, message: error.message }),
-      { status: 500, headers: corsHeaders }
-    );
+    return createErrorResponse(error);
   }
 }
+

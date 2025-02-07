@@ -1,13 +1,13 @@
 
 import { supabaseClient } from "../../db.ts";
 import { endpoints, getHeaders } from "../../config.ts";
-import { corsHeaders } from "../../../_shared/cors.ts";
+import { createSuccessResponse, createErrorResponse, logWhatsAppEvent } from "../../utils/handlers.ts";
 
 export async function createInstance(headers: HeadersInit, companyId: string): Promise<Response> {
   try {
     console.log("Iniciando criação de instância para empresa:", companyId);
     
-    const connectionKey = `instance_${companyId}_${Date.now()}`; // Chave única por empresa
+    const connectionKey = `instance_${companyId}_${Date.now()}`; 
     const wapiHeaders = await getHeaders(supabaseClient, companyId);
     const createInstanceUrl = `${endpoints.createInstance}`;
     
@@ -34,20 +34,13 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     const data = await response.json();
     console.log("Instância criada com sucesso:", data);
 
-    // Registrar o log
-    const { error: logError } = await supabaseClient
-      .from('whatsapp_logs')
-      .insert({
-        company_id: companyId,
-        instance_key: connectionKey,
-        event_type: 'create_instance',
-        status: 'success',
-        message: 'Instância criada com sucesso'
-      });
-
-    if (logError) {
-      console.error("Erro ao salvar log:", logError);
-    }
+    await logWhatsAppEvent({
+      companyId,
+      instanceKey: connectionKey,
+      eventType: 'create_instance',
+      status: 'success',
+      message: 'Instância criada com sucesso'
+    });
 
     const { error: dbError } = await supabaseClient
       .from('whatsapp_connections')
@@ -64,15 +57,9 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
       throw new Error("Erro ao salvar conexão no banco de dados");
     }
 
-    return new Response(
-      JSON.stringify({ success: true, data }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return createSuccessResponse(data);
   } catch (error) {
-    console.error("Erro ao criar instância:", error);
-    return new Response(
-      JSON.stringify({ success: false, message: error.message }),
-      { status: 500, headers: corsHeaders }
-    );
+    return createErrorResponse(error);
   }
 }
+

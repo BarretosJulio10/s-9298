@@ -1,7 +1,6 @@
 
 import { endpoints, getHeaders } from "../config.ts";
-import { corsHeaders } from "../../_shared/cors.ts";
-import { supabaseClient } from "../db.ts";
+import { createSuccessResponse, createErrorResponse, logWhatsAppEvent, getCompanyIdFromInstanceKey } from "../utils/handlers.ts";
 
 export async function sendMessage(headers: HeadersInit, params: any): Promise<Response> {
   const { phone, message, instanceKey } = params;
@@ -10,23 +9,13 @@ export async function sendMessage(headers: HeadersInit, params: any): Promise<Re
     console.log("Enviando mensagem para:", phone);
     console.log("Conteúdo da mensagem:", message);
 
-    // Buscar company_id baseado no instance_key
-    const { data: connection } = await supabaseClient
-      .from('whatsapp_connections')
-      .select('company_id')
-      .eq('instance_key', instanceKey)
-      .single();
-
-    if (!connection) {
-      throw new Error("Conexão não encontrada");
-    }
-
-    const wapiHeaders = await getHeaders(supabaseClient, connection.company_id);
+    const companyId = await getCompanyIdFromInstanceKey(instanceKey);
+    const wapiHeaders = await getHeaders(supabaseClient, companyId);
 
     const body = {
-      number: phone.replace(/\D/g, ''), // Remove caracteres não numéricos
+      number: phone.replace(/\D/g, ''),
       text: message,
-      channelId: "WHATSAPP" // Especifica o canal como WhatsApp
+      channelId: "WHATSAPP"
     };
 
     console.log("Corpo da requisição:", JSON.stringify(body));
@@ -52,38 +41,19 @@ export async function sendMessage(headers: HeadersInit, params: any): Promise<Re
       data = { success: true, message: "Mensagem enviada" };
     }
 
-    // Registrar o log
-    const { error: logError } = await supabaseClient
-      .from('whatsapp_logs')
-      .insert({
-        company_id: connection.company_id,
-        instance_key: instanceKey,
-        event_type: 'send_message',
-        status: 'success',
-        message: `Mensagem enviada para ${phone}`
-      });
-
-    if (logError) {
-      console.error("Erro ao salvar log:", logError);
-    }
+    await logWhatsAppEvent({
+      companyId,
+      instanceKey,
+      eventType: 'send_message',
+      status: 'success',
+      message: `Mensagem enviada para ${phone}`
+    });
 
     console.log("Mensagem enviada com sucesso:", data);
 
-    return new Response(
-      JSON.stringify({ success: true, data }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return createSuccessResponse(data);
   } catch (error) {
-    console.error("Erro ao enviar mensagem:", error);
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : "Erro desconhecido ao enviar mensagem" 
-      }),
-      { 
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500
-      }
-    );
+    return createErrorResponse(error);
   }
 }
+
