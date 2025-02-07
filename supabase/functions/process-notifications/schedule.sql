@@ -1,3 +1,4 @@
+
 -- Criar um agendamento para executar a função a cada hora
 select
   cron.schedule(

@@ -983,6 +983,7 @@ export type Database = {
       charge_status: "pending" | "paid" | "overdue" | "cancelled"
       company_status: "active" | "inactive" | "pending"
       fatura_status: "pendente" | "atrasado" | "pago"
+      notification_status: "pending" | "sent" | "failed"
       payment_gateway_type:
         | "mercadopago"
         | "asaas"
