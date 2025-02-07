@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +17,6 @@ const AdminSettings = () => {
   const queryClient = useQueryClient();
   const [apiKey, setApiKey] = useState("");
   const [environment, setEnvironment] = useState("sandbox");
-  const [whatsappInstanceId, setWhatsappInstanceId] = useState("");
 
   const { data: config } = useQuery({
     queryKey: ["configurations"],
@@ -36,7 +36,6 @@ const AdminSettings = () => {
         if (data) {
           setApiKey(data.asaas_api_key || "");
           setEnvironment(data.asaas_environment || "sandbox");
-          setWhatsappInstanceId(data.whatsapp_instance_id || "");
         }
       }
     }
@@ -46,7 +45,6 @@ const AdminSettings = () => {
     mutationFn: async (values: {
       asaas_api_key: string;
       asaas_environment: string;
-      whatsapp_instance_id: string;
     }) => {
       if (config?.id) {
         const { error } = await supabase
@@ -82,7 +80,6 @@ const AdminSettings = () => {
     mutation.mutate({
       asaas_api_key: apiKey,
       asaas_environment: environment,
-      whatsapp_instance_id: whatsappInstanceId,
     });
   };
 
@@ -100,7 +97,6 @@ const AdminSettings = () => {
           <TabsTrigger value="gateways">Gateways de Pagamento</TabsTrigger>
           <TabsTrigger value="stripe">Stripe</TabsTrigger>
           <TabsTrigger value="asaas">Asaas</TabsTrigger>
-          <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
           <TabsTrigger value="charges">Cobranças</TabsTrigger>
         </TabsList>
 
@@ -150,31 +146,6 @@ const AdminSettings = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="whatsapp">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configurações do WhatsApp</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="whatsappInstanceId">ID da Instância do WhatsApp</label>
-                  <Input
-                    id="whatsappInstanceId"
-                    placeholder="Insira o ID da sua instância do WhatsApp"
-                    value={whatsappInstanceId}
-                    onChange={(e) => setWhatsappInstanceId(e.target.value)}
-                  />
-                </div>
-
-                <Button type="submit" disabled={mutation.isPending}>
-                  {mutation.isPending ? "Salvando..." : "Salvar configurações"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="charges">
           <ChargeSettingsForm />
         </TabsContent>
@@ -193,10 +164,6 @@ const AdminSettings = () => {
               <p>
                 <strong>Chave API Asaas:</strong>{" "}
                 {config.asaas_api_key ? "Configurada" : "Não configurada"}
-              </p>
-              <p>
-                <strong>ID da Instância WhatsApp:</strong>{" "}
-                {config.whatsapp_instance_id ? "Configurado" : "Não configurado"}
               </p>
               <p>
                 <strong>ID do Produto Stripe:</strong>{" "}

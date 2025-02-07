@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -7,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { callWhatsAppAPI } from "@/lib/whatsapp";
 import { MessageSquare } from "lucide-react";
 
 const notificationSchema = z.object({
@@ -41,10 +41,8 @@ export function SendNotificationDialog({ open, onOpenChange, template }: SendNot
 
   const sendNotification = useMutation({
     mutationFn: async (data: NotificationFormData) => {
-      await callWhatsAppAPI("sendMessage", {
-        phone: data.phone,
-        message: template?.content,
-      });
+      // Funcionalidade temporariamente indisponível
+      throw new Error("Funcionalidade de WhatsApp não disponível no momento.");
     },
     onSuccess: () => {
       toast({
