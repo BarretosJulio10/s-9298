@@ -14,6 +14,7 @@ export async function callWhatsAppAPI(action: string, params?: any): Promise<WAP
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem('sb-access-token')}`
       },
       body: JSON.stringify({
         action,
