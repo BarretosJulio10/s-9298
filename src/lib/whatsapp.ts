@@ -10,7 +10,7 @@ export async function callWhatsAppAPI(action: string, params?: any): Promise<WAP
   try {
     console.log(`Chamando API do WhatsApp - Ação: ${action}`, params);
 
-    const response = await fetch(`/functions/v1/whatsapp`, {
+    const response = await fetch(`/functions/whatsapp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
