@@ -1,4 +1,3 @@
-
 import { supabaseClient } from "../db.ts";
 import { WAPI_ENDPOINT } from "../config.ts";
 import { corsHeaders } from "../../_shared/cors.ts";
@@ -20,7 +19,10 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     
     const response = await fetch(createInstanceUrl, {
       method: "POST",
-      headers,
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(requestBody)
     });
 

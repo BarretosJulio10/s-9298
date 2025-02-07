@@ -6,3 +6,4 @@ export const headers = {
   "Authorization": `Bearer ${DEFAULT_TOKEN}`,
   "Content-Type": "application/json"
 };
+
