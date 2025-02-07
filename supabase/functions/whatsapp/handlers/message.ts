@@ -1,9 +1,10 @@
 
-import { WAPI_ENDPOINT } from "../config.ts";
+import { endpoints } from "../config.ts";
 import { corsHeaders } from "../../_shared/cors.ts";
+import { supabaseClient } from "../db.ts";
 
 export async function sendMessage(headers: HeadersInit, params: any): Promise<Response> {
-  const { phone, message } = params;
+  const { phone, message, instanceKey } = params;
   
   try {
     console.log("Enviando mensagem para:", phone);
@@ -17,7 +18,7 @@ export async function sendMessage(headers: HeadersInit, params: any): Promise<Re
 
     console.log("Corpo da requisição:", JSON.stringify(body));
 
-    const response = await fetch(`${WAPI_ENDPOINT}/messages/text`, {
+    const response = await fetch(`${endpoints.sendMessage}`, {
       method: "POST",
       headers: {
         ...headers,
@@ -39,6 +40,21 @@ export async function sendMessage(headers: HeadersInit, params: any): Promise<Re
     } catch (e) {
       console.warn("Resposta não é JSON válido:", responseText);
       data = { success: true, message: "Mensagem enviada" };
+    }
+
+    // Registrar o log
+    const { error: logError } = await supabaseClient
+      .from('whatsapp_logs')
+      .insert({
+        company_id: (await supabaseClient.from('whatsapp_connections').select('company_id').eq('instance_key', instanceKey).single()).data?.company_id,
+        instance_key: instanceKey,
+        event_type: 'send_message',
+        status: 'success',
+        message: `Mensagem enviada para ${phone}`
+      });
+
+    if (logError) {
+      console.error("Erro ao salvar log:", logError);
     }
 
     console.log("Mensagem enviada com sucesso:", data);

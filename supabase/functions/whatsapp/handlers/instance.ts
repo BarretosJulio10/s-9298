@@ -1,5 +1,6 @@
+
 import { supabaseClient } from "../db.ts";
-import { WAPI_ENDPOINT } from "../config.ts";
+import { WAPI_ENDPOINT, endpoints } from "../config.ts";
 import { corsHeaders } from "../../_shared/cors.ts";
 
 export async function createInstance(headers: HeadersInit, companyId: string): Promise<Response> {
@@ -7,7 +8,7 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     console.log("Iniciando criação de instância para empresa:", companyId);
     
     const connectionKey = `instance_${companyId}_${Date.now()}`; // Chave única por empresa
-    const createInstanceUrl = `${WAPI_ENDPOINT}/manager/create?adm_key=${headers.Authorization?.toString().split(' ')[1]}`;
+    const createInstanceUrl = `${endpoints.createInstance}?adm_key=${headers.Authorization?.toString().split(' ')[1]}`;
     
     const requestBody = {
       connectionKey,
@@ -34,6 +35,21 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
 
     const data = await response.json();
     console.log("Instância criada com sucesso:", data);
+
+    // Registrar o log
+    const { error: logError } = await supabaseClient
+      .from('whatsapp_logs')
+      .insert({
+        company_id: companyId,
+        instance_key: connectionKey,
+        event_type: 'create_instance',
+        status: 'success',
+        message: 'Instância criada com sucesso'
+      });
+
+    if (logError) {
+      console.error("Erro ao salvar log:", logError);
+    }
 
     const { error: dbError } = await supabaseClient
       .from('whatsapp_connections')
@@ -67,7 +83,7 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
   try {
     console.log("Verificando status da instância:", instanceKey);
 
-    const response = await fetch(`${WAPI_ENDPOINT}/api/instance/status/${instanceKey}`, {
+    const response = await fetch(`${endpoints.getStatus}/${instanceKey}`, {
       method: "GET",
       headers
     });
@@ -91,6 +107,21 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
       if (dbError) {
         console.error("Erro ao atualizar status no banco:", dbError);
       }
+
+      // Registrar o log
+      const { error: logError } = await supabaseClient
+        .from('whatsapp_logs')
+        .insert({
+          company_id: (await supabaseClient.from('whatsapp_connections').select('company_id').eq('instance_key', instanceKey).single()).data?.company_id,
+          instance_key: instanceKey,
+          event_type: 'check_status',
+          status: data.status,
+          message: `Status da instância: ${data.status}`
+        });
+
+      if (logError) {
+        console.error("Erro ao salvar log:", logError);
+      }
     }
 
     return new Response(
@@ -110,7 +141,7 @@ export async function generateQRCode(headers: HeadersInit, instanceKey: string):
   try {
     console.log("Gerando QR Code para instância:", instanceKey);
     
-    const response = await fetch(`${WAPI_ENDPOINT}/instance/getQrcode?connectionKey=${instanceKey}&syncContacts=enable&returnQrcode=enable`, {
+    const response = await fetch(`${endpoints.getQRCode}?connectionKey=${instanceKey}&syncContacts=enable&returnQrcode=enable`, {
       method: "GET",
       headers
     });
@@ -135,6 +166,21 @@ export async function generateQRCode(headers: HeadersInit, instanceKey: string):
       if (dbError) {
         console.error("Erro ao salvar QR code no banco:", dbError);
       }
+
+      // Registrar o log
+      const { error: logError } = await supabaseClient
+        .from('whatsapp_logs')
+        .insert({
+          company_id: (await supabaseClient.from('whatsapp_connections').select('company_id').eq('instance_key', instanceKey).single()).data?.company_id,
+          instance_key: instanceKey,
+          event_type: 'generate_qrcode',
+          status: 'success',
+          message: 'QR Code gerado com sucesso'
+        });
+
+      if (logError) {
+        console.error("Erro ao salvar log:", logError);
+      }
     }
 
     return new Response(
@@ -154,7 +200,7 @@ export async function disconnectInstance(headers: HeadersInit, instanceKey: stri
   try {
     console.log("Desconectando instância:", instanceKey);
     
-    const response = await fetch(`${WAPI_ENDPOINT}/api/instance/logout/${instanceKey}`, {
+    const response = await fetch(`${endpoints.deleteInstance}/${instanceKey}`, {
       method: "DELETE",
       headers
     });
@@ -178,6 +224,21 @@ export async function disconnectInstance(headers: HeadersInit, instanceKey: stri
 
     if (dbError) {
       console.error("Erro ao atualizar status no banco:", dbError);
+    }
+
+    // Registrar o log
+    const { error: logError } = await supabaseClient
+      .from('whatsapp_logs')
+      .insert({
+        company_id: (await supabaseClient.from('whatsapp_connections').select('company_id').eq('instance_key', instanceKey).single()).data?.company_id,
+        instance_key: instanceKey,
+        event_type: 'disconnect',
+        status: 'success',
+        message: 'Instância desconectada com sucesso'
+      });
+
+    if (logError) {
+      console.error("Erro ao salvar log:", logError);
     }
 
     return new Response(
