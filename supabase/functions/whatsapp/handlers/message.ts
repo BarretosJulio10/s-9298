@@ -1,6 +1,7 @@
 
-import { endpoints, getHeaders } from "../config.ts";
+import { endpoints, getHeaders } from "../config/index.ts";
 import { createSuccessResponse, createErrorResponse, logWhatsAppEvent, getCompanyIdFromInstanceKey } from "../utils/handlers.ts";
+import { supabaseClient } from "../db.ts";
 
 export async function sendMessage(headers: HeadersInit, params: any): Promise<Response> {
   const { phone, message, instanceKey } = params;
