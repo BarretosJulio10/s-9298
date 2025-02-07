@@ -7,7 +7,6 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AdminHome from "@/pages/admin/AdminHome";
 import AdminCompanies from "@/pages/admin/AdminCompanies";
 import AdminSettings from "@/pages/admin/AdminSettings";
-import AdminWhatsApp from "@/pages/admin/AdminWhatsApp";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -45,7 +44,6 @@ export function AppRoutes() {
         <Route path="/admin" element={<AdminDashboard />}>
           <Route index element={<AdminHome />} />
           <Route path="companies" element={<AdminCompanies />} />
-          <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
         <Route path="*" element={<Navigate to="/admin" replace />} />

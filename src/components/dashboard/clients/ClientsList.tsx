@@ -13,6 +13,7 @@ export function ClientsList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [perPage, setPerPage] = useState("10");
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
+  const [isSendingNotifications, setIsSendingNotifications] = useState(false);
   const { toast } = useToast();
 
   const { data: clientsWithCharges, isLoading } = useClients();
@@ -23,6 +24,19 @@ export function ClientsList() {
     client.document.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleSendNotifications = async () => {
+    setIsSendingNotifications(true);
+    try {
+      // Implementação futura do envio de notificações
+      toast({
+        title: "Notificações",
+        description: "Funcionalidade em desenvolvimento",
+      });
+    } finally {
+      setIsSendingNotifications(false);
+    }
+  };
+
   if (isLoading) {
     return <div>Carregando...</div>;
   }
@@ -31,6 +45,8 @@ export function ClientsList() {
     <div className="space-y-4">
       <ClientListHeader 
         onNewClient={() => setShowForm(true)}
+        onSendNotifications={handleSendNotifications}
+        sending={isSendingNotifications}
       />
 
       <ClientSearchBar

@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface WapiInstance {
@@ -17,6 +16,17 @@ const WAPI_ID_ADM = "1716319589869x721327290780988000";
 
 export async function createInstance(name: string): Promise<WapiInstance> {
   try {
+    // Primeiro, precisamos obter o ID da empresa do usuário autenticado
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError) throw authError;
+    if (!user) throw new Error('Usuário não autenticado');
+
+    const company_id = user.id;
+
     const response = await fetch(`${WAPI_ENDPOINT}/createNewConnection?id=${WAPI_ID_ADM}`, {
       method: 'POST',
       headers: {
@@ -35,6 +45,7 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       .from('whatsapp_instances')
       .insert({
         name,
+        company_id,
         connection_key: data.connectionKey,
         host: data.host,
         token: data.token,
