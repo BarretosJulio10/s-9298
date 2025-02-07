@@ -37,9 +37,15 @@ export async function callWhatsAppAPI(action: string, params?: any): Promise<WAP
       throw new Error(data.error || data.message || "Erro ao enviar mensagem");
     }
 
-    return data;
+    return {
+      success: true,
+      data: data
+    };
   } catch (error: any) {
     console.error("Erro na chamada da API do WhatsApp:", error);
-    throw new Error(error.message || "Erro ao se comunicar com o serviço do WhatsApp");
+    return {
+      success: false,
+      error: error.message || "Erro ao se comunicar com o serviço do WhatsApp"
+    };
   }
 }
