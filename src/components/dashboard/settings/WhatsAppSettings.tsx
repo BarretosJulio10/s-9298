@@ -33,11 +33,14 @@ export function WhatsAppSettings() {
   };
 
   const handleShowQR = async (instanceId: string) => {
-    setSelectedInstanceId(instanceId);
-    setShowQRDialog(true);
-    const qr = await getQRCode(instanceId);
-    if (qr) {
-      setQrCode(qr);
+    try {
+      setSelectedInstanceId(instanceId);
+      setShowQRDialog(true);
+      const qrCodeData = await getQRCode(instanceId);
+      setQrCode(qrCodeData);
+    } catch (error) {
+      console.error("Erro ao obter QR code:", error);
+      setQrCode(null);
     }
   };
 
