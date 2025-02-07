@@ -5,7 +5,10 @@ import { headers as defaultHeaders } from "./config.ts";
 import { createInstance, getInstanceStatus, generateQRCode, disconnectInstance } from "./handlers/instance.ts";
 import { sendMessage } from "./handlers/message.ts";
 
-async function handleRequest(req: Request): Promise<Response> {
+console.log("Hello from Whatsapp Edge Function!")
+
+serve(async (req) => {
+  // Tratamento do CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -43,6 +46,4 @@ async function handleRequest(req: Request): Promise<Response> {
       { status: 500, headers: corsHeaders }
     );
   }
-}
-
-serve(handleRequest);
+});

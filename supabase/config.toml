@@ -1,5 +1,9 @@
+
 [functions.stripe-checkout]
 verify_jwt = true
 
 [functions.check-subscription]
+verify_jwt = true
+
+[functions.whatsapp]
 verify_jwt = true
