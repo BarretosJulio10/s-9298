@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
-import { createInstance, getInstanceStatus, generateQRCode, disconnectInstance } from "./handlers/instance.ts";
+import { createInstance, getInstanceStatus, generateQRCode, disconnectInstance } from "./handlers/instance/index.ts";
 import { sendMessage } from "./handlers/message.ts";
 
 console.log("Hello from Whatsapp Edge Function!")
