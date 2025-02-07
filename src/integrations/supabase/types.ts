@@ -870,6 +870,8 @@ export type Database = {
           last_qr_code: string | null
           name: string
           updated_at: string
+          webhook_secret: string | null
+          webhook_url: string | null
         }
         Insert: {
           company_id: string
@@ -881,6 +883,8 @@ export type Database = {
           last_qr_code?: string | null
           name: string
           updated_at?: string
+          webhook_secret?: string | null
+          webhook_url?: string | null
         }
         Update: {
           company_id?: string
@@ -892,6 +896,8 @@ export type Database = {
           last_qr_code?: string | null
           name?: string
           updated_at?: string
+          webhook_secret?: string | null
+          webhook_url?: string | null
         }
         Relationships: [
           {
