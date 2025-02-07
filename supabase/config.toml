@@ -17,10 +17,10 @@ verify_jwt = false
 [functions.check-mercadopago-payment]
 verify_jwt = true
 
-[functions.stripe-checkout]
+[functions.check-subscription]
 verify_jwt = true
 
-[functions.check-subscription]
+[functions.stripe-checkout]
 verify_jwt = true
 
 [functions.process-notifications]
