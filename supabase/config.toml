@@ -28,4 +28,3 @@ verify_jwt = true
 
 [functions.delete-client]
 verify_jwt = true
-
