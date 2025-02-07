@@ -1,6 +1,6 @@
 
 import { supabaseClient } from "../db.ts";
-import { WAPI_ENDPOINT, endpoints } from "../config.ts";
+import { endpoints } from "../config.ts";
 import { corsHeaders } from "../../_shared/cors.ts";
 
 export async function createInstance(headers: HeadersInit, companyId: string): Promise<Response> {
@@ -8,7 +8,8 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     console.log("Iniciando criação de instância para empresa:", companyId);
     
     const connectionKey = `instance_${companyId}_${Date.now()}`; // Chave única por empresa
-    const createInstanceUrl = `${endpoints.createInstance}?adm_key=${headers.Authorization?.toString().split(' ')[1]}`;
+    const admKey = headers.Authorization?.toString().split(' ')[1];
+    const createInstanceUrl = `${endpoints.createInstance}?adm_key=${admKey}`;
     
     const requestBody = {
       connectionKey,
@@ -21,8 +22,7 @@ export async function createInstance(headers: HeadersInit, companyId: string): P
     const response = await fetch(createInstanceUrl, {
       method: "POST",
       headers: {
-        ...headers,
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(requestBody)
     });
@@ -85,7 +85,10 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
 
     const response = await fetch(`${endpoints.getStatus}/${instanceKey}`, {
       method: "GET",
-      headers
+      headers: {
+        ...headers,
+        'Accept': 'application/json'
+      }
     });
 
     if (!response.ok) {
@@ -140,10 +143,13 @@ export async function getInstanceStatus(headers: HeadersInit, instanceKey: strin
 export async function generateQRCode(headers: HeadersInit, instanceKey: string): Promise<Response> {
   try {
     console.log("Gerando QR Code para instância:", instanceKey);
+    const admKey = headers.Authorization?.toString().split(' ')[1];
     
-    const response = await fetch(`${endpoints.getQRCode}?connectionKey=${instanceKey}&syncContacts=enable&returnQrcode=enable`, {
+    const response = await fetch(`${endpoints.getQRCode}?connectionKey=${instanceKey}&adm_key=${admKey}`, {
       method: "GET",
-      headers
+      headers: {
+        'Accept': 'application/json'
+      }
     });
 
     if (!response.ok) {
@@ -202,7 +208,10 @@ export async function disconnectInstance(headers: HeadersInit, instanceKey: stri
     
     const response = await fetch(`${endpoints.deleteInstance}/${instanceKey}`, {
       method: "DELETE",
-      headers
+      headers: {
+        ...headers,
+        'Accept': 'application/json'
+      }
     });
 
     if (!response.ok) {
