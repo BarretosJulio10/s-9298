@@ -27,6 +27,8 @@ export async function createInstance(name: string): Promise<WapiInstance> {
 
     const company_id = user.id;
 
+    console.log('Criando nova instância do WhatsApp...');
+
     const response = await fetch(`${WAPI_ENDPOINT}/createNewConnection?id=${WAPI_ID_ADM}`, {
       method: 'POST',
       headers: {
@@ -36,9 +38,11 @@ export async function createInstance(name: string): Promise<WapiInstance> {
     });
 
     const data = await response.json();
+    console.log('Resposta da API de criação:', data);
 
     if (data.error) {
-      throw new Error('Erro ao criar instância');
+      console.error('Erro na resposta da API:', data.error);
+      throw new Error('Erro ao criar instância no W-API');
     }
 
     const { data: instance, error } = await supabase
@@ -125,29 +129,41 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     const response = await fetch(
       `https://${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
       {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${instance.token}`
         }
       }
     );
 
+    if (!response.ok) {
+      throw new Error(`Erro HTTP: ${response.status}`);
+    }
+
     const data = await response.json();
     console.log('Resposta da API de QR code:', data);
     
+    // Com base no código PHP fornecido, vamos verificar o formato da resposta
     if (data.error) {
       console.error('Erro na resposta da API:', data.error);
-      throw new Error('Erro ao gerar QR code: ' + data.error);
+      throw new Error('Erro ao gerar QR code');
     }
 
     if (!data.qrcode) {
       console.error('QR code não recebido da API');
-      throw new Error('QR code não disponível no momento');
+      throw new Error('QR code não disponível no momento. Tente novamente.');
     }
 
-    await supabase
+    // Atualiza o QR code no banco de dados
+    const { error: updateError } = await supabase
       .from('whatsapp_instances')
       .update({ qr_code: data.qrcode })
       .eq('id', instanceId);
+
+    if (updateError) {
+      console.error('Erro ao atualizar QR code no banco:', updateError);
+      throw updateError;
+    }
 
     return data.qrcode;
 
@@ -181,6 +197,7 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
     );
 
     const data = await response.json();
+    console.log('Resposta da API de desconexão:', data);
     
     if (data.error) {
       return false;

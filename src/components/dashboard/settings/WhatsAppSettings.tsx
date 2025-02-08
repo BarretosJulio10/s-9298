@@ -29,9 +29,25 @@ export function WhatsAppSettings() {
   } = useWapiInstances();
 
   const handleCreateInstance = async () => {
-    if (!instanceName) return;
-    await createInstance(instanceName);
-    setInstanceName("");
+    if (!instanceName.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "O nome da instância é obrigatório",
+      });
+      return;
+    }
+    try {
+      await createInstance(instanceName);
+      setInstanceName("");
+    } catch (error) {
+      console.error("Erro ao criar instância:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro ao criar instância. Tente novamente.",
+      });
+    }
   };
 
   const handleShowQR = async (instanceId: string) => {
@@ -39,8 +55,8 @@ export function WhatsAppSettings() {
       setSelectedInstanceId(instanceId);
       setShowQRDialog(true);
       setQrCode(null); // Reset QR code while loading
-      const qrCodeData = await getQRCode(instanceId);
       
+      const qrCodeData = await getQRCode(instanceId);
       if (!qrCodeData) {
         throw new Error("Não foi possível gerar o QR code. Verifique se a instância está conectada ao WhatsApp.");
       }
@@ -54,6 +70,22 @@ export function WhatsAppSettings() {
         description: error instanceof Error ? error.message : "Não foi possível gerar o QR code. Tente novamente.",
       });
       setShowQRDialog(false);
+    }
+  };
+
+  const handleDisconnect = async (instanceId: string) => {
+    try {
+      await disconnectInstance(instanceId);
+      toast({
+        title: "Sucesso",
+        description: "Instância desconectada com sucesso",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao desconectar instância. Tente novamente.",
+      });
     }
   };
 
@@ -116,7 +148,7 @@ export function WhatsAppSettings() {
                         onClick={() => refreshStatus(instance.id)}
                         disabled={isRefreshing}
                       >
-                        <RefreshCw className="h-4 w-4" />
+                        <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                       </Button>
                       {instance.status !== "connected" && (
                         <Button
@@ -132,7 +164,7 @@ export function WhatsAppSettings() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => disconnectInstance(instance.id)}
+                          onClick={() => handleDisconnect(instance.id)}
                           disabled={isDisconnecting}
                         >
                           <LogOut className="h-4 w-4" />
