@@ -14,6 +14,18 @@ export interface WapiInstance {
   qr_code?: string;
 }
 
+export interface WapiInstanceResponse {
+  id: string;
+  name: string;
+  etiqueta?: string;
+  info_api: unknown;
+  status: 'disconnected' | 'connected' | 'pending';
+  qr_code?: string;
+  company_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 const WAPI_ENDPOINT = "https://api-painel.w-api.app";
 const WAPI_ID_ADM = "1716319589869x721327290780988000";
 
@@ -63,8 +75,14 @@ export async function createInstance(name: string): Promise<WapiInstance> {
 
     if (error) throw error;
 
-    // Forçar o tipo de retorno para corresponder à interface WapiInstance
-    return instance as WapiInstance;
+    return {
+      id: instance.id,
+      name: instance.name,
+      etiqueta: instance.etiqueta,
+      info_api: instance.info_api as WapiInstance['info_api'],
+      status: instance.status,
+      qr_code: instance.qr_code
+    };
 
   } catch (error) {
     console.error('Erro ao criar instância:', error);

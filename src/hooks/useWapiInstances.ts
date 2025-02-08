@@ -1,7 +1,6 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { createInstance, getInstanceStatus, getQRCode, disconnectInstance, WapiInstance } from '@/lib/wapi';
+import { createInstance, getInstanceStatus, getQRCode, disconnectInstance, WapiInstance, WapiInstanceResponse } from '@/lib/wapi';
 import { useToast } from '@/hooks/use-toast';
 
 export function useWapiInstances() {
@@ -17,7 +16,16 @@ export function useWapiInstances() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as WapiInstance[];
+
+      // Converter a resposta para o tipo WapiInstance
+      return (data as WapiInstanceResponse[]).map(instance => ({
+        id: instance.id,
+        name: instance.name,
+        etiqueta: instance.etiqueta,
+        info_api: instance.info_api as WapiInstance['info_api'],
+        status: instance.status,
+        qr_code: instance.qr_code
+      }));
     }
   });
 
