@@ -9,7 +9,7 @@ export interface WapiInstance {
     host: string;
     connectionKey: string;
     token: string;
-  };
+  } | null;
   status: 'disconnected' | 'connected' | 'pending';
   qr_code?: string;
 }
@@ -62,7 +62,9 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       .single();
 
     if (error) throw error;
-    return instance;
+
+    // Forçar o tipo de retorno para corresponder à interface WapiInstance
+    return instance as WapiInstance;
 
   } catch (error) {
     console.error('Erro ao criar instância:', error);
@@ -84,11 +86,14 @@ export async function getInstanceStatus(instanceId: string): Promise<boolean> {
       return false;
     }
 
+    const info = instance.info_api as WapiInstance['info_api'];
+    if (!info) return false;
+
     const response = await fetch(
-      `https://${instance.info_api.host}/instance/info?connectionKey=${instance.info_api.connectionKey}`,
+      `https://${info.host}/instance/info?connectionKey=${info.connectionKey}`,
       {
         headers: {
-          'Authorization': `Bearer ${instance.info_api.token}`
+          'Authorization': `Bearer ${info.token}`
         }
       }
     );
@@ -127,14 +132,17 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       throw new Error('Instância não configurada corretamente');
     }
 
+    const info = instance.info_api as WapiInstance['info_api'];
+    if (!info) throw new Error('Informações da API não encontradas');
+
     console.log('Obtendo QR code para instância:', instance);
 
     const response = await fetch(
-      `https://${instance.info_api.host}/instance/qrcode?connectionKey=${instance.info_api.connectionKey}`,
+      `https://${info.host}/instance/qrcode?connectionKey=${info.connectionKey}`,
       {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${instance.info_api.token}`
+          'Authorization': `Bearer ${info.token}`
         }
       }
     );
@@ -182,12 +190,15 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
       return false;
     }
 
+    const info = instance.info_api as WapiInstance['info_api'];
+    if (!info) return false;
+
     const response = await fetch(
-      `https://${instance.info_api.host}/instance/logout?connectionKey=${instance.info_api.connectionKey}`,
+      `https://${info.host}/instance/logout?connectionKey=${info.connectionKey}`,
       {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${instance.info_api.token}`
+          'Authorization': `Bearer ${info.token}`
         }
       }
     );
