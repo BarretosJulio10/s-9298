@@ -28,8 +28,11 @@ export async function createInstance(name: string): Promise<WapiInstance> {
     console.log('Resposta da API de criação:', data);
 
     if (data.error) {
+      if (data.message === "Limite de conexões atingido.") {
+        throw new Error('Limite de conexões atingido. Por favor, entre em contato com o suporte para aumentar seu limite.');
+      }
       console.error('Erro na resposta da API:', data.error);
-      throw new Error('Erro ao criar instância no W-API');
+      throw new Error(data.message || 'Erro ao criar instância no W-API');
     }
 
     const { data: instance, error } = await supabase
