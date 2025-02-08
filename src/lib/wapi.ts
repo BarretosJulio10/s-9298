@@ -1,12 +1,15 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface WapiInstance {
   id: string;
   name: string;
   etiqueta?: string;
-  connection_key?: string;
-  host?: string;
-  token?: string;
+  info_api?: {
+    host: string;
+    connectionKey: string;
+    token: string;
+  };
   status: 'disconnected' | 'connected' | 'pending';
   qr_code?: string;
 }
@@ -31,8 +34,7 @@ export async function createInstance(name: string): Promise<WapiInstance> {
     const response = await fetch(`${WAPI_ENDPOINT}/createNewConnection?id=${WAPI_ID_ADM}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' // TODO: Adicionar token da sua conta W-API
+        'Content-Type': 'application/json'
       }
     });
 
@@ -49,9 +51,11 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       .insert({
         name,
         company_id,
-        connection_key: data.connectionKey,
-        host: data.host,
-        token: data.token,
+        info_api: {
+          host: data.host,
+          connectionKey: data.connectionKey,
+          token: data.token
+        },
         status: 'pending'
       })
       .select()
@@ -75,16 +79,16 @@ export async function getInstanceStatus(instanceId: string): Promise<boolean> {
       .single();
 
     if (error) throw error;
-    if (!instance.host || !instance.connection_key || !instance.token) {
+    if (!instance.info_api) {
       console.log('Instância não configurada corretamente');
       return false;
     }
 
     const response = await fetch(
-      `https://${instance.host}/instance/info?connectionKey=${instance.connection_key}`,
+      `https://${instance.info_api.host}/instance/info?connectionKey=${instance.info_api.connectionKey}`,
       {
         headers: {
-          'Authorization': `Bearer ${instance.token}`
+          'Authorization': `Bearer ${instance.info_api.token}`
         }
       }
     );
@@ -118,7 +122,7 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       .single();
 
     if (error) throw error;
-    if (!instance.host || !instance.connection_key || !instance.token) {
+    if (!instance.info_api) {
       console.error('Instância não configurada corretamente');
       throw new Error('Instância não configurada corretamente');
     }
@@ -126,11 +130,11 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     console.log('Obtendo QR code para instância:', instance);
 
     const response = await fetch(
-      `https://${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
+      `https://${instance.info_api.host}/instance/qrcode?connectionKey=${instance.info_api.connectionKey}`,
       {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${instance.token}`
+          'Authorization': `Bearer ${instance.info_api.token}`
         }
       }
     );
@@ -142,7 +146,6 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     const data = await response.json();
     console.log('Resposta da API de QR code:', data);
     
-    // Com base no código PHP fornecido, vamos verificar o formato da resposta
     if (data.error) {
       console.error('Erro na resposta da API:', data.error);
       throw new Error('Erro ao gerar QR code');
@@ -153,16 +156,10 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       throw new Error('QR code não disponível no momento. Tente novamente.');
     }
 
-    // Atualiza o QR code no banco de dados
-    const { error: updateError } = await supabase
+    await supabase
       .from('whatsapp_instances')
       .update({ qr_code: data.qrcode })
       .eq('id', instanceId);
-
-    if (updateError) {
-      console.error('Erro ao atualizar QR code no banco:', updateError);
-      throw updateError;
-    }
 
     return data.qrcode;
 
@@ -181,16 +178,16 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
       .single();
 
     if (error) throw error;
-    if (!instance.host || !instance.connection_key || !instance.token) {
+    if (!instance.info_api) {
       return false;
     }
 
     const response = await fetch(
-      `https://${instance.host}/instance/logout?connectionKey=${instance.connection_key}`,
+      `https://${instance.info_api.host}/instance/logout?connectionKey=${instance.info_api.connectionKey}`,
       {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${instance.token}`
+          'Authorization': `Bearer ${instance.info_api.token}`
         }
       }
     );

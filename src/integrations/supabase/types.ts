@@ -829,45 +829,39 @@ export type Database = {
       whatsapp_instances: {
         Row: {
           company_id: string
-          connection_key: string | null
           created_at: string
           etiqueta: string | null
-          host: string | null
           id: string
+          info_api: Json | null
           name: string
           qr_code: string | null
           status: Database["public"]["Enums"]["whatsapp_instance_status"] | null
-          token: string | null
           updated_at: string
         }
         Insert: {
           company_id: string
-          connection_key?: string | null
           created_at?: string
           etiqueta?: string | null
-          host?: string | null
           id?: string
+          info_api?: Json | null
           name: string
           qr_code?: string | null
           status?:
             | Database["public"]["Enums"]["whatsapp_instance_status"]
             | null
-          token?: string | null
           updated_at?: string
         }
         Update: {
           company_id?: string
-          connection_key?: string | null
           created_at?: string
           etiqueta?: string | null
-          host?: string | null
           id?: string
+          info_api?: Json | null
           name?: string
           qr_code?: string | null
           status?:
             | Database["public"]["Enums"]["whatsapp_instance_status"]
             | null
-          token?: string | null
           updated_at?: string
         }
         Relationships: [
