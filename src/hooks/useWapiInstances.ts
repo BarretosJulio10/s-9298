@@ -106,3 +106,4 @@ export function useWapiInstances() {
     isGettingQR: getQRCodeMutation.isPending
   };
 }
+

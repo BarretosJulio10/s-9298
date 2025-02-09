@@ -828,9 +828,12 @@ export type Database = {
       }
       whatsapp_instances: {
         Row: {
+          api_token: string | null
           company_id: string
+          connection_key: string | null
           created_at: string
           etiqueta: string | null
+          host: string | null
           id: string
           info_api: Json | null
           name: string
@@ -839,9 +842,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          api_token?: string | null
           company_id: string
+          connection_key?: string | null
           created_at?: string
           etiqueta?: string | null
+          host?: string | null
           id?: string
           info_api?: Json | null
           name: string
@@ -852,9 +858,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          api_token?: string | null
           company_id?: string
+          connection_key?: string | null
           created_at?: string
           etiqueta?: string | null
+          host?: string | null
           id?: string
           info_api?: Json | null
           name?: string

@@ -47,3 +47,4 @@ export async function getInstanceStatus(instanceId: string): Promise<boolean> {
     return false;
   }
 }
+

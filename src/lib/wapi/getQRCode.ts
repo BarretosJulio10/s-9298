@@ -59,3 +59,4 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     throw error;
   }
 }
+

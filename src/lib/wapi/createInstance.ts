@@ -66,3 +66,4 @@ export async function createInstance(name: string): Promise<WapiInstance> {
     throw error;
   }
 }
+
