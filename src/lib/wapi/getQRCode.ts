@@ -11,27 +11,28 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       .single();
 
     if (error) throw error;
-    if (!instance.info_api) {
-      console.error('Instância não configurada corretamente');
+
+    // Verifica se a instância existe e tem as informações necessárias
+    if (!instance || !instance.host || !instance.connection_key || !instance.api_token) {
+      console.error('Instância não configurada corretamente. Dados:', instance);
       throw new Error('Instância não configurada corretamente');
     }
-
-    const info = instance.info_api as WapiInstance['info_api'];
-    if (!info) throw new Error('Informações da API não encontradas');
 
     console.log('Obtendo QR code para instância:', instance);
 
     const response = await fetch(
-      `https://${info.host}/instance/qrcode?connectionKey=${info.connectionKey}`,
+      `https://${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
       {
         headers: {
-          'Authorization': `Bearer ${info.token}`
+          'Authorization': `Bearer ${instance.api_token}`
         }
       }
     );
 
     if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
+      const errorData = await response.json();
+      console.error('Erro na resposta da API:', errorData);
+      throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
     }
 
     const data = await response.json();
@@ -39,7 +40,7 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     
     if (data.error) {
       console.error('Erro na resposta da API:', data.error);
-      throw new Error('Erro ao gerar QR code');
+      throw new Error(data.message || 'Erro ao gerar QR code');
     }
 
     if (!data.qrcode) {
@@ -47,10 +48,15 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       throw new Error('QR code não disponível no momento. Tente novamente.');
     }
 
-    await supabase
+    // Atualiza o QR code na instância
+    const { error: updateError } = await supabase
       .from('whatsapp_instances')
       .update({ qr_code: data.qrcode })
       .eq('id', instanceId);
+
+    if (updateError) {
+      console.error('Erro ao atualizar QR code no banco:', updateError);
+    }
 
     return data.qrcode;
 
@@ -59,4 +65,3 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     throw error;
   }
 }
-

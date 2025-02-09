@@ -24,13 +24,18 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       }
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      if (errorData.message === "Limite de conexões atingido.") {
+        throw new Error('Limite de conexões atingido. Por favor, entre em contato com o suporte para aumentar seu limite.');
+      }
+      throw new Error(errorData.message || 'Erro ao criar instância no W-API');
+    }
+
     const data = await response.json();
     console.log('Resposta da API de criação:', data);
 
     if (data.error) {
-      if (data.message === "Limite de conexões atingido.") {
-        throw new Error('Limite de conexões atingido. Por favor, entre em contato com o suporte para aumentar seu limite.');
-      }
       console.error('Erro na resposta da API:', data.error);
       throw new Error(data.message || 'Erro ao criar instância no W-API');
     }
@@ -40,11 +45,9 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       .insert({
         name,
         company_id,
-        info_api: {
-          host: data.host,
-          connectionKey: data.connectionKey,
-          token: data.token
-        },
+        host: data.host,
+        connection_key: data.connectionKey,
+        api_token: data.token,
         status: 'pending'
       })
       .select()
@@ -56,7 +59,11 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       id: instance.id,
       name: instance.name,
       etiqueta: instance.etiqueta,
-      info_api: instance.info_api as WapiInstance['info_api'],
+      info_api: {
+        host: instance.host,
+        connectionKey: instance.connection_key,
+        token: instance.api_token
+      },
       status: instance.status,
       qr_code: instance.qr_code
     };
@@ -66,4 +73,3 @@ export async function createInstance(name: string): Promise<WapiInstance> {
     throw error;
   }
 }
-
