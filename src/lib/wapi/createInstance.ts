@@ -20,23 +20,24 @@ export async function createInstance(name: string): Promise<WapiInstance> {
     const response = await fetch(`${WAPI_ENDPOINT}/createNewConnection?id=${WAPI_ID_ADM}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     });
 
     const data = await response.json();
-    console.log('Resposta da API de criação:', data);
+    console.log('Resposta completa da API:', data);
 
-    if (!response.ok) {
-      if (data.message === "Limite de conexões atingido.") {
-        throw new Error('Limite de conexões atingido. Por favor, entre em contato com o suporte para aumentar seu limite.');
-      }
+    // Verifica se há erro na resposta da API
+    if (!response.ok || data.error) {
+      console.error('Erro detalhado da API:', data);
       throw new Error(data.message || 'Erro ao criar instância no W-API');
     }
 
-    if (data.error) {
-      console.error('Erro na resposta da API:', data.error);
-      throw new Error(data.message || 'Erro ao criar instância no W-API');
+    // Verifica se os dados necessários estão presentes
+    if (!data.host || !data.connectionKey || !data.token) {
+      console.error('Dados incompletos da API:', data);
+      throw new Error('Resposta da API incompleta ou inválida');
     }
 
     const { data: instance, error } = await supabase
@@ -52,7 +53,10 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Erro ao salvar no Supabase:', error);
+      throw error;
+    }
 
     return {
       id: instance.id,
@@ -68,7 +72,7 @@ export async function createInstance(name: string): Promise<WapiInstance> {
     };
 
   } catch (error) {
-    console.error('Erro ao criar instância:', error);
+    console.error('Erro detalhado ao criar instância:', error);
     throw error;
   }
 }
