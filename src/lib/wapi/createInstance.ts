@@ -21,8 +21,13 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+        'Accept': 'application/json',
+        'Origin': window.location.origin,
+        'Cache-Control': 'no-cache'
+      },
+      body: JSON.stringify({
+        id: WAPI_ID_ADM
+      })
     });
 
     const data = await response.json();
