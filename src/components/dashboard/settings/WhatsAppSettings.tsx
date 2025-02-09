@@ -57,11 +57,12 @@ export function WhatsAppSettings() {
       setQrCode(null); // Reset QR code while loading
       
       const qrCodeData = await getQRCode(instanceId);
+      console.log('QR Code recebido:', qrCodeData); // Debug
+      setQrCode(qrCodeData);
+      
       if (!qrCodeData) {
         throw new Error("Não foi possível gerar o QR code. Verifique se a instância está conectada ao WhatsApp.");
       }
-      
-      setQrCode(qrCodeData);
     } catch (error) {
       console.error("Erro ao obter QR code:", error);
       toast({
@@ -193,7 +194,7 @@ export function WhatsAppSettings() {
             <div className="flex flex-col items-center justify-center p-4">
               {qrCode ? (
                 <img
-                  src={`data:image/png;base64,${qrCode}`}
+                  src={qrCode}
                   alt="QR Code"
                   className="w-64 h-64"
                 />
@@ -212,4 +213,3 @@ export function WhatsAppSettings() {
     </Card>
   );
 }
-
