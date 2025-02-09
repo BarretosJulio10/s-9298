@@ -30,7 +30,11 @@ export function useWapiInstances() {
         id: instance.id,
         name: instance.name,
         etiqueta: instance.etiqueta,
-        info_api: instance.info_api as WapiInstance['info_api'],
+        info_api: instance.host && instance.connection_key && instance.api_token ? {
+          host: instance.host,
+          connectionKey: instance.connection_key,
+          token: instance.api_token
+        } : null,
         status: instance.status,
         qr_code: instance.qr_code
       }));
@@ -106,4 +110,3 @@ export function useWapiInstances() {
     isGettingQR: getQRCodeMutation.isPending
   };
 }
-
