@@ -24,16 +24,15 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       }
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      if (errorData.message === "Limite de conexões atingido.") {
-        throw new Error('Limite de conexões atingido. Por favor, entre em contato com o suporte para aumentar seu limite.');
-      }
-      throw new Error(errorData.message || 'Erro ao criar instância no W-API');
-    }
-
     const data = await response.json();
     console.log('Resposta da API de criação:', data);
+
+    if (!response.ok) {
+      if (data.message === "Limite de conexões atingido.") {
+        throw new Error('Limite de conexões atingido. Por favor, entre em contato com o suporte para aumentar seu limite.');
+      }
+      throw new Error(data.message || 'Erro ao criar instância no W-API');
+    }
 
     if (data.error) {
       console.error('Erro na resposta da API:', data.error);
