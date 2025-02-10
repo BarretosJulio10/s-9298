@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { WAPI_ENDPOINT, WAPI_ID_ADM } from "./config";
+import { WAPI_CONFIG } from "./config";
 import { WapiInstance } from "./types";
 
 export async function createInstance(name: string): Promise<WapiInstance> {
@@ -17,17 +17,14 @@ export async function createInstance(name: string): Promise<WapiInstance> {
 
     console.log('Criando nova instância do WhatsApp...');
 
-    const response = await fetch(`${WAPI_ENDPOINT}/createNewConnection?id=${WAPI_ID_ADM}`, {
+    const response = await fetch(`${WAPI_CONFIG.apiUrl}/api/createConnection`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Origin': window.location.origin,
         'Cache-Control': 'no-cache'
-      },
-      body: JSON.stringify({
-        id: WAPI_ID_ADM
-      })
+      }
     });
 
     const data = await response.json();
