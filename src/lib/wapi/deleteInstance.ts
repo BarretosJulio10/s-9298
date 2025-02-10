@@ -13,20 +13,19 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
 
     if (error) throw error;
 
-    // Deletar na API W-API primeiro
-    const response = await fetch(`${WAPI_ENDPOINT}/api/deleteInstance?id=${WAPI_ID_ADM}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Origin': window.location.origin,
-        'Cache-Control': 'no-cache'
-      },
-      body: JSON.stringify({
-        id: WAPI_ID_ADM,
-        connectionKey: instance.connection_key
-      })
-    });
+    // Deletar na API W-API primeiro usando o método DELETE
+    const response = await fetch(
+      `${WAPI_ENDPOINT}/deleteConnection?connectionKey=${instance.connection_key}&id=${WAPI_ID_ADM}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Origin': window.location.origin,
+          'Cache-Control': 'no-cache'
+        }
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Falha ao deletar conexão na W-API');
