@@ -13,7 +13,7 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
 
     if (error) throw error;
 
-    // Deletar na API W-API primeiro usando o método DELETE
+    // Deletar na API W-API primeiro usando o método DELETE com os parâmetros corretos
     const response = await fetch(
       `${WAPI_ENDPOINT}/deleteConnection?connectionKey=${instance.connection_key}&id=${WAPI_ID_ADM}`,
       {
@@ -28,14 +28,20 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
     );
 
     if (!response.ok) {
+      console.error('Erro ao deletar na W-API:', await response.text());
       throw new Error('Falha ao deletar conexão na W-API');
     }
 
     // Se a deleção na W-API foi bem sucedida, deletar do banco de dados
     const { error: deleteError } = await supabase
-      .rpc('delete_whatsapp_instance', { instance_id: instanceId });
+      .from('whatsapp_instances')
+      .delete()
+      .eq('id', instanceId);
 
-    if (deleteError) throw deleteError;
+    if (deleteError) {
+      console.error('Erro ao deletar no banco:', deleteError);
+      throw deleteError;
+    }
 
     return true;
   } catch (error) {
