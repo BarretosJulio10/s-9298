@@ -5,7 +5,8 @@ import {
   createInstance, 
   getInstanceStatus, 
   getQRCode, 
-  disconnectInstance, 
+  disconnectInstance,
+  deleteInstance,
   WapiInstance, 
   WapiInstanceResponse 
 } from '@/lib/wapi';
@@ -25,7 +26,6 @@ export function useWapiInstances() {
 
       if (error) throw error;
 
-      // Converter a resposta para o tipo WapiInstance
       return (data as WapiInstanceResponse[]).map(instance => ({
         id: instance.id,
         name: instance.name,
@@ -81,6 +81,26 @@ export function useWapiInstances() {
     }
   });
 
+  const deleteInstanceMutation = useMutation({
+    mutationFn: async (instanceId: string) => {
+      return await deleteInstance(instanceId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wapi-instances'] });
+      toast({
+        title: "Sucesso",
+        description: "Instância excluída com sucesso",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao excluir instância: " + error.message,
+      });
+    }
+  });
+
   const refreshStatusMutation = useMutation({
     mutationFn: async (instanceId: string) => {
       return await getInstanceStatus(instanceId);
@@ -102,10 +122,12 @@ export function useWapiInstances() {
     isLoading,
     createInstance: createInstanceMutation.mutate,
     disconnectInstance: disconnectInstanceMutation.mutate,
+    deleteInstance: deleteInstanceMutation.mutate,
     refreshStatus: refreshStatusMutation.mutate,
     getQRCode: getQRCodeMutation.mutateAsync,
     isCreating: createInstanceMutation.isPending,
     isDisconnecting: disconnectInstanceMutation.isPending,
+    isDeleting: deleteInstanceMutation.isPending,
     isRefreshing: refreshStatusMutation.isPending,
     isGettingQR: getQRCodeMutation.isPending
   };

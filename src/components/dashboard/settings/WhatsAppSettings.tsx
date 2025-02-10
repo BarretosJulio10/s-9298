@@ -18,10 +18,12 @@ export function WhatsAppSettings() {
     isLoading,
     createInstance,
     disconnectInstance,
+    deleteInstance,
     refreshStatus,
     getQRCode,
     isCreating,
     isDisconnecting,
+    isDeleting,
     isRefreshing,
     isGettingQR
   } = useWapiInstances();
@@ -83,10 +85,10 @@ export function WhatsAppSettings() {
     try {
       setSelectedInstanceId(instanceId);
       setShowQRDialog(true);
-      setQrCode(null); // Reset QR code while loading
+      setQrCode(null);
       
       const qrCodeData = await getQRCode(instanceId);
-      console.log('QR Code recebido:', qrCodeData); // Debug
+      console.log('QR Code recebido:', qrCodeData);
       setQrCode(qrCodeData);
       
       if (!qrCodeData) {
@@ -119,6 +121,18 @@ export function WhatsAppSettings() {
     }
   };
 
+  const handleDelete = async (instanceId: string) => {
+    try {
+      await deleteInstance(instanceId);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao excluir instância. Tente novamente.",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -138,9 +152,11 @@ export function WhatsAppSettings() {
           isRefreshing={isRefreshing}
           isGettingQR={isGettingQR}
           isDisconnecting={isDisconnecting}
+          isDeleting={isDeleting}
           onRefreshStatus={refreshStatus}
           onShowQR={handleShowQR}
           onDisconnect={handleDisconnect}
+          onDelete={handleDelete}
         />
 
         <QRCodeDialog

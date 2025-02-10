@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, QrCode, RefreshCw, LogOut } from "lucide-react";
+import { Loader2, QrCode, RefreshCw, LogOut, Trash2 } from "lucide-react";
 import { WapiInstance } from "@/lib/wapi/types";
 
 interface InstanceListProps {
@@ -11,9 +11,11 @@ interface InstanceListProps {
   isRefreshing: boolean;
   isGettingQR: boolean;
   isDisconnecting: boolean;
+  isDeleting: boolean;
   onRefreshStatus: (id: string) => void;
   onShowQR: (id: string) => void;
   onDisconnect: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 export function InstanceList({
@@ -22,9 +24,11 @@ export function InstanceList({
   isRefreshing,
   isGettingQR,
   isDisconnecting,
+  isDeleting,
   onRefreshStatus,
   onShowQR,
-  onDisconnect
+  onDisconnect,
+  onDelete
 }: InstanceListProps) {
   if (isLoading) {
     return (
@@ -95,6 +99,14 @@ export function InstanceList({
                     <LogOut className="h-4 w-4" />
                   </Button>
                 )}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDelete(instance.id)}
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </CardContent>
