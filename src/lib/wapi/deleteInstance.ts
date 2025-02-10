@@ -14,7 +14,7 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
     if (error) throw error;
 
     // Deletar na API W-API primeiro
-    const response = await fetch(`${WAPI_ENDPOINT}/deleteConnection?id=${WAPI_ID_ADM}`, {
+    const response = await fetch(`${WAPI_ENDPOINT}/api/deleteConnection?id=${WAPI_ID_ADM}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,4 +44,3 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
     return false;
   }
 }
-
