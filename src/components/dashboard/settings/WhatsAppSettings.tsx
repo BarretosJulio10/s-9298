@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWapiInstances } from "@/hooks/useWapiInstances";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +27,37 @@ export function WhatsAppSettings() {
     isRefreshing,
     isGettingQR
   } = useWapiInstances();
+
+  // Efeito para verificar o status da conexão periodicamente quando o QR code está sendo exibido
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (showQRDialog && selectedInstanceId) {
+      intervalId = setInterval(async () => {
+        const instance = instances?.find(i => i.id === selectedInstanceId);
+        if (instance) {
+          await refreshStatus(selectedInstanceId);
+          
+          // Se a instância estiver conectada, fecha o modal
+          if (instance.status === "connected") {
+            setShowQRDialog(false);
+            setQrCode(null);
+            toast({
+              title: "Sucesso",
+              description: "WhatsApp conectado com sucesso!",
+            });
+            clearInterval(intervalId);
+          }
+        }
+      }, 3000); // Verifica a cada 3 segundos
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [showQRDialog, selectedInstanceId, instances, refreshStatus, toast]);
 
   const handleCreateInstance = async () => {
     if (!instanceName.trim()) {
