@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useWapiInstances } from "@/hooks/useWapiInstances";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,29 +29,29 @@ export function WhatsAppSettings() {
     isGettingQR
   } = useWapiInstances();
 
-  // Efeito para verificar o status da conexão periodicamente quando o QR code está sendo exibido
+  // Efeito para verificar o status da conexão periodicamente
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
     if (showQRDialog && selectedInstanceId) {
       intervalId = setInterval(async () => {
         const instance = instances?.find(i => i.id === selectedInstanceId);
-        if (instance && instance.info_api?.connectionKey) {
+        if (instance?.connection_key) {
           try {
-            const connectionInfo = await getConnectionInfo(instance.info_api.connectionKey);
+            const connectionInfo = await getConnectionInfo(instance.connection_key);
             console.log('Info da conexão:', connectionInfo);
             
-            // Se a instância estiver conectada, fecha o modal
+            // Se a instância estiver conectada, fecha o modal e atualiza o status
             if (connectionInfo.status.toLowerCase() === 'connected' || 
                 connectionInfo.status.toLowerCase() === 'conectado') {
               await refreshStatus(selectedInstanceId);
               setShowQRDialog(false);
               setQrCode(null);
+              setSelectedInstanceId(null);
               toast({
                 title: "Sucesso",
                 description: "WhatsApp conectado com sucesso!",
               });
-              clearInterval(intervalId);
             }
           } catch (error) {
             console.error('Erro ao verificar status:', error);
@@ -65,6 +66,25 @@ export function WhatsAppSettings() {
       }
     };
   }, [showQRDialog, selectedInstanceId, instances, refreshStatus, toast]);
+
+  // Efeito para atualizar o status periodicamente de todas as instâncias
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (instances?.length) {
+      intervalId = setInterval(() => {
+        instances.forEach(instance => {
+          refreshStatus(instance.id);
+        });
+      }, 10000); // Atualiza a cada 10 segundos
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [instances, refreshStatus]);
 
   const handleCreateInstance = async () => {
     if (!instanceName.trim()) {
