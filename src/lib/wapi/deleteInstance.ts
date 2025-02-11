@@ -30,18 +30,26 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
       connectionKey: instance.connection_key
     });
 
-    // Se a instância estiver conectada, primeiro fazer logout
-    if (instance.status === 'connected') {
-      console.log('Instância está conectada, realizando logout...');
+    // Se a instância estiver conectada ou com status pending, primeiro fazer logout
+    if (instance.status === 'connected' || instance.status === 'pending') {
+      console.log('Instância está', instance.status, ', realizando logout...');
       const disconnected = await disconnectInstance(instanceId);
-      if (!disconnected) {
-        console.error('Falha ao desconectar instância');
+      
+      // Aguardar 5 segundos para garantir que a desconexão foi processada
+      console.log('Aguardando processamento da desconexão...');
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // Verificar novamente o status após a tentativa de desconexão
+      const { data: updatedInstance } = await supabase
+        .from('whatsapp_instances')
+        .select('status')
+        .eq('id', instanceId)
+        .single();
+        
+      if (updatedInstance?.status === 'connected') {
+        console.error('Não foi possível desconectar a instância');
         throw new Error('Não foi possível desconectar a instância');
       }
-      
-      // Aguardar um momento para garantir que a desconexão foi processada
-      console.log('Aguardando processamento da desconexão...');
-      await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
     // Se não tiver connection_key, podemos deletar direto do banco
@@ -75,19 +83,20 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
       const responseData = await response.json();
       console.log('Resposta da API de deleção:', responseData);
 
-      // Se recebemos 400 ou qualquer outro erro, mas a mensagem indica que a connectionKey não existe,
+      // Se recebemos qualquer erro da API, mas a mensagem indica que a connectionKey não existe,
       // podemos prosseguir com a deleção local
       if (!response.ok) {
         const shouldProceedWithLocalDelete = 
-          (response.status === 400 && responseData.message?.includes('não encontrada')) ||
-          responseData.message?.includes('não existe');
+          responseData.message?.includes('não encontrada') ||
+          responseData.message?.includes('não existe') ||
+          responseData.message?.includes('está online');
 
         if (!shouldProceedWithLocalDelete) {
           console.error('Erro ao deletar na W-API:', responseData);
           throw new Error(responseData.message || 'Falha ao deletar conexão na W-API');
         }
         
-        console.log('Connection key não encontrada/válida na API, prosseguindo com deleção local');
+        console.log('Prosseguindo com deleção local após erro da API:', responseData.message);
       }
     } catch (apiError) {
       // Se houver erro de conexão com a API, vamos logar e prosseguir com deleção local

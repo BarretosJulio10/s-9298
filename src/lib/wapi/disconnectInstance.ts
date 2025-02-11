@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { WapiInstance } from "./types";
 
 export async function disconnectInstance(instanceId: string): Promise<boolean> {
   try {
@@ -10,20 +9,23 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
       .eq('id', instanceId)
       .single();
 
-    if (error) throw error;
-    if (!instance.info_api) {
+    if (error) {
+      console.error('Erro ao buscar instância:', error);
+      throw error;
+    }
+
+    if (!instance.host || !instance.connection_key || !instance.api_token) {
+      console.error('Dados da API incompletos:', instance);
       return false;
     }
 
-    const info = instance.info_api as WapiInstance['info_api'];
-    if (!info) return false;
-
     const response = await fetch(
-      `https://${info.host}/instance/logout?connectionKey=${info.connectionKey}`,
+      `https://${instance.host}/instance/logout?connectionKey=${instance.connection_key}`,
       {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${info.token}`
+          'Authorization': `Bearer ${instance.api_token}`,
+          'Content-Type': 'application/json'
         }
       }
     );
@@ -31,7 +33,8 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
     const data = await response.json();
     console.log('Resposta da API de desconexão:', data);
     
-    if (data.error) {
+    if (!response.ok && !data.message?.includes('não encontrada')) {
+      console.error('Erro na resposta da API:', data);
       return false;
     }
 
@@ -47,4 +50,3 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
     return false;
   }
 }
-

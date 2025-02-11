@@ -5,7 +5,7 @@ import { WAPI_ENDPOINT, WAPI_ID_ADM } from "./config";
 export async function getConnectionInfo(connectionKey: string): Promise<{ instancia: string; status: string }> {
   try {
     const response = await fetch(
-      `${WHATSAPP_CONFIG.W_API_HOST}/inf-da-conexo?connectionKey=${connectionKey}&id=${WAPI_ID_ADM}`,
+      `${WAPI_ENDPOINT}/inf-da-conexao?connectionKey=${connectionKey}&id=${WAPI_ID_ADM}`,
       {
         method: 'GET',
         headers: {
