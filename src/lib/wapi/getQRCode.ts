@@ -15,27 +15,21 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       throw error;
     }
 
-    if (!instance?.info_api) {
-      console.error('Instância não tem info_api configurada:', instance);
+    if (!instance?.host || !instance?.connection_key || !instance?.api_token) {
+      console.error('Dados da API incompletos:', instance);
       throw new Error('Instância não configurada corretamente');
     }
 
-    const info = instance.info_api as WapiInstance['info_api'];
-    if (!info?.host || !info?.connectionKey || !info?.token) {
-      console.error('Dados da API incompletos:', info);
-      throw new Error('Configuração da API incompleta');
-    }
-
     console.log('Obtendo QR code para instância:', {
-      host: info.host,
-      connectionKey: info.connectionKey
+      host: instance.host,
+      connectionKey: instance.connection_key
     });
 
     const response = await fetch(
-      `https://${info.host}/instance/qrcode?connectionKey=${info.connectionKey}`,
+      `https://${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
       {
         headers: {
-          'Authorization': `Bearer ${info.token}`,
+          'Authorization': `Bearer ${instance.api_token}`,
           'Content-Type': 'application/json'
         }
       }

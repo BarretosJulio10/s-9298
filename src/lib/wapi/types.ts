@@ -3,14 +3,11 @@ export interface WapiInstance {
   id: string;
   name: string;
   etiqueta?: string;
-  info_api?: {
-    host: string;
-    connectionKey: string;
-    token: string;
-  } | null;
   status: 'disconnected' | 'connected' | 'pending';
   qr_code?: string;
+  host?: string;
   connection_key?: string;
+  api_token?: string;
 }
 
 export interface WapiInstanceResponse {
