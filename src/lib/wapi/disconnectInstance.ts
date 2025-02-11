@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function disconnectInstance(instanceId: string): Promise<boolean> {
   try {
+    console.log('Iniciando processo de desconexão da instância:', instanceId);
+    
     const { data: instance, error } = await supabase
       .from('whatsapp_instances')
       .select('*')
@@ -19,6 +21,11 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
       return false;
     }
 
+    console.log('Tentando desconectar instância com dados:', {
+      host: instance.host,
+      connectionKey: instance.connection_key
+    });
+
     const response = await fetch(
       `https://${instance.host}/instance/logout?connectionKey=${instance.connection_key}`,
       {
@@ -31,7 +38,10 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
     );
 
     const data = await response.json();
-    console.log('Resposta da API de desconexão:', data);
+    console.log('Resposta da API de desconexão:', {
+      status: response.status,
+      data: data
+    });
 
     // Se receber erro 401 ou resposta indicando que o telefone não está conectado,
     // consideramos como sucesso já que o objetivo era desconectar
@@ -39,9 +49,12 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
       if (response.status === 401 || 
           data?.message?.toLowerCase().includes('não está conectado') ||
           data?.message?.toLowerCase().includes('não encontrada')) {
-        console.log('Instância já estava desconectada ou não existe mais');
+        console.log('Instância já estava desconectada ou não existe mais - prosseguindo com atualização do status');
       } else {
-        console.error('Erro na resposta da API:', data);
+        console.error('Erro inesperado na resposta da API:', {
+          status: response.status,
+          data: data
+        });
         return false;
       }
     }
@@ -49,7 +62,10 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
     // Atualiza o status para desconectado no banco de dados
     const { error: updateError } = await supabase
       .from('whatsapp_instances')
-      .update({ status: 'disconnected' })
+      .update({ 
+        status: 'disconnected',
+        updated_at: new Date().toISOString()
+      })
       .eq('id', instanceId);
 
     if (updateError) {
@@ -57,6 +73,7 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
       return false;
     }
 
+    console.log('Instância desconectada com sucesso');
     return true;
 
   } catch (error) {
