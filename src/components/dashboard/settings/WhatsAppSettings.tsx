@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useWapiInstances } from "@/hooks/useWapiInstances";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,9 +35,9 @@ export function WhatsAppSettings() {
     if (showQRDialog && selectedInstanceId) {
       intervalId = setInterval(async () => {
         const instance = instances?.find(i => i.id === selectedInstanceId);
-        if (instance && instance.connection_key) {
+        if (instance && instance.info_api?.connectionKey) {
           try {
-            const connectionInfo = await getConnectionInfo(instance.connection_key);
+            const connectionInfo = await getConnectionInfo(instance.info_api.connectionKey);
             console.log('Info da conexão:', connectionInfo);
             
             // Se a instância estiver conectada, fecha o modal
