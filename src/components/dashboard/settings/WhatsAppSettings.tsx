@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CreateInstanceForm } from "./whatsapp/CreateInstanceForm";
 import { InstanceList } from "./whatsapp/InstanceList";
 import { QRCodeDialog } from "./whatsapp/QRCodeDialog";
+import { getConnectionInfo } from "@/lib/wapi/getConnectionInfo";
 
 export function WhatsAppSettings() {
   const [instanceName, setInstanceName] = useState("");
@@ -35,18 +36,25 @@ export function WhatsAppSettings() {
     if (showQRDialog && selectedInstanceId) {
       intervalId = setInterval(async () => {
         const instance = instances?.find(i => i.id === selectedInstanceId);
-        if (instance) {
-          await refreshStatus(selectedInstanceId);
-          
-          // Se a instância estiver conectada, fecha o modal
-          if (instance.status === "connected") {
-            setShowQRDialog(false);
-            setQrCode(null);
-            toast({
-              title: "Sucesso",
-              description: "WhatsApp conectado com sucesso!",
-            });
-            clearInterval(intervalId);
+        if (instance && instance.connection_key) {
+          try {
+            const connectionInfo = await getConnectionInfo(instance.connection_key);
+            console.log('Info da conexão:', connectionInfo);
+            
+            // Se a instância estiver conectada, fecha o modal
+            if (connectionInfo.status.toLowerCase() === 'connected' || 
+                connectionInfo.status.toLowerCase() === 'conectado') {
+              await refreshStatus(selectedInstanceId);
+              setShowQRDialog(false);
+              setQrCode(null);
+              toast({
+                title: "Sucesso",
+                description: "WhatsApp conectado com sucesso!",
+              });
+              clearInterval(intervalId);
+            }
+          } catch (error) {
+            console.error('Erro ao verificar status:', error);
           }
         }
       }, 3000); // Verifica a cada 3 segundos

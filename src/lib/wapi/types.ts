@@ -10,6 +10,7 @@ export interface WapiInstance {
   } | null;
   status: 'disconnected' | 'connected' | 'pending';
   qr_code?: string;
+  connection_key?: string;
 }
 
 export interface WapiInstanceResponse {
