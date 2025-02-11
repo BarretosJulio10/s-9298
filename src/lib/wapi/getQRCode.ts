@@ -10,56 +10,74 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       .eq('id', instanceId)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Erro ao buscar instância:', error);
+      throw error;
+    }
 
-    // Verifica se a instância existe e tem as informações necessárias
-    if (!instance || !instance.host || !instance.connection_key || !instance.api_token) {
-      console.error('Instância não configurada corretamente. Dados:', instance);
+    if (!instance?.info_api) {
+      console.error('Instância não tem info_api configurada:', instance);
       throw new Error('Instância não configurada corretamente');
     }
 
-    console.log('Obtendo QR code para instância:', instance);
+    const info = instance.info_api as WapiInstance['info_api'];
+    if (!info?.host || !info?.connectionKey || !info?.token) {
+      console.error('Dados da API incompletos:', info);
+      throw new Error('Configuração da API incompleta');
+    }
+
+    console.log('Obtendo QR code para instância:', {
+      host: info.host,
+      connectionKey: info.connectionKey
+    });
 
     const response = await fetch(
-      `https://${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
+      `https://${info.host}/instance/qrcode?connectionKey=${info.connectionKey}`,
       {
         headers: {
-          'Authorization': `Bearer ${instance.api_token}`
+          'Authorization': `Bearer ${info.token}`,
+          'Content-Type': 'application/json'
         }
       }
     );
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Erro na resposta da API:', errorData);
+      console.error('Erro na resposta da API:', {
+        status: response.status,
+        data: errorData
+      });
+      
+      if (response.status === 403) {
+        throw new Error('Instância não encontrada ou não autorizada');
+      }
+      
       throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Resposta da API de QR code:', data);
+    console.log('Resposta da API de QR code:', {
+      success: !!data.qrcode,
+      length: data.qrcode?.length
+    });
     
-    if (data.error) {
-      console.error('Erro na resposta da API:', data.error);
-      throw new Error(data.message || 'Erro ao gerar QR code');
-    }
-
-    // Verifica se o QR code está presente e é uma string base64 válida
     if (!data.qrcode) {
       console.error('QR code não recebido da API');
-      throw new Error('QR code não disponível no momento. Tente novamente.');
+      throw new Error('QR code não disponível no momento');
     }
 
-    // Garante que a string base64 esteja formatada corretamente
     let formattedQRCode = data.qrcode;
     if (!formattedQRCode.startsWith('data:image/')) {
-      // Se não for uma URL de dados completa, assume que é uma string base64 pura
       formattedQRCode = `data:image/png;base64,${formattedQRCode}`;
     }
 
     // Atualiza o QR code na instância
     const { error: updateError } = await supabase
       .from('whatsapp_instances')
-      .update({ qr_code: formattedQRCode })
+      .update({ 
+        qr_code: formattedQRCode,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', instanceId);
 
     if (updateError) {
