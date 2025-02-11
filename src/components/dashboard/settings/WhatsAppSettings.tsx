@@ -35,27 +35,16 @@ export function WhatsAppSettings() {
 
     if (showQRDialog && selectedInstanceId) {
       intervalId = setInterval(async () => {
-        const instance = instances?.find(i => i.id === selectedInstanceId);
-        if (instance?.info_api?.connectionKey) {
-          try {
-            const connectionInfo = await getConnectionInfo(instance.info_api.connectionKey);
-            console.log('Info da conexão:', connectionInfo);
-            
-            // Se a instância estiver conectada, fecha o modal e atualiza o status
-            if (connectionInfo.status.toLowerCase() === 'connected' || 
-                connectionInfo.status.toLowerCase() === 'conectado') {
-              await refreshStatus(selectedInstanceId);
-              setShowQRDialog(false);
-              setQrCode(null);
-              setSelectedInstanceId(null);
-              toast({
-                title: "Sucesso",
-                description: "WhatsApp conectado com sucesso!",
-              });
-            }
-          } catch (error) {
-            console.error('Erro ao verificar status:', error);
-          }
+        const isConnected = await refreshStatus(selectedInstanceId);
+        
+        if (isConnected) {
+          setShowQRDialog(false);
+          setQrCode(null);
+          setSelectedInstanceId(null);
+          toast({
+            title: "Sucesso",
+            description: "WhatsApp conectado com sucesso!",
+          });
         }
       }, 3000); // Verifica a cada 3 segundos
     }
@@ -65,7 +54,7 @@ export function WhatsAppSettings() {
         clearInterval(intervalId);
       }
     };
-  }, [showQRDialog, selectedInstanceId, instances, refreshStatus, toast]);
+  }, [showQRDialog, selectedInstanceId, refreshStatus, toast]);
 
   // Efeito para atualizar o status periodicamente de todas as instâncias
   useEffect(() => {
