@@ -44,6 +44,7 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
       await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
+    // Se não tiver connection_key, podemos deletar direto do banco
     if (!instance.connection_key) {
       console.log('Instância não tem connection_key, removendo do banco...');
       const { error: deleteError } = await supabase
@@ -55,34 +56,42 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
       return true;
     }
 
-    // Agora podemos tentar deletar a conexão na W-API
-    console.log('Deletando conexão na W-API...');
-    const response = await fetch(
-      `${WAPI_ENDPOINT}/deleteConnection?connectionKey=${instance.connection_key}&id=${WAPI_ID_ADM}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': window.location.origin,
-          'Cache-Control': 'no-cache'
+    try {
+      // Tentar deletar a conexão na W-API
+      console.log('Deletando conexão na W-API...');
+      const response = await fetch(
+        `${WAPI_ENDPOINT}/deleteConnection?connectionKey=${instance.connection_key}&id=${WAPI_ID_ADM}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Origin': window.location.origin,
+            'Cache-Control': 'no-cache'
+          }
         }
-      }
-    );
+      );
 
-    const responseData = await response.json();
-    console.log('Resposta da API de deleção:', responseData);
+      const responseData = await response.json();
+      console.log('Resposta da API de deleção:', responseData);
 
-    if (!response.ok) {
-      if (response.status === 400 && responseData.message?.includes('não encontrada')) {
-        console.log('Connection key não encontrada na API, prosseguindo com deleção local');
-      } else if (response.status === 500 && responseData.message?.includes('online')) {
-        console.error('Instância ainda está online na API');
-        throw new Error('A instância ainda está online. Por favor, tente novamente.');
-      } else {
-        console.error('Erro ao deletar na W-API:', responseData);
-        throw new Error(responseData.message || 'Falha ao deletar conexão na W-API');
+      // Se recebemos 400 ou qualquer outro erro, mas a mensagem indica que a connectionKey não existe,
+      // podemos prosseguir com a deleção local
+      if (!response.ok) {
+        const shouldProceedWithLocalDelete = 
+          (response.status === 400 && responseData.message?.includes('não encontrada')) ||
+          responseData.message?.includes('não existe');
+
+        if (!shouldProceedWithLocalDelete) {
+          console.error('Erro ao deletar na W-API:', responseData);
+          throw new Error(responseData.message || 'Falha ao deletar conexão na W-API');
+        }
+        
+        console.log('Connection key não encontrada/válida na API, prosseguindo com deleção local');
       }
+    } catch (apiError) {
+      // Se houver erro de conexão com a API, vamos logar e prosseguir com deleção local
+      console.warn('Erro ao tentar deletar na W-API, prosseguindo com deleção local:', apiError);
     }
 
     // Se chegamos aqui, podemos deletar do banco de dados
