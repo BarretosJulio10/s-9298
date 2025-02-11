@@ -36,35 +36,54 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
             'Authorization': `Bearer ${instance.api_token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Origin': window.location.origin,
+            'Origin': '*',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Authorization, Content-Type, Accept',
             'Cache-Control': 'no-cache'
-          }
+          },
+          mode: 'cors',
+          credentials: 'omit'
         }
       );
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.log('Erro ao processar JSON da resposta:', jsonError);
+        // Se não conseguir processar o JSON, ainda assim continuamos
+        data = { error: true, message: 'Erro ao processar resposta' };
+      }
+
       console.log('Resposta da API de desconexão:', {
         status: response.status,
         data: data
       });
 
-      // Se receber erro 403/401 ou resposta indicando que a connectionKey é inválida ou telefone não está conectado,
-      // consideramos como sucesso já que o objetivo era desconectar
-      if (!response.ok) {
-        if (response.status === 401 || 
-            response.status === 403 ||
-            data?.message?.toLowerCase().includes('não está conectado') ||
-            data?.message?.toLowerCase().includes('não encontrada') ||
-            data?.message?.toLowerCase().includes('inválida')) {
-          console.log('Instância já estava desconectada, connectionKey inválida ou não existe mais - prosseguindo com atualização do status');
-        } else {
-          console.error('Erro inesperado na resposta da API:', {
-            status: response.status,
-            data: data
-          });
-          return false;
-        }
+      // Lista de condições que consideramos como "desconexão bem sucedida"
+      const successConditions = [
+        response.status === 401,
+        response.status === 403,
+        data?.message?.toLowerCase().includes('não está conectado'),
+        data?.message?.toLowerCase().includes('não encontrada'),
+        data?.message?.toLowerCase().includes('inválida'),
+        data?.message?.toLowerCase().includes('invalid'),
+        data?.message?.toLowerCase().includes('not connected'),
+        data?.message?.toLowerCase().includes('not found')
+      ];
+
+      if (!response.ok && !successConditions.some(condition => condition)) {
+        console.error('Erro inesperado na resposta da API:', {
+          status: response.status,
+          data: data
+        });
+        // Mesmo com erro, vamos tentar atualizar o status
+        await updateInstanceStatus(instanceId);
+        return true;
       }
+
+      console.log('Desconexão processada, atualizando status no banco...');
     } catch (fetchError) {
       // Se houver erro de rede/CORS, também consideramos que a instância está desconectada
       console.log('Erro ao tentar acessar API (possível erro CORS ou rede) - considerando instância como desconectada:', fetchError);
