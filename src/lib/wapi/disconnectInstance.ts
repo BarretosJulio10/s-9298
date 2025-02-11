@@ -32,22 +32,30 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
 
     const data = await response.json();
     console.log('Resposta da API de desconexão:', data);
-    
-    // Se receber erro 401 com mensagem de telefone não conectado, consideramos como sucesso
-    // já que o objetivo era desconectar
-    if (!response.ok && 
-        (response.status === 401 || data.message?.includes('não está conectado') || data.message?.includes('não encontrada'))) {
-      console.log('Instância já estava desconectada');
-    } else if (!response.ok) {
-      console.error('Erro na resposta da API:', data);
-      return false;
+
+    // Se receber erro 401 ou resposta indicando que o telefone não está conectado,
+    // consideramos como sucesso já que o objetivo era desconectar
+    if (!response.ok) {
+      if (response.status === 401 || 
+          data?.message?.toLowerCase().includes('não está conectado') ||
+          data?.message?.toLowerCase().includes('não encontrada')) {
+        console.log('Instância já estava desconectada ou não existe mais');
+      } else {
+        console.error('Erro na resposta da API:', data);
+        return false;
+      }
     }
 
     // Atualiza o status para desconectado no banco de dados
-    await supabase
+    const { error: updateError } = await supabase
       .from('whatsapp_instances')
       .update({ status: 'disconnected' })
       .eq('id', instanceId);
+
+    if (updateError) {
+      console.error('Erro ao atualizar status no banco:', updateError);
+      return false;
+    }
 
     return true;
 
