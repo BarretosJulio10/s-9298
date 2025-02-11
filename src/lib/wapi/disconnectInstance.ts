@@ -43,13 +43,15 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
       data: data
     });
 
-    // Se receber erro 401 ou resposta indicando que o telefone não está conectado,
+    // Se receber erro 403/401 ou resposta indicando que a connectionKey é inválida ou telefone não está conectado,
     // consideramos como sucesso já que o objetivo era desconectar
     if (!response.ok) {
       if (response.status === 401 || 
+          response.status === 403 ||
           data?.message?.toLowerCase().includes('não está conectado') ||
-          data?.message?.toLowerCase().includes('não encontrada')) {
-        console.log('Instância já estava desconectada ou não existe mais - prosseguindo com atualização do status');
+          data?.message?.toLowerCase().includes('não encontrada') ||
+          data?.message?.toLowerCase().includes('inválida')) {
+        console.log('Instância já estava desconectada, connectionKey inválida ou não existe mais - prosseguindo com atualização do status');
       } else {
         console.error('Erro inesperado na resposta da API:', {
           status: response.status,
@@ -64,7 +66,9 @@ export async function disconnectInstance(instanceId: string): Promise<boolean> {
       .from('whatsapp_instances')
       .update({ 
         status: 'disconnected',
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        connection_key: null, // Limpa a connection_key quando desconectado
+        api_token: null      // Limpa o token também
       })
       .eq('id', instanceId);
 
