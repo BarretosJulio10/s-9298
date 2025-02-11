@@ -11,19 +11,16 @@ export async function getInstanceStatus(instanceId: string): Promise<boolean> {
       .single();
 
     if (error) throw error;
-    if (!instance.info_api) {
+    if (!instance.host || !instance.connection_key || !instance.api_token) {
       console.log('Instância não configurada corretamente');
       return false;
     }
 
-    const info = instance.info_api as WapiInstance['info_api'];
-    if (!info) return false;
-
     const response = await fetch(
-      `https://${info.host}/instance/info?connectionKey=${info.connectionKey}`,
+      `https://${instance.host}/instance/info?connectionKey=${instance.connection_key}`,
       {
         headers: {
-          'Authorization': `Bearer ${info.token}`
+          'Authorization': `Bearer ${instance.api_token}`
         }
       }
     );
@@ -47,4 +44,3 @@ export async function getInstanceStatus(instanceId: string): Promise<boolean> {
     return false;
   }
 }
-

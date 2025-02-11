@@ -67,13 +67,11 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       id: instance.id,
       name: instance.name,
       etiqueta: instance.etiqueta,
-      info_api: {
-        host: instance.host,
-        connectionKey: instance.connection_key,
-        token: instance.api_token
-      },
       status: instance.status,
-      qr_code: instance.qr_code
+      qr_code: instance.qr_code,
+      host: instance.host,
+      connection_key: instance.connection_key,
+      api_token: instance.api_token
     };
 
   } catch (error) {
