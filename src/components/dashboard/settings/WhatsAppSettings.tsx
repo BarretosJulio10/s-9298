@@ -36,9 +36,9 @@ export function WhatsAppSettings() {
     if (showQRDialog && selectedInstanceId) {
       intervalId = setInterval(async () => {
         const instance = instances?.find(i => i.id === selectedInstanceId);
-        if (instance?.connection_key) {
+        if (instance?.info_api?.connectionKey) {
           try {
-            const connectionInfo = await getConnectionInfo(instance.connection_key);
+            const connectionInfo = await getConnectionInfo(instance.info_api.connectionKey);
             console.log('Info da conexão:', connectionInfo);
             
             // Se a instância estiver conectada, fecha o modal e atualiza o status
