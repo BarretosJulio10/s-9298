@@ -19,7 +19,7 @@ export async function getInstanceStatus(instanceId: string): Promise<boolean> {
 
     try {
       const response = await fetch(
-        `https://${instance.host}/instance/info?connectionKey=${instance.connection_key}`,
+        `${instance.host}/api/instance/info?connectionKey=${instance.connection_key}`,
         {
           headers: {
             'Authorization': `Bearer ${instance.api_token}`,
