@@ -5,7 +5,7 @@ import { WapiInstance } from "./types";
 
 export async function getQRCode(instanceId: string): Promise<string | null> {
   try {
-    const { data: instance, error } = await supabase
+    let { data: instance, error } = await supabase
       .from('whatsapp_instances')
       .select('*')
       .eq('id', instanceId)
