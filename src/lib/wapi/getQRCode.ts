@@ -58,8 +58,9 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       connectionKey: instance.connection_key
     });
 
+    // Corrigido o endpoint para incluir "api" no path
     const response = await fetch(
-      `${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
+      `${instance.host}/api/instance/qrcode?connectionKey=${instance.connection_key}`,
       {
         headers: {
           'Authorization': `Bearer ${instance.api_token}`,
@@ -69,7 +70,13 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     );
 
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = await response.text();
+      }
+      
       console.error('Erro na resposta da API:', {
         status: response.status,
         data: errorData
@@ -79,7 +86,11 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
         throw new Error('Instância não encontrada ou não autorizada');
       }
       
-      throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
+      throw new Error(
+        typeof errorData === 'object' ? 
+          errorData.message || `Erro HTTP: ${response.status}` :
+          `Erro HTTP: ${response.status}`
+      );
     }
 
     const data = await response.json();
