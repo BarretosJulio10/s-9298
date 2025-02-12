@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import { CreateInstanceForm } from "./whatsapp/CreateInstanceForm";
 import { InstanceList } from "./whatsapp/InstanceList";
 import { QRCodeDialog } from "./whatsapp/QRCodeDialog";
-import { getConnectionInfo } from "@/lib/wapi/getConnectionInfo";
 
 export function WhatsAppSettings() {
   const [instanceName, setInstanceName] = useState("");
@@ -35,16 +34,20 @@ export function WhatsAppSettings() {
 
     if (showQRDialog && selectedInstanceId) {
       intervalId = setInterval(async () => {
-        const isConnected = await refreshStatus(selectedInstanceId);
-        
-        if (isConnected) {
-          setShowQRDialog(false);
-          setQrCode(null);
-          setSelectedInstanceId(null);
-          toast({
-            title: "Sucesso",
-            description: "WhatsApp conectado com sucesso!",
-          });
+        try {
+          const status = await refreshStatus(selectedInstanceId);
+          
+          if (status === true) {
+            setShowQRDialog(false);
+            setQrCode(null);
+            setSelectedInstanceId(null);
+            toast({
+              title: "Sucesso",
+              description: "WhatsApp conectado com sucesso!",
+            });
+          }
+        } catch (error) {
+          console.error('Erro ao verificar status:', error);
         }
       }, 3000); // Verifica a cada 3 segundos
     }
@@ -63,7 +66,9 @@ export function WhatsAppSettings() {
     if (instances?.length) {
       intervalId = setInterval(() => {
         instances.forEach(instance => {
-          refreshStatus(instance.id);
+          refreshStatus(instance.id).catch(error => {
+            console.error('Erro ao atualizar status:', error);
+          });
         });
       }, 10000); // Atualiza a cada 10 segundos
     }

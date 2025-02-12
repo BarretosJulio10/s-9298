@@ -5,15 +5,20 @@ import { WAPI_ENDPOINT, WAPI_ID_ADM } from "./config";
 export async function getConnectionInfo(connectionKey: string): Promise<{ instancia: string; status: string }> {
   try {
     const response = await fetch(
-      `${WAPI_ENDPOINT}/inf-da-conexao?connectionKey=${connectionKey}&id=${WAPI_ID_ADM}`,
+      `${WAPI_ENDPOINT}/instance/info?connectionKey=${connectionKey}`,
       {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Origin': window.location.origin,
+          'Origin': '*',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Authorization, Content-Type, Accept',
           'Cache-Control': 'no-cache'
-        }
+        },
+        mode: 'cors',
+        credentials: 'omit'
       }
     );
 
