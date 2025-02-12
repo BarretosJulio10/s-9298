@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { WAPI_ENDPOINT, WAPI_ID_ADM } from "./config";
 import { WapiInstance } from "./types";
 
 export async function getQRCode(instanceId: string): Promise<string | null> {
@@ -15,6 +16,38 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       throw error;
     }
 
+    // Se não houver host configurado, vamos configurar
+    if (!instance?.host) {
+      const { error: updateError } = await supabase
+        .from('whatsapp_instances')
+        .update({ 
+          host: WAPI_ENDPOINT,
+          connection_key: `w-api_${Math.random().toString(36).substr(2, 9)}`,
+          api_token: WAPI_ID_ADM,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', instanceId);
+
+      if (updateError) {
+        console.error('Erro ao atualizar instância:', updateError);
+        throw updateError;
+      }
+
+      // Buscar a instância atualizada
+      const { data: updatedInstance, error: fetchError } = await supabase
+        .from('whatsapp_instances')
+        .select('*')
+        .eq('id', instanceId)
+        .single();
+
+      if (fetchError) {
+        console.error('Erro ao buscar instância atualizada:', fetchError);
+        throw fetchError;
+      }
+
+      instance = updatedInstance;
+    }
+
     if (!instance?.host || !instance?.connection_key || !instance?.api_token) {
       console.error('Dados da API incompletos:', instance);
       throw new Error('Instância não configurada corretamente');
@@ -26,7 +59,7 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     });
 
     const response = await fetch(
-      `https://${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
+      `${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
       {
         headers: {
           'Authorization': `Bearer ${instance.api_token}`,
