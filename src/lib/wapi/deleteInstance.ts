@@ -68,7 +68,7 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
       // Tentar deletar a conexão na W-API
       console.log('Deletando conexão na W-API...');
       const response = await fetch(
-        `${WAPI_ENDPOINT}/deleteConnection?connectionKey=${instance.connection_key}&id=${WAPI_ID_ADM}`,
+        `${WAPI_ENDPOINT}/api/connection/delete?connectionKey=${instance.connection_key}&id=${WAPI_ID_ADM}`,
         {
           method: 'DELETE',
           headers: {
