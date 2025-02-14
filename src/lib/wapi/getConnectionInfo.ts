@@ -5,7 +5,7 @@ import { WAPI_ENDPOINT, WAPI_ID_ADM } from "./config";
 export async function getConnectionInfo(connectionKey: string): Promise<{ instancia: string; status: string }> {
   try {
     const response = await fetch(
-      `${WAPI_ENDPOINT}/instance/info?connectionKey=${connectionKey}`,
+      `${WAPI_ENDPOINT}/api/instance/info?connectionKey=${connectionKey}`,
       {
         method: 'GET',
         headers: {
