@@ -25,7 +25,14 @@ export async function createInstance(name: string): Promise<WapiInstance> {
         'Authorization': `Bearer ${WAPI_ID_ADM}`,
         'Origin': window.location.origin,
         'Cache-Control': 'no-cache'
-      }
+      },
+      body: JSON.stringify({
+        instanceName: name,
+        token: WAPI_ID_ADM,
+        qrcode: true,
+        number: "", // número opcional
+        webhook: "", // webhook opcional
+      })
     });
 
     const data = await response.json();
@@ -38,7 +45,7 @@ export async function createInstance(name: string): Promise<WapiInstance> {
     }
 
     // Verifica se os dados necessários estão presentes
-    if (!data.host || !data.connectionKey || !data.token) {
+    if (!data.hash || !data.apikey) {
       console.error('Dados incompletos da API:', data);
       throw new Error('Resposta da API incompleta ou inválida');
     }
@@ -48,9 +55,9 @@ export async function createInstance(name: string): Promise<WapiInstance> {
       .insert({
         name,
         company_id,
-        host: data.host,
-        connection_key: data.connectionKey,
-        api_token: data.token,
+        host: WAPI_ENDPOINT,
+        connection_key: data.hash,
+        api_token: data.apikey,
         status: 'pending'
       })
       .select()
