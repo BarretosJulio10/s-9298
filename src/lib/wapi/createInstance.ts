@@ -17,7 +17,7 @@ export async function createInstance(name: string): Promise<WapiInstance> {
 
     console.log('Criando nova instância do WhatsApp...');
 
-    const response = await fetch(`${WAPI_ENDPOINT}/connections`, {
+    const response = await fetch(`${WAPI_ENDPOINT}/api/${WAPI_ID_ADM}/connection`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
