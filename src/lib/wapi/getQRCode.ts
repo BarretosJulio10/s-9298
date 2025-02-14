@@ -59,7 +59,7 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
     });
 
     const response = await fetch(
-      `${instance.host}/instance/qrcode?connectionKey=${instance.connection_key}`,
+      `${instance.host}/api/instance/qrcode?connectionKey=${instance.connection_key}`,
       {
         headers: {
           'Authorization': `Bearer ${instance.api_token}`,
