@@ -15,7 +15,21 @@ export async function createInstance(name: string): Promise<WapiInstance> {
 
     const company_id = user.id;
 
-    console.log('Criando nova instância do WhatsApp...');
+    console.log('Criando nova instância do WhatsApp...', {
+      url: `${WAPI_ENDPOINT}/api/${WAPI_ID_ADM}/connection`,
+      token: WAPI_ID_ADM
+    });
+
+    const requestBody = {
+      apiKey: WAPI_ID_ADM,
+      instanceName: name,
+      token: WAPI_ID_ADM,
+      qrcode: true,
+      webhookUrl: "",
+      number: ""
+    };
+
+    console.log('Request body:', requestBody);
 
     const response = await fetch(`${WAPI_ENDPOINT}/api/${WAPI_ID_ADM}/connection`, {
       method: 'POST',
@@ -23,16 +37,9 @@ export async function createInstance(name: string): Promise<WapiInstance> {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': `Bearer ${WAPI_ID_ADM}`,
-        'Origin': window.location.origin,
-        'Cache-Control': 'no-cache'
+        'Origin': '*'
       },
-      body: JSON.stringify({
-        instanceName: name,
-        token: WAPI_ID_ADM,
-        qrcode: true,
-        number: "", // número opcional
-        webhook: "", // webhook opcional
-      })
+      body: JSON.stringify(requestBody)
     });
 
     const data = await response.json();

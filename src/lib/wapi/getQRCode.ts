@@ -62,8 +62,10 @@ export async function getQRCode(instanceId: string): Promise<string | null> {
       `${instance.host}/api/${WAPI_ID_ADM}/qrcode/${instance.connection_key}`,
       {
         headers: {
+          'Accept': 'application/json',
           'Authorization': `Bearer ${instance.api_token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Origin': '*'
         }
       }
     );
