@@ -17,17 +17,15 @@ export async function createInstance(name: string): Promise<WapiInstance> {
 
     console.log('Criando nova instância do WhatsApp...');
 
-    const response = await fetch(`${WAPI_ENDPOINT}/api/connection/create`, {
+    const response = await fetch(`${WAPI_ENDPOINT}/api/connection`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Authorization': `Bearer ${WAPI_ID_ADM}`,
         'Origin': window.location.origin,
         'Cache-Control': 'no-cache'
-      },
-      body: JSON.stringify({
-        id: WAPI_ID_ADM
-      })
+      }
     });
 
     const data = await response.json();
