@@ -15,48 +15,44 @@ export async function createInstance(name: string): Promise<WapiInstance> {
 
     const company_id = user.id;
 
-    // 1. Criar instância na W-API
-    const apiEndpoint = `${WAPI_ENDPOINT}/api/${WAPI_ID_ADM}/instance/create`;
-    console.log('Criando instância na W-API:', {
-      endpoint: apiEndpoint,
-      instanceName: name
-    });
+    console.log('Criando nova instância do WhatsApp...');
 
-    const response = await fetch(apiEndpoint, {
+    const response = await fetch(`${WAPI_ENDPOINT}/createNewConnection?id=${WAPI_ID_ADM}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': WAPI_ID_ADM
+        'Accept': 'application/json',
+        'Origin': window.location.origin,
+        'Cache-Control': 'no-cache'
       },
       body: JSON.stringify({
-        instanceName: name,
-        token: WAPI_ID_ADM,
-        qrcode: true
+        id: WAPI_ID_ADM
       })
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Erro na resposta da API:', errorData);
-      throw new Error(errorData.message || 'Erro ao criar instância na W-API');
-    }
-
     const data = await response.json();
-    console.log('Resposta da W-API:', data);
+    console.log('Resposta completa da API:', data);
 
-    if (!data.instance || !data.instance.instanceId) {
-      throw new Error('Resposta inválida da W-API');
+    // Verifica se há erro na resposta da API
+    if (!response.ok || data.error) {
+      console.error('Erro detalhado da API:', data);
+      throw new Error(data.message || 'Erro ao criar instância no W-API');
     }
 
-    // 2. Salvar no Supabase
+    // Verifica se os dados necessários estão presentes
+    if (!data.host || !data.connectionKey || !data.token) {
+      console.error('Dados incompletos da API:', data);
+      throw new Error('Resposta da API incompleta ou inválida');
+    }
+
     const { data: instance, error } = await supabase
       .from('whatsapp_instances')
       .insert({
         name,
         company_id,
-        host: WAPI_ENDPOINT,
-        connection_key: data.instance.instanceId,
-        api_token: WAPI_ID_ADM,
+        host: data.host,
+        connection_key: data.connectionKey,
+        api_token: data.token,
         status: 'pending'
       })
       .select()
@@ -79,7 +75,7 @@ export async function createInstance(name: string): Promise<WapiInstance> {
     };
 
   } catch (error) {
-    console.error('Erro ao criar instância:', error);
+    console.error('Erro detalhado ao criar instância:', error);
     throw error;
   }
 }

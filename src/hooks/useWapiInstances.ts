@@ -123,7 +123,7 @@ export function useWapiInstances() {
     createInstance: createInstanceMutation.mutate,
     disconnectInstance: disconnectInstanceMutation.mutate,
     deleteInstance: deleteInstanceMutation.mutate,
-    refreshStatus: refreshStatusMutation.mutateAsync, // Mudado de mutate para mutateAsync
+    refreshStatus: refreshStatusMutation.mutate,
     getQRCode: getQRCodeMutation.mutateAsync,
     isCreating: createInstanceMutation.isPending,
     isDisconnecting: disconnectInstanceMutation.isPending,

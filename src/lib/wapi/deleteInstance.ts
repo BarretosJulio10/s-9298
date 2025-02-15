@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { WAPI_ENDPOINT, WAPI_ID_ADM } from "./config";
 import { disconnectInstance } from "./disconnectInstance";
@@ -67,13 +68,12 @@ export async function deleteInstance(instanceId: string): Promise<boolean> {
       // Tentar deletar a conexão na W-API
       console.log('Deletando conexão na W-API...');
       const response = await fetch(
-        `${WAPI_ENDPOINT}/api/connection/${instance.connection_key}`,
+        `${WAPI_ENDPOINT}/deleteConnection?connectionKey=${instance.connection_key}&id=${WAPI_ID_ADM}`,
         {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': `Bearer ${WAPI_ID_ADM}`,
             'Origin': window.location.origin,
             'Cache-Control': 'no-cache'
           }

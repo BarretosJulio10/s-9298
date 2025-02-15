@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CreateInstanceForm } from "./whatsapp/CreateInstanceForm";
 import { InstanceList } from "./whatsapp/InstanceList";
 import { QRCodeDialog } from "./whatsapp/QRCodeDialog";
+import { getConnectionInfo } from "@/lib/wapi/getConnectionInfo";
 
 export function WhatsAppSettings() {
   const [instanceName, setInstanceName] = useState("");
@@ -34,20 +35,27 @@ export function WhatsAppSettings() {
 
     if (showQRDialog && selectedInstanceId) {
       intervalId = setInterval(async () => {
-        try {
-          const status = await refreshStatus(selectedInstanceId);
-          
-          if (status === true) {
-            setShowQRDialog(false);
-            setQrCode(null);
-            setSelectedInstanceId(null);
-            toast({
-              title: "Sucesso",
-              description: "WhatsApp conectado com sucesso!",
-            });
+        const instance = instances?.find(i => i.id === selectedInstanceId);
+        if (instance?.connection_key) {
+          try {
+            const connectionInfo = await getConnectionInfo(instance.connection_key);
+            console.log('Info da conexão:', connectionInfo);
+            
+            // Se a instância estiver conectada, fecha o modal e atualiza o status
+            if (connectionInfo.status.toLowerCase() === 'connected' || 
+                connectionInfo.status.toLowerCase() === 'conectado') {
+              await refreshStatus(selectedInstanceId);
+              setShowQRDialog(false);
+              setQrCode(null);
+              setSelectedInstanceId(null);
+              toast({
+                title: "Sucesso",
+                description: "WhatsApp conectado com sucesso!",
+              });
+            }
+          } catch (error) {
+            console.error('Erro ao verificar status:', error);
           }
-        } catch (error) {
-          console.error('Erro ao verificar status:', error);
         }
       }, 3000); // Verifica a cada 3 segundos
     }
@@ -57,7 +65,7 @@ export function WhatsAppSettings() {
         clearInterval(intervalId);
       }
     };
-  }, [showQRDialog, selectedInstanceId, refreshStatus, toast]);
+  }, [showQRDialog, selectedInstanceId, instances, refreshStatus, toast]);
 
   // Efeito para atualizar o status periodicamente de todas as instâncias
   useEffect(() => {
@@ -66,9 +74,7 @@ export function WhatsAppSettings() {
     if (instances?.length) {
       intervalId = setInterval(() => {
         instances.forEach(instance => {
-          refreshStatus(instance.id).catch(error => {
-            console.error('Erro ao atualizar status:', error);
-          });
+          refreshStatus(instance.id);
         });
       }, 10000); // Atualiza a cada 10 segundos
     }
