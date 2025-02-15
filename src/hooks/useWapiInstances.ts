@@ -30,11 +30,9 @@ export function useWapiInstances() {
         id: instance.id,
         name: instance.name,
         etiqueta: instance.etiqueta,
-        info_api: instance.host && instance.connection_key && instance.api_token ? {
-          host: instance.host,
-          connectionKey: instance.connection_key,
-          token: instance.api_token
-        } : null,
+        host: instance.host,
+        connection_key: instance.connection_key,
+        api_token: instance.api_token,
         status: instance.status,
         qr_code: instance.qr_code
       }));
