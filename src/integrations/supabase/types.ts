@@ -201,6 +201,7 @@ export type Database = {
           phone: string
           plan_id: string | null
           status: string
+          template_id: string | null
           updated_at: string
         }
         Insert: {
@@ -229,6 +230,7 @@ export type Database = {
           phone: string
           plan_id?: string | null
           status?: string
+          template_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -257,6 +259,7 @@ export type Database = {
           phone?: string
           plan_id?: string | null
           status?: string
+          template_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -265,6 +268,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -700,6 +710,61 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      template_image_history: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          invoice_id: string | null
+          sent_at: string | null
+          status: string | null
+          template_id: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          invoice_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          template_id?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          invoice_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_image_history_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_image_history_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_image_history_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "message_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

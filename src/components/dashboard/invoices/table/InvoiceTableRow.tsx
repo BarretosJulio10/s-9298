@@ -43,13 +43,39 @@ export function InvoiceTableRow({
         return;
       }
 
-      // 2. Obter o template apropriado
-      const template = await getAppropriateTemplate(
-        "invoice", // Tipo do template
-        invoice.due_date,
-        invoice.status,
-        invoice.id
-      );
+      // 2. Buscar cliente e seu template associado
+      const { data: client, error: clientError } = await supabase
+        .from('clients')
+        .select(`
+          *,
+          message_templates (
+            id,
+            content,
+            image_url
+          )
+        `)
+        .eq('id', invoice.client_id)
+        .single();
+
+      if (clientError || !client) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao enviar fatura",
+          description: "Cliente não encontrado.",
+        });
+        return;
+      }
+
+      // 3. Se não tiver template específico, busca o template padrão
+      let template = client.message_templates;
+      if (!template) {
+        template = await getAppropriateTemplate(
+          "invoice",
+          invoice.due_date,
+          invoice.status,
+          invoice.id
+        );
+      }
 
       if (!template) {
         toast({
@@ -60,9 +86,9 @@ export function InvoiceTableRow({
         return;
       }
 
-      // 3. Preparar a mensagem
+      // 4. Preparar a mensagem
       const message = template.content
-        .replace('{nome}', invoice.client.name)
+        .replace('{nome}', client.name)
         .replace('{valor}', new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL'
@@ -70,14 +96,15 @@ export function InvoiceTableRow({
         .replace('{vencimento}', new Date(invoice.due_date).toLocaleDateString('pt-BR'))
         .replace('{codigo}', invoice.code);
 
-      // 4. Enviar a mensagem
+      // 5. Enviar a mensagem com imagem se disponível
       await sendMessage({
-        phone: invoice.client.phone,
+        phone: client.phone,
         message,
-        instanceId: instance.connection_key // Usando connection_key como instanceId
+        instanceId: instance.connection_key,
+        imageUrl: template.image_url
       });
 
-      // 5. Registrar o envio
+      // 6. Registrar o envio da mensagem
       await supabase
         .from('notification_history')
         .insert({
@@ -86,6 +113,18 @@ export function InvoiceTableRow({
           message,
           charge_id: invoice.id
         });
+
+      // 7. Se tiver imagem, registra o envio da imagem
+      if (template.image_url) {
+        await supabase
+          .from('template_image_history')
+          .insert({
+            template_id: template.id,
+            client_id: client.id,
+            invoice_id: invoice.id,
+            image_url: template.image_url
+          });
+      }
 
       toast({
         title: "Sucesso",
