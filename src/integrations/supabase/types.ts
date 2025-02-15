@@ -948,6 +948,86 @@ export type Database = {
           },
         ]
       }
+      whatsapp_messages: {
+        Row: {
+          client_id: string
+          company_id: string
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          id: string
+          instance_id: string
+          invoice_id: string | null
+          message: string
+          read_at: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["whatsapp_message_status"]
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          company_id: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          instance_id: string
+          invoice_id?: string | null
+          message: string
+          read_at?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["whatsapp_message_status"]
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          company_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          instance_id?: string
+          invoice_id?: string | null
+          message?: string
+          read_at?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["whatsapp_message_status"]
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_messages_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -988,6 +1068,12 @@ export type Database = {
       template_subtype: "notification" | "delayed" | "paid"
       user_role: "admin" | "company"
       whatsapp_instance_status: "disconnected" | "connected" | "pending"
+      whatsapp_message_status:
+        | "pending"
+        | "sent"
+        | "failed"
+        | "delivered"
+        | "read"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -66,6 +66,18 @@ export function InvoiceTableRow({
         return;
       }
 
+      // Obter o perfil da empresa
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile) throw new Error("Perfil da empresa não encontrado");
+
       // 3. Se não tiver template específico, busca o template padrão
       let template = client.message_templates;
       if (!template) {
@@ -101,30 +113,11 @@ export function InvoiceTableRow({
         phone: client.phone,
         message,
         instanceId: instance.connection_key,
-        imageUrl: template.image_url
+        imageUrl: template.image_url,
+        clientId: client.id,
+        invoiceId: invoice.id,
+        companyId: profile.id
       });
-
-      // 6. Registrar o envio da mensagem
-      await supabase
-        .from('notification_history')
-        .insert({
-          type: 'whatsapp',
-          status: 'sent',
-          message,
-          charge_id: invoice.id
-        });
-
-      // 7. Se tiver imagem, registra o envio da imagem
-      if (template.image_url) {
-        await supabase
-          .from('template_image_history')
-          .insert({
-            template_id: template.id,
-            client_id: client.id,
-            invoice_id: invoice.id,
-            image_url: template.image_url
-          });
-      }
 
       toast({
         title: "Sucesso",
