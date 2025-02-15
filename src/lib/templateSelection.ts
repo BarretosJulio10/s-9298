@@ -14,7 +14,7 @@ export async function getAppropriateTemplate(
       .select("*")
       .eq("type", templateType)
       .is("parent_id", null)
-      .single();
+      .maybeSingle();
 
     if (parentError) throw parentError;
     if (!parentTemplate) {
