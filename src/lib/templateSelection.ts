@@ -8,11 +8,16 @@ export async function getAppropriateTemplate(
   invoiceId: string
 ) {
   try {
-    // 1. Primeiro buscar o template pai pelo tipo
+    // Primeiro obter o company_id do usuário atual
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Usuário não autenticado");
+
+    // 1. Primeiro buscar o template pai pelo tipo e company_id
     const { data: parentTemplate, error: parentError } = await supabase
       .from("message_templates")
       .select("*")
       .eq("type", templateType)
+      .eq("company_id", user.id)
       .is("parent_id", null)
       .maybeSingle();
 
@@ -22,11 +27,12 @@ export async function getAppropriateTemplate(
       return null;
     }
 
-    // 2. Buscar templates filhos usando o ID do template pai
+    // 2. Buscar templates filhos usando o ID do template pai e company_id
     const { data: childTemplates, error: templatesError } = await supabase
       .from("message_templates")
       .select("*")
-      .eq("parent_id", parentTemplate.id);
+      .eq("parent_id", parentTemplate.id)
+      .eq("company_id", user.id);
 
     if (templatesError) throw templatesError;
 
