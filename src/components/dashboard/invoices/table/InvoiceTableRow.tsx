@@ -45,7 +45,7 @@ export function InvoiceTableRow({
 
       // 2. Obter o template apropriado
       const template = await getAppropriateTemplate(
-        "invoice_template", // ID do template pai
+        "invoice", // Tipo do template
         invoice.due_date,
         invoice.status,
         invoice.id
@@ -74,7 +74,7 @@ export function InvoiceTableRow({
       await sendMessage({
         phone: invoice.client.phone,
         message,
-        instanceId: instance.id
+        instanceId: instance.connection_key // Usando connection_key como instanceId
       });
 
       // 5. Registrar o envio

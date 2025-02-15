@@ -2,28 +2,36 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export async function getAppropriateTemplate(
-  parentTemplateId: string,
+  templateType: string,
   dueDate: string,
   status: string,
   invoiceId: string
 ) {
   try {
-    // Busca todos os templates filhos do template principal
+    // 1. Primeiro buscar o template pai pelo tipo
+    const { data: parentTemplate, error: parentError } = await supabase
+      .from("message_templates")
+      .select("*")
+      .eq("type", templateType)
+      .is("parent_id", null)
+      .single();
+
+    if (parentError) throw parentError;
+    if (!parentTemplate) {
+      console.error('Template pai não encontrado para o tipo:', templateType);
+      return null;
+    }
+
+    // 2. Buscar templates filhos usando o ID do template pai
     const { data: childTemplates, error: templatesError } = await supabase
       .from("message_templates")
       .select("*")
-      .eq("parent_id", parentTemplateId);
+      .eq("parent_id", parentTemplate.id);
 
     if (templatesError) throw templatesError;
 
     // Se não houver templates filhos, retorna o template principal
     if (!childTemplates || childTemplates.length === 0) {
-      const { data: parentTemplate } = await supabase
-        .from("message_templates")
-        .select("*")
-        .eq("id", parentTemplateId)
-        .single();
-      
       return parentTemplate;
     }
 
@@ -33,16 +41,16 @@ export async function getAppropriateTemplate(
 
     if (status === "pago") {
       // Busca o template de pagamento
-      const paymentTemplate = childTemplates.find(t => t.type === "paid");
-      return paymentTemplate || null;
+      const paymentTemplate = childTemplates.find(t => t.subtype === "paid");
+      return paymentTemplate || parentTemplate;
     } else if (dueDateTime < currentDate) {
       // Se vencido, busca o template de atraso
-      const delayedTemplate = childTemplates.find(t => t.type === "delayed");
-      return delayedTemplate || null;
+      const delayedTemplate = childTemplates.find(t => t.subtype === "delayed");
+      return delayedTemplate || parentTemplate;
     } else {
       // Se dentro do prazo, busca o template de notificação
-      const notificationTemplate = childTemplates.find(t => t.type === "notification");
-      return notificationTemplate || null;
+      const notificationTemplate = childTemplates.find(t => t.subtype === "notification");
+      return notificationTemplate || parentTemplate;
     }
   } catch (error) {
     console.error("Erro ao selecionar template:", error);
