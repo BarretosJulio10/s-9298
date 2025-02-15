@@ -54,7 +54,7 @@ export function InvoiceTableRow({
             image_url
           )
         `)
-        .eq('id', invoice.client_id)
+        .eq('id', invoice.client.id)
         .single();
 
       if (clientError || !client) {
