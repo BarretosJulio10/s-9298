@@ -1,8 +1,14 @@
+
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Send, Trash2 } from "lucide-react";
 import { Invoice } from "../types/Invoice";
+import { useToast } from "@/hooks/use-toast";
+import { useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { getAppropriateTemplate } from "@/lib/templateSelection";
+import { sendMessage } from "@/lib/wapi/sendMessage";
 
 interface InvoiceTableRowProps {
   invoice: Invoice;
@@ -17,6 +23,85 @@ export function InvoiceTableRow({
   onDelete, 
   onSend 
 }: InvoiceTableRowProps) {
+  const { toast } = useToast();
+
+  const handleSendInvoice = useCallback(async () => {
+    try {
+      // 1. Verificar se existe instância ativa do WhatsApp
+      const { data: instance, error: instanceError } = await supabase
+        .from('whatsapp_instances')
+        .select('*')
+        .eq('status', 'connected')
+        .single();
+
+      if (instanceError || !instance) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao enviar fatura",
+          description: "Nenhuma instância do WhatsApp conectada. Por favor, configure o WhatsApp primeiro.",
+        });
+        return;
+      }
+
+      // 2. Obter o template apropriado
+      const template = await getAppropriateTemplate(
+        "invoice_template", // ID do template pai
+        invoice.due_date,
+        invoice.status,
+        invoice.id
+      );
+
+      if (!template) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao enviar fatura",
+          description: "Template de mensagem não encontrado.",
+        });
+        return;
+      }
+
+      // 3. Preparar a mensagem
+      const message = template.content
+        .replace('{nome}', invoice.client.name)
+        .replace('{valor}', new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        }).format(invoice.amount))
+        .replace('{vencimento}', new Date(invoice.due_date).toLocaleDateString('pt-BR'))
+        .replace('{codigo}', invoice.code);
+
+      // 4. Enviar a mensagem
+      await sendMessage({
+        phone: invoice.client.phone,
+        message,
+        instanceId: instance.id
+      });
+
+      // 5. Registrar o envio
+      await supabase
+        .from('notification_history')
+        .insert({
+          type: 'whatsapp',
+          status: 'sent',
+          message,
+          charge_id: invoice.id
+        });
+
+      toast({
+        title: "Sucesso",
+        description: "Fatura enviada com sucesso via WhatsApp.",
+      });
+
+    } catch (error) {
+      console.error('Erro ao enviar fatura:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao enviar fatura",
+        description: error instanceof Error ? error.message : "Erro ao enviar fatura via WhatsApp.",
+      });
+    }
+  }, [invoice, toast]);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pago":
@@ -54,7 +139,7 @@ export function InvoiceTableRow({
           <Button
             variant="outline"
             size="icon"
-            onClick={() => onSend(invoice)}
+            onClick={handleSendInvoice}
             title="Enviar fatura"
           >
             <Send className="h-4 w-4" />
